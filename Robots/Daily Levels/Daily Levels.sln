@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Daily Levels", "Daily Levels\Daily Levels.csproj", "{FD6DD0D0-2243-4AF2-A0F7-FFBD342A156E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FD6DD0D0-2243-4AF2-A0F7-FFBD342A156E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FD6DD0D0-2243-4AF2-A0F7-FFBD342A156E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FD6DD0D0-2243-4AF2-A0F7-FFBD342A156E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FD6DD0D0-2243-4AF2-A0F7-FFBD342A156E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

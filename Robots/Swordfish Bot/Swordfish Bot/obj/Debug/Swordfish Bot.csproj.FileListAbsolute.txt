@@ -1,0 +1,7 @@
+C:\Users\andrewfblake\Documents\cAlgo\Sources\Robots\Swordfish Bot\Swordfish Bot\bin\Debug\Swordfish Bot.dll
+C:\Users\andrewfblake\Documents\cAlgo\Sources\Robots\Swordfish Bot\Swordfish Bot\bin\Debug\Swordfish Bot.pdb
+C:\Users\andrewfblake\Documents\cAlgo\Sources\Robots\Swordfish Bot\Swordfish Bot\bin\Debug\cAlgo.API.dll
+C:\Users\andrewfblake\Documents\cAlgo\Sources\Robots\Swordfish Bot\Swordfish Bot\bin\Debug\cAlgo.API.xml
+C:\Users\andrewfblake\Documents\cAlgo\Sources\Robots\Swordfish Bot\Swordfish Bot\obj\Debug\Swordfish Bot.csprojResolveAssemblyReference.cache
+C:\Users\andrewfblake\Documents\cAlgo\Sources\Robots\Swordfish Bot\Swordfish Bot\obj\Debug\Swordfish Bot.dll
+C:\Users\andrewfblake\Documents\cAlgo\Sources\Robots\Swordfish Bot\Swordfish Bot\obj\Debug\Swordfish Bot.pdb
