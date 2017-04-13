@@ -4,10 +4,11 @@ using cAlgo.API;
 using cAlgo.API.Indicators;
 using cAlgo.API.Internals;
 using cAlgo.Indicators;
+using System.Collections.Generic;
 
 namespace cAlgo
 {
-    [Robot(TimeZone = TimeZones.UTC, AccessRights = AccessRights.None)]
+    [Robot(TimeZone = TimeZones.UTC, AccessRights = AccessRights.FileSystem)]
     public class SwordfishBot : Robot
     {
 
@@ -35,6 +36,9 @@ namespace cAlgo
         [Parameter("Volume (Lots)", DefaultValue = 1)]
         public int Volume { get; set; }
 
+        [Parameter("Volume Max (Lots)", DefaultValue = 200)]
+        public int VolumeMax { get; set; }
+
         [Parameter("# Order placed before Volume multiples", DefaultValue = 5)]
         public int OrderVolumeLevels { get; set; }
 
@@ -49,7 +53,6 @@ namespace cAlgo
 
         [Parameter("Enable Retrace risk management", DefaultValue = false)]
         public bool retraceEnabled { get; set; }
-
 
         [Parameter("Initial Hard SL for last Order placed", DefaultValue = 5)]
         public double FinalOrderStopLoss { get; set; }
@@ -81,19 +84,23 @@ namespace cAlgo
         protected bool isHardSLLastPositionEntryPrice = false;
         protected bool isHardSLLastClosedPositionEntryPrice = false;
         protected bool isBreakEvenStopLossActive = false;
+        protected int retraceLevel1 = 25;
+        protected int retraceLevel2 = 50;
+        protected int retraceLevel3 = 75;
+
 
         //Swordfish State Variables
         protected bool isPendingOrdersClosed = false;
         protected bool OpenPriceCaptured = false;
         protected bool OrdersPlaced = false;
         protected bool isSwordfishTerminated = false;
-        protected bool isSwordFishReset = false;
+        protected bool isSwordFishReset = true;
         protected bool isReducedRiskTime = false;
 
-        //Performance
+        List<string> profitList = new List<string>();
+
+        //Performance Reporting
         protected double DayProfitTotal = 0;
-
-
         protected override void OnStart()
         {
             swordFishTimeInfo = new MarketTimeInfo();
@@ -139,9 +146,22 @@ namespace cAlgo
                             }
                             else
                             {
-                                TradeResult SellLimitOrder = PlaceLimitOrder(TradeType.Sell, Symbol, setVolume(OrderCount, NumberOfOrders), (OpenPrice + OrderEntryOffset + OrderCount * OrderSpacing), "SWORDFISH#" + OrderCount + "-" + getTimeStamp(), setPendingOrderStopLoss(OrderCount, NumberOfOrders), TakeProfit * (1 / Symbol.TickSize));
-                                if (!SellLimitOrder.IsSuccessful)
-                                    debug("FAILED to place order", SellLimitOrder);
+                                //Check that entry price is valid
+                                double EntryPrice = OpenPrice + OrderEntryOffset + OrderCount * OrderSpacing;
+                                if (EntryPrice > Symbol.Ask)
+                                {
+                                    TradeResult SellLimitOrder = PlaceLimitOrder(TradeType.Sell, Symbol, setVolume(OrderCount, NumberOfOrders), EntryPrice, "SWORDFISH#" + OrderCount + "-" + getTimeStamp(), setPendingOrderStopLoss(OrderCount, NumberOfOrders), TakeProfit * (1 / Symbol.TickSize));
+                                    if (!SellLimitOrder.IsSuccessful)
+                                        debug("FAILED to place order", SellLimitOrder);
+                                }
+                                else
+                                {
+                                    //Avoid placing all PendingOrders that have been 'jumped' by re-calculating the OrderCount to the equivelant entry point.
+                                    //OrderCount = calculateNewOrderCount(OrderCount, Symbol.Ask);
+                                    TradeResult SellOrder = ExecuteMarketOrder(TradeType.Sell, Symbol, setVolume(OrderCount, NumberOfOrders), "SWORDFISH-X#" + OrderCount + "-" + getTimeStamp(), setPendingOrderStopLoss(OrderCount, NumberOfOrders), TakeProfit * (1 / Symbol.TickSize));
+                                    if (!SellOrder.IsSuccessful)
+                                        debug("FAILED to place order", SellOrder);
+                                }
                             }
                         }
                         //All Sell Stop Orders have been placed
@@ -151,7 +171,7 @@ namespace cAlgo
                     else if (OpenPrice - SwordFishTrigger > Symbol.Ask)
                     {
                         //Place Buy Limit Orders
-                        for (int OrderCount = 0; OrderCount < NumberOfOrders - 1; OrderCount++)
+                        for (int OrderCount = 0; OrderCount < NumberOfOrders; OrderCount++)
                         {
                             //confirm last bar broke the Bollinger Band Top indicating overbought - OPTIONAL
                             if (checkBollingerBand)
@@ -166,9 +186,22 @@ namespace cAlgo
                             }
                             else
                             {
-                                TradeResult BuyLimitOrder = PlaceLimitOrder(TradeType.Buy, Symbol, setVolume(OrderCount, NumberOfOrders), (OpenPrice - OrderEntryOffset - OrderCount * OrderSpacing), "SWORDFISH#" + OrderCount + "-" + getTimeStamp(), setPendingOrderStopLoss(OrderCount, NumberOfOrders), TakeProfit * (1 / Symbol.TickSize));
-                                if (!BuyLimitOrder.IsSuccessful)
-                                    debug("FAILED to place order", BuyLimitOrder);
+                                //Check that entry price is valid
+                                double EntryPrice = OpenPrice - OrderEntryOffset - OrderCount * OrderSpacing;
+                                if(EntryPrice < Symbol.Bid)
+                                {
+                                    TradeResult BuyLimitOrder = PlaceLimitOrder(TradeType.Buy, Symbol, setVolume(OrderCount, NumberOfOrders), EntryPrice, "SWORDFISH#" + OrderCount + "-" + getTimeStamp(), setPendingOrderStopLoss(OrderCount, NumberOfOrders), TakeProfit * (1 / Symbol.TickSize));
+                                    if (!BuyLimitOrder.IsSuccessful)
+                                        debug("FAILED to place order", BuyLimitOrder);
+                                }
+                                else
+                                {
+                                   //Avoid placing all PendingOrders that have been 'jumped' by re-calculating the OrderCount to the equivelant entry point.
+                                   OrderCount = calculateNewOrderCount(OrderCount, Symbol.Bid);
+                                   TradeResult BuyOrder = ExecuteMarketOrder(TradeType.Buy,Symbol,setVolume(OrderCount, NumberOfOrders),"SWORDFISH-X#" + OrderCount + "-" + getTimeStamp(), setPendingOrderStopLoss(OrderCount, NumberOfOrders), TakeProfit * (1 / Symbol.TickSize));
+                                   if (!BuyOrder.IsSuccessful)
+                                       debug("FAILED to place order", BuyOrder);
+                                }
                             }
                         }
                         //All Buy Stop Orders have been placed
@@ -279,6 +312,20 @@ namespace cAlgo
             }
         }
 
+        //Calculate a new orderCount number for when tick jumps
+        protected int calculateNewOrderCount(int _orderCount, double _currentTickPrice)
+        {
+            double tickJumpIntoRange = Math.Abs(OpenPrice - _currentTickPrice) - OrderEntryOffset;
+            double pendingOrderRange = NumberOfOrders * OrderSpacing;
+            double pendingOrdersPercentageJumped = tickJumpIntoRange / pendingOrderRange;
+            double _newOrderCount = NumberOfOrders * pendingOrdersPercentageJumped;
+
+            if (_newOrderCount > _orderCount)
+                return (int)_newOrderCount;
+            else
+                return (int)_orderCount;
+        }
+
         protected void PositionsOnOpened(PositionOpenedEventArgs args)
         {
             OpenedPositionsCount++;
@@ -336,6 +383,17 @@ namespace cAlgo
                 //Calculate spike retrace factor
                 double retraceFactor = calculateRetraceFactor();
 
+                if(isReducedRiskTime)
+                {
+                    //reset HARD SL Limits with reduced SL's
+                    isHardSLLastPositionEntryPrice = true;
+
+                    //Reduce all retrace limits
+                    retraceLevel1 = 10;
+                    retraceLevel2 = 30;
+                    retraceLevel3 = 50;
+                }
+
                 //Set hard stop losses
                 if (!isHardSLLastPositionEntryPrice && !IsSwordFishTime())
                 {
@@ -344,7 +402,7 @@ namespace cAlgo
                 }
 
                 //If it has retraced between than 25% and 50%
-                if (50 > retraceFactor && retraceFactor > 30)
+                if (retraceLevel2 > retraceFactor && retraceFactor > retraceLevel1)
                 {
                     //If Hard SL has not been set yet
                     if (!isHardSLLastPositionEntryPrice)
@@ -358,7 +416,7 @@ namespace cAlgo
                 }
 
                 //If it has retraced between than 50% and 75%
-                if (75 > retraceFactor && retraceFactor > 50)
+                if (retraceLevel3 > retraceFactor && retraceFactor > retraceLevel2)
                 {
                     //Set hard stop losses
                     if (!isHardSLLastClosedPositionEntryPrice)
@@ -371,7 +429,7 @@ namespace cAlgo
                     isBreakEvenStopLossActive = true;
                 }
 
-                if (100 > retraceFactor && retraceFactor > 75)
+                if (retraceFactor > retraceLevel3)
                 {
                     //Set hard stop losses
                     if (!isHardSLLastProfitPrice)
@@ -402,22 +460,24 @@ namespace cAlgo
             return retraceFactor;
         }
 
-
-
         protected double calculatePercentageRetrace()
         {
             double percentRetrace = 0;
             if (LastPositionTradeType == TradeType.Sell)
             {
                 //Position are Selling
-                percentRetrace = 1 - (Symbol.Bid - OpenPrice) / (LastPositionEntryPrice - OpenPrice) * 100;
+                percentRetrace = (Symbol.Bid - OpenPrice) / (LastPositionEntryPrice - OpenPrice);
             }
 
             if (LastPositionTradeType == TradeType.Buy)
             {
                 //Positions are buying
-                percentRetrace = 1 - (OpenPrice - Symbol.Bid) / (OpenPrice - LastPositionEntryPrice) * 100;
+                percentRetrace = (OpenPrice - Symbol.Bid) / (OpenPrice - LastPositionEntryPrice);
             }
+
+            percentRetrace = 1 - percentRetrace;
+            percentRetrace = percentRetrace * 100;
+
             return percentRetrace;
         }
 
@@ -511,8 +571,13 @@ namespace cAlgo
             isSwordFishReset = true;
             isReducedRiskTime = false;
 
+           
+            string profit = "";
             if (DayProfitTotal != 0)
-                Print("Profit Total: ", DayProfitTotal, " ", Time.DayOfWeek);
+            {
+                profit = (DayProfitTotal + "," + Time.DayOfWeek + "," + Time);
+                profitList.Add(profit);
+            }
 
             DayProfitTotal = 0;
         }
@@ -578,20 +643,19 @@ namespace cAlgo
             }
         }
 
-        //Increase the volume based on VolumeLevels
+        //Increase the volume based on Orders places and volume levels and multiplier until max volume reached
         protected int setVolume(int _orderCount, int _numberOfOrders)
         {
-            int _volume = Volume;
-            int orderVolumeLevel = _orderCount / OrderVolumeLevels;
 
-            if (orderVolumeLevel > 0)
+            double _orderVolumeLevel = _orderCount / OrderVolumeLevels;
+            double _volume = Math.Pow(VolumeMultipler, _orderVolumeLevel) * Volume;
+
+            if (_volume > VolumeMax)
             {
-                for (int multiplyCount = 0; orderVolumeLevel > multiplyCount; multiplyCount++)
-                {
-                    _volume = _volume * VolumeMultipler;
-                }
+                _volume = VolumeMax;
             }
-            return _volume;
+
+            return (int) _volume;
         }
 
         protected void CloseAllPendingOrders()
@@ -620,6 +684,7 @@ namespace cAlgo
         protected override void OnStop()
         {
             // Put your deinitialization logic here
+            System.IO.File.WriteAllLines("C:\\Users\\alist\\Desktop\\profit.csv",profitList.ToArray());
         }
 
         protected void debug(string msg, TradeResult tr)
