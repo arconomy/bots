@@ -15,7 +15,7 @@ namespace Niffler.Tester
 
             Niffler.Bots.Client.Entry.Test();
 
-            Niffler.Bots.Client.Entry.UpdateAccount(null);
+           // Niffler.Bots.Client.Entry.UpdateAccount(null);
 
             Niffler.Bots.Client.Entry.UpdatePosition(null, null,null);
 

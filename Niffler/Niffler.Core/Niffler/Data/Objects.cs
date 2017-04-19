@@ -28,40 +28,40 @@ namespace Niffler.Data
 
                 foreach (System.Reflection.PropertyInfo Pi in typeof(t).GetProperties())
                 {
-                    if (Pi.GetValue(Obj,null) != null)
+                    if (Pi.GetValue(Obj) != null)
                     {
                         // if they are readonly then no point sending them to the db... 
                         if (Pi.CanWrite)
                         {
-                            DateTime dte = DateTime.MinValue ;
-                            if (DateTime.TryParse(Pi.GetValue(Obj, null).ToString(),out dte))
+                            DateTime dte = DateTime.MinValue;
+                            if (IsDate(Pi.GetValue(Obj).ToString()))
                             {
-                                if (!((DateTime)Pi.GetValue(Obj, null) == DateTime.MinValue))
+                                if (!((DateTime)Pi.GetValue(Obj) == DateTime.MinValue))
                                 {
-                                    Parameters.Add(Pi.Name, Pi.GetValue(Obj, null));
+                                    Parameters.Add(Pi.Name, Pi.GetValue(Obj));
                                 }
                             }
                             else if (object.ReferenceEquals(Pi.PropertyType, typeof(Guid)))
                             {
-                                Guid tmpID = (Guid)Pi.GetValue(Obj, null);
+                                Guid tmpID = (Guid)Pi.GetValue(Obj);
                                 if (tmpID != Guid.Empty)
-                                    Parameters.Add(Pi.Name, Pi.GetValue(Obj, null));
+                                    Parameters.Add(Pi.Name, Pi.GetValue(Obj));
 
                             }
                             else if (object.ReferenceEquals(Pi.PropertyType, typeof(TimeSpan)))
                             {
-                                Parameters.Add(Pi.Name, ((TimeSpan)Pi.GetValue(Obj, null)).ToString());
+                                Parameters.Add(Pi.Name, ((TimeSpan)Pi.GetValue(Obj)).ToString());
 
                             }
                             else if (Pi.PropertyType.IsEnum)
                             {
-                                Parameters.Add(Pi.Name, System.Enum.GetName(Pi.PropertyType, Pi.GetValue(Obj, null)));
+                                Parameters.Add(Pi.Name, System.Enum.GetName(Pi.PropertyType, Pi.GetValue(Obj)));
 
 
                             }
                             else
                             {
-                                Parameters.Add(Pi.Name, Pi.GetValue(Obj, null));
+                                Parameters.Add(Pi.Name, Pi.GetValue(Obj));
                             }
                         }
                     }
@@ -69,6 +69,22 @@ namespace Niffler.Data
             }
 
             return Parameters;
+
+        }
+
+          public static bool IsDate(object item)
+        {
+            try
+            {
+                DateTime X = (DateTime)item;
+                    return true;
+            }
+            catch (Exception)
+            {
+                
+               return false;
+            }
+
 
         }
 
@@ -84,7 +100,7 @@ namespace Niffler.Data
                 {
                     if (P.Name == objP.Name & objP.CanWrite)
                     {
-                        objP.SetValue(obj, P.GetValue(item, null), null);
+                        objP.SetValue(obj, P.GetValue(item));
                     }
                 }
             }

@@ -12,9 +12,9 @@ namespace Niffler.Model
          
         public string TradeType { get; set; }
 
-        public int? Volume { get; set; }
+        public long? Volume { get; set; }
 
-        public int? Quantity { get; set; }
+        public double? Quantity { get; set; }
          
         public decimal? EntryPrice { get; set; }
          
@@ -36,11 +36,11 @@ namespace Niffler.Model
          
         public decimal? NetProfit { get; set; }
 
-        public int? Pips { get; set; }
+        public double? Pips { get; set; }
 
-        public DateTime? CreatedUTC { get; set; }
+        public DateTime? DateTimeCreatedUTC { get; set; }
 
-        public DateTime? LastModifiedUTC { get; set; }
+        public DateTime? DateTimeLastModifiedUTC { get; set; }
          
         public string Status { get; set; }
     }

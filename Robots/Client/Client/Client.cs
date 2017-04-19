@@ -15,71 +15,54 @@ namespace cAlgo
         protected override void OnStart()
         {
 
-            // Sync Account and Set Access
-            Niffler.Bots.Client.Entry.UpdateAccount(Account);
+            Positions.Closed += OnPositionsClosed;
+            Positions.Opened += OnPositionsOpened;
 
-            // Run hourly tasks
+            Niffler.Bots.Client.Entry.UpdateAccountAndPositions(Account, Positions);
+
             Timer.Start(new TimeSpan(0, 0, 10));
 
         }
 
+        void OnPositionsOpened(PositionOpenedEventArgs obj)
+        {
+            Niffler.Bots.Client.Entry.UpdatePosition(Account, obj.Position, "Opened");
+        }
 
+        void OnPositionsClosed(PositionClosedEventArgs obj)
+        {
+            Niffler.Bots.Client.Entry.UpdatePosition(Account, obj.Position, "Closed");
+        }
 
         protected override void OnError(Error error)
         {
-
-
-        }
-
-        protected override void OnPositionClosed(Position closedposition)
-        {
-            // Check Positions to Manage
-            Niffler.Bots.Client.Entry.UpdatePosition(Account, closedposition, "Closed");
-        }
-
-        protected override void OnPositionOpened(Position openedPosition)
-        {
-            // Check Positions to Manage
-            Niffler.Bots.Client.Entry.UpdatePosition(Account, openedPosition, "Opened");
-
+            // Pending...
         }
 
         protected override void OnPendingOrderCreated(PendingOrder newOrder)
         {
-
-
+            // nothing required...
         }
-
 
         protected override void OnBar()
         {
-
-
+            // Nothing Required?
         }
 
         protected override void OnTimer()
         {
-
-            // Check on Positions
             Niffler.Bots.Client.Entry.UpdateAccountAndPositions(Account, Positions);
-
-            // Monitor and Calculate Daily Levels 
             Niffler.Bots.Client.Entry.UpdateKeyLevels(Account, Symbol, MarketData.GetSeries(TimeFrame.Minute30));
-
-
-
         }
 
         protected override void OnTick()
         {
-            // Put your core logic here
+            // nothing required...
         }
 
         protected override void OnStop()
         {
-            // Put your deinitialization logic here
-
-
+            // nothing required...
         }
     }
 }

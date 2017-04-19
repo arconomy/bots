@@ -10,67 +10,115 @@ using cAlgo.API.Indicators;
 using cAlgo.API.Internals;
 using cAlgo.Indicators;
 using Niffler.Data;
+using Niffler.Model;
 
 namespace Niffler.Business
 {
 
     public class Positions
     {
-         
+
         private static string StoredProcedure = "[Operations].[Positions]";
 
-        public static bool Save(IAccount Account, Position Position, string Status)
+        public enum StatusEnum
+        {
+            Open,
+            Closed
+        }
+
+        public static bool Update(IAccount Account, cAlgo.API.Position Position, string Status)
         {
 
-            Hashtable Parameters = new Hashtable();
-            Parameters.Add("Operation", "Save");
-            Parameters.Add("ID", Position.Id);
-            Parameters.Add("AccountID", Account.Number);
-            Parameters.Add("Symbol", Position.SymbolCode);
-            Parameters.Add("TradeType", Position.TradeType.ToString());
-            Parameters.Add("Volume", Position.Volume);
-            Parameters.Add("Quantity", Position.Quantity);
-            Parameters.Add("EntryPrice", Position.EntryPrice);
-            Parameters.Add("StopLoss", Position.StopLoss);
-            Parameters.Add("TakeProfit", Position.TakeProfit);
-            Parameters.Add("ClosedPrice", "");
-            Parameters.Add("Swap", Position.Swap);
-            Parameters.Add("Channel", "");
-            Parameters.Add("Label", Position.Label);
-            Parameters.Add("Comment", Position.Comment);
-            Parameters.Add("GrossProfit", Position.GrossProfit);
-            Parameters.Add("NetProfit", Position.NetProfit);
-            Parameters.Add("Pips", Position.Pips);
-            if (Status == "Opened")
-                Parameters.Add("CreatedUTC", DateTime.UtcNow);
+            Model.Position LocalPosition = GetByID(Position.Id);
 
-            Parameters.Add("LastModifiedUTC", DateTime.UtcNow);
-            Parameters.Add("Status", Status);
+            if (LocalPosition is null) LocalPosition = new Model.Position();
+
+            LocalPosition.ID = Position.Id;
+            LocalPosition.AccountID = Account.Number;
+            LocalPosition.Symbol = Position.SymbolCode;
+            LocalPosition.TradeType = Position.TradeType.ToString();
+            LocalPosition.Volume = Position.Volume;
+            LocalPosition.Quantity = Position.Quantity;
+            LocalPosition.EntryPrice = (decimal)Position.EntryPrice;
+            if (Position.StopLoss != null) LocalPosition.StopLoss = (decimal)Position.StopLoss;
+            if (Position.TakeProfit != null) LocalPosition.TakeProfit = (decimal)Position.TakeProfit;
+            // LocalPosition.ClosedPrice = "";
+            LocalPosition.Swap = (decimal)Position.Swap;
+            LocalPosition.Channel = "";
+            LocalPosition.Label = Position.Label;
+            LocalPosition.Comment = Position.Comment;
+            LocalPosition.GrossProfit = (decimal)Position.GrossProfit;
+            LocalPosition.NetProfit = (decimal)Position.NetProfit;
+            LocalPosition.Pips = Position.Pips;
+
+            if (Status == "Opened")
+                LocalPosition.DateTimeCreatedUTC = DateTime.UtcNow;
+
+            LocalPosition.DateTimeLastModifiedUTC = DateTime.UtcNow;
+            LocalPosition.Status = Status;
+
+            return Save(LocalPosition);
+
+        }
+
+
+        public enum ChangedEnum
+        {
+            StopLoss,
+            TakeProfit,
+            Volume,
+            Status,
+            Unknown
+        }
+
+        public static ChangedEnum WhatsChanged(cAlgo.API.Position Position)
+        {
+
+            Model.Position LocalPosition = GetByID(Position.Id);
+
+
+            if (LocalPosition == null)
+                return ChangedEnum.Status;
+            // else if (LocalPosition.TakeProfit <> (decimal)Position.TakeProfit  )
+            //   return ChangedEnum.TakeProfit 
+
+            return ChangedEnum.Unknown;
+        }
+
+
+
+
+
+
+        public static bool Save(Model.Position Position)
+        {
+
+            Hashtable Parameters = Data.Objects.ToHashTable(Position, "Save");
 
             return Data.SQLServer.Query().Execute(CommandType.StoredProcedure, StoredProcedure, Parameters);
 
         }
 
-        public static Position GetByID(int ID)
+        public static Model.Position GetByID(int ID)
         {
-            return General.Query(StoredProcedure).GetByID<Position>(ID);
+            return General.Query(StoredProcedure).GetByID<Model.Position>(ID);
         }
 
-        public static List<Position> GetByAccountID(int AccountID)
+        public static List<Model.Position> GetByAccountID(int AccountID, string Status)
         {
             Hashtable Parameters = new Hashtable();
-            Parameters.Add("Operation", "GetByAccountID"); 
+            Parameters.Add("Operation", "GetByAccountID");
             Parameters.Add("AccountID", AccountID);
-            
+            Parameters.Add("Status", Status);
 
-            return Data.SQLServer.Query().Retrieve<Position >(CommandType.StoredProcedure, StoredProcedure, Parameters);
+            return Data.SQLServer.Query().Retrieve<Model.Position>(CommandType.StoredProcedure, StoredProcedure, Parameters);
 
         }
 
 
-        public static List<Position> GetbyStatus(string Status)
+        public static List<Model.Position> GetbyStatus(string Status)
         {
-            return General.Query(StoredProcedure).GetByStatus<Position>(Status);
+            return General.Query(StoredProcedure).GetByStatus<Model.Position>(Status);
         }
 
     }

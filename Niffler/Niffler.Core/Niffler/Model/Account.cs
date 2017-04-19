@@ -1,3 +1,5 @@
+using System;
+
 namespace Niffler.Model
 {
     
@@ -30,5 +32,7 @@ namespace Niffler.Model
         public decimal? UnrealizedNetProfit { get; set; }
          
         public string Status { get; set; }
+
+        public DateTime DateTimeLastModifiedUTC { get; set; }
     }
 }
