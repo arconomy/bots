@@ -149,7 +149,7 @@ namespace cAlgo
                             {
                                 if (Boli.Top.Last(0) < MarketSeries.Close.LastValue)
                                 {
-                                    PlaceLimitOrder(TradeType.Sell, Symbol, setVolume(OrderCount, NumberOfOrders), (OpenPrice + OrderEntryOffset + OrderCount * OrderSpacing), "SWORDFISH#" + OrderCount + "-" + getTimeStamp(), setPendingOrderStopLossPips(OrderCount, NumberOfOrders), TakeProfit * (1 / Symbol.TickSize));
+                                    PlaceLimitOrder(TradeType.Sell, Symbol, setVolume(OrderCount, NumberOfOrders), (OpenPrice + OrderEntryOffset + OrderCount * OrderSpacing), swordFishTimeInfo.market + "-SWF#" + OrderCount + "-" + getTimeStamp(), setPendingOrderStopLossPips(OrderCount, NumberOfOrders), TakeProfit * (1 / Symbol.TickSize));
                                 }
                             }
                             else
@@ -158,7 +158,7 @@ namespace cAlgo
                                 double EntryPrice = OpenPrice + OrderEntryOffset + OrderCount * OrderSpacing;
                                 if (EntryPrice > Symbol.Ask)
                                 {
-                                    TradeResult SellLimitOrder = PlaceLimitOrder(TradeType.Sell, Symbol, setVolume(OrderCount, NumberOfOrders), EntryPrice, "SWORDFISH#" + OrderCount + "-" + getTimeStamp(), setPendingOrderStopLossPips(OrderCount, NumberOfOrders), TakeProfit * (1 / Symbol.TickSize));
+                                    TradeResult SellLimitOrder = PlaceLimitOrder(TradeType.Sell, Symbol, setVolume(OrderCount, NumberOfOrders), EntryPrice, swordFishTimeInfo.market + "-SWF#" + OrderCount + "-" + getTimeStamp(), setPendingOrderStopLossPips(OrderCount, NumberOfOrders), TakeProfit * (1 / Symbol.TickSize));
                                     if (!SellLimitOrder.IsSuccessful)
                                         debug("FAILED to place order", SellLimitOrder);
                                 }
@@ -166,7 +166,7 @@ namespace cAlgo
                                 {
                                     //Avoid placing all PendingOrders that have been 'jumped' by re-calculating the OrderCount to the equivelant entry point.
                                     //OrderCount = calculateNewOrderCount(OrderCount, Symbol.Ask);
-                                    TradeResult SellOrder = ExecuteMarketOrder(TradeType.Sell, Symbol, setVolume(OrderCount, NumberOfOrders), "SWORDFISH-X#" + OrderCount + "-" + getTimeStamp(), setPendingOrderStopLossPips(OrderCount, NumberOfOrders), TakeProfit * (1 / Symbol.TickSize));
+                                    TradeResult SellOrder = ExecuteMarketOrder(TradeType.Sell, Symbol, setVolume(OrderCount, NumberOfOrders), swordFishTimeInfo.market + "-SWF-X#" + OrderCount + "-" + getTimeStamp(), setPendingOrderStopLossPips(OrderCount, NumberOfOrders), TakeProfit * (1 / Symbol.TickSize));
                                     if (!SellOrder.IsSuccessful)
                                         debug("FAILED to place order", SellOrder);
                                 }
@@ -188,7 +188,7 @@ namespace cAlgo
                                 if (Boli.Bottom.Last(0) < MarketSeries.Close.LastValue)
                                 {
                                     // Place BUY Limit order spaced by OrderSpacing 
-                                    PlaceLimitOrder(TradeType.Buy, Symbol, setVolume(OrderCount, NumberOfOrders), (OpenPrice + OrderEntryOffset + OrderCount * OrderSpacing), "SWORDFISH#" + OrderCount + "-" + getTimeStamp(), setPendingOrderStopLossPips(OrderCount, NumberOfOrders), TakeProfit * (1 / Symbol.TickSize));
+                                    PlaceLimitOrder(TradeType.Buy, Symbol, setVolume(OrderCount, NumberOfOrders), (OpenPrice + OrderEntryOffset + OrderCount * OrderSpacing), swordFishTimeInfo.market + "-SWF#" + OrderCount + "-" + getTimeStamp(), setPendingOrderStopLossPips(OrderCount, NumberOfOrders), TakeProfit * (1 / Symbol.TickSize));
                                 }
 
                             }
@@ -198,7 +198,7 @@ namespace cAlgo
                                 double EntryPrice = OpenPrice - OrderEntryOffset - OrderCount * OrderSpacing;
                                 if (EntryPrice < Symbol.Bid)
                                 {
-                                    TradeResult BuyLimitOrder = PlaceLimitOrder(TradeType.Buy, Symbol, setVolume(OrderCount, NumberOfOrders), EntryPrice, "SWORDFISH#" + OrderCount + "-" + getTimeStamp(), setPendingOrderStopLossPips(OrderCount, NumberOfOrders), TakeProfit * (1 / Symbol.TickSize));
+                                    TradeResult BuyLimitOrder = PlaceLimitOrder(TradeType.Buy, Symbol, setVolume(OrderCount, NumberOfOrders), EntryPrice, swordFishTimeInfo.market + "-SWF#" + OrderCount + "-" + getTimeStamp(), setPendingOrderStopLossPips(OrderCount, NumberOfOrders), TakeProfit * (1 / Symbol.TickSize));
                                     if (!BuyLimitOrder.IsSuccessful)
                                         debug("FAILED to place order", BuyLimitOrder);
                                 }
@@ -206,7 +206,7 @@ namespace cAlgo
                                 {
                                     //Avoid placing all PendingOrders that have been 'jumped' by re-calculating the OrderCount to the equivelant entry point.
                                     OrderCount = calculateNewOrderCount(OrderCount, Symbol.Bid);
-                                    TradeResult BuyOrder = ExecuteMarketOrder(TradeType.Buy, Symbol, setVolume(OrderCount, NumberOfOrders), "SWORDFISH-X#" + OrderCount + "-" + getTimeStamp(), setPendingOrderStopLossPips(OrderCount, NumberOfOrders), TakeProfit * (1 / Symbol.TickSize));
+                                    TradeResult BuyOrder = ExecuteMarketOrder(TradeType.Buy, Symbol, setVolume(OrderCount, NumberOfOrders), swordFishTimeInfo.market + "-SWF-X#" + OrderCount + "-" + getTimeStamp(), setPendingOrderStopLossPips(OrderCount, NumberOfOrders), TakeProfit * (1 / Symbol.TickSize));
                                     if (!BuyOrder.IsSuccessful)
                                         debug("FAILED to place order", BuyOrder);
                                 }
@@ -321,7 +321,7 @@ namespace cAlgo
                             continue;
                     }
 
-                    TradeResult tr = ModifyPosition(_p, newStopLossPrice, _p.TakeProfit);
+                    TradeResult tr = ModifyPosition(_p, newStopLossPrice, null);
                     if (!tr.IsSuccessful)
                         debug("FAILED to modify SL", tr);
 
@@ -408,9 +408,9 @@ namespace cAlgo
                     isHardSLLastPositionEntryPrice = true;
 
                     //Reduce all retrace limits
-                    retraceLevel1 = retraceLevel1/2;
-                    retraceLevel2 = retraceLevel2/2;
-                    retraceLevel3 = retraceLevel3/2;
+                    retraceLevel1 = retraceLevel1 / 2;
+                    retraceLevel2 = retraceLevel2 / 2;
+                    retraceLevel3 = retraceLevel3 / 2;
                 }
 
                 //Set hard stop losses as soon as Swordfish time is over
@@ -705,7 +705,7 @@ namespace cAlgo
         protected override void OnStop()
         {
             // Put your deinitialization logic here
-            System.IO.File.WriteAllLines("C:\\Users\\alist\\Desktop\\swordfish-debug.csv", debugCSV.ToArray());
+            System.IO.File.WriteAllLines("C:\\Users\\alist\\Desktop\\" + swordFishTimeInfo.market + "-swordfish.csv", debugCSV.ToArray());
         }
 
         protected void debug(string msg, TradeResult tr)
@@ -730,7 +730,7 @@ namespace cAlgo
             {
                 case "UK100":
                     // Instantiate a MarketTimeInfo object.
-                    swordFishTimeInfo.market = "FTSE 100";
+                    swordFishTimeInfo.market = "FTSE";
                     swordFishTimeInfo.tz = TimeZoneInfo.FindSystemTimeZoneById("GMT Standard Time");
                     // Market for swordfish trades opens at 8:00am.
                     swordFishTimeInfo.open = new TimeSpan(8, 0, 0);
@@ -740,12 +740,25 @@ namespace cAlgo
                     swordFishTimeInfo.closeAll = new TimeSpan(11, 29, 0);
 
                     break;
-                case "AUS200":
-                    swordFishTimeInfo.tz = TimeZoneInfo.FindSystemTimeZoneById("AUS Eastern Standard Time");
+                case "GER30":
+                    swordFishTimeInfo.market = "DAX";
+                    swordFishTimeInfo.tz = TimeZoneInfo.FindSystemTimeZoneById("W. Europe Standard Time");
                     // Market for swordfish opens at 9:00.
                     swordFishTimeInfo.open = new TimeSpan(9, 0, 0);
                     // Market for swordfish closes at 9:05.
-                    swordFishTimeInfo.close = new TimeSpan(9, 3, 0);
+                    swordFishTimeInfo.close = new TimeSpan(9, 5, 0);
+                    // Close all open Swordfish position at 11:29am before US opens.
+                    swordFishTimeInfo.closeAll = new TimeSpan(11, 29, 0);
+                    break;
+                case "HK50":
+                    swordFishTimeInfo.market = "HSI";
+                    swordFishTimeInfo.tz = TimeZoneInfo.FindSystemTimeZoneById("China Standard Time");
+                    // Market for swordfish opens at 9:00.
+                    swordFishTimeInfo.open = new TimeSpan(9, 30, 0);
+                    // Market for swordfish closes at 9:05.
+                    swordFishTimeInfo.close = new TimeSpan(9, 35, 0);
+                    // Close all open Swordfish positions
+                    swordFishTimeInfo.closeAll = new TimeSpan(11, 30, 0);
                     break;
             }
         }
