@@ -1,0 +1,11 @@
+﻿C:\Users\andrewfblake\Documents\cAlgo\Sources\Robots\Client\Client\bin\Debug\Client.dll
+C:\Users\andrewfblake\Documents\cAlgo\Sources\Robots\Client\Client\bin\Debug\Client.pdb
+C:\Users\andrewfblake\Documents\cAlgo\Sources\Robots\Client\Client\bin\Debug\cAlgo.API.dll
+C:\Users\andrewfblake\Documents\cAlgo\Sources\Robots\Client\Client\bin\Debug\Niffler.dll
+C:\Users\andrewfblake\Documents\cAlgo\Sources\Robots\Client\Client\bin\Debug\cAlgo.API.xml
+C:\Users\andrewfblake\Documents\cAlgo\Sources\Robots\Client\Client\bin\Debug\Niffler.pdb
+C:\Users\andrewfblake\Documents\cAlgo\Sources\Robots\Client\Client\obj\Debug\Client.dll
+C:\Users\andrewfblake\Documents\cAlgo\Sources\Robots\Client\Client\obj\Debug\Client.pdb
+C:\Users\andrewfblake\Documents\cAlgo\Sources\Robots\Client\Client\bin\Debug\Microsoft.ServiceBus.dll
+C:\Users\andrewfblake\Documents\cAlgo\Sources\Robots\Client\Client\bin\Debug\Microsoft.ServiceBus.xml
+C:\Users\andrewfblake\Documents\cAlgo\Sources\Robots\Client\Client\obj\Debug\Client.csprojResolveAssemblyReference.cache

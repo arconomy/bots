@@ -33,6 +33,9 @@
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="cAlgo.API">
       <HintPath>..\..\..\..\API\cAlgo.API.dll</HintPath>
@@ -49,6 +52,7 @@
     <Reference Include="System.Core">
       <Private>True</Private>
     </Reference>
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Runtime.Caching">
       <Private>True</Private>
     </Reference>
@@ -68,6 +72,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Web" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq">
       <Private>True</Private>
     </Reference>
@@ -88,16 +93,18 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Bots\OptionsExpiry\Entry.cs" />
     <Compile Include="Business\Accounts.cs" />
     <Compile Include="Business\KeyLevels.cs" />
     <Compile Include="Business\Positions.cs" />
     <Compile Include="Business\TradingHours.cs" />
     <Compile Include="Bots\Client\Entry.cs" />
+    <Compile Include="Bots\Client\Bot.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="Data\Data.cs" />
     <Compile Include="Data\Objects.cs" />
     <Compile Include="Data\Queues.cs" />
-    <Compile Include="Indicators\KeyLevels\Entry.cs" />
+    <Compile Include="Indicators\KeyLevels\Bot.cs" />
     <Compile Include="Model\Account.cs" />
     <Compile Include="Model\Convert.cs" />
     <Compile Include="Model\KeyLevel.cs" />
@@ -106,6 +113,7 @@
     <Compile Include="Model\TradingHour.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Bots\Shadow\Entry.cs" />
+    <Compile Include="Rules\Test.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Bots\RandomWalk\" />

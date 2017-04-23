@@ -1,0 +1,9 @@
+C:\Users\andrewfblake\Documents\cAlgo\Sources\Niffler\Niffler.App\Niffler.App\obj\Debug\Niffler.App.Main.resources
+C:\Users\andrewfblake\Documents\cAlgo\Sources\Niffler\Niffler.App\Niffler.App\obj\Debug\Niffler.App.Properties.Resources.resources
+C:\Users\andrewfblake\Documents\cAlgo\Sources\Niffler\Niffler.App\Niffler.App\obj\Debug\Niffler.App.csproj.GenerateResource.Cache
+C:\Users\andrewfblake\Documents\cAlgo\Sources\Niffler\Niffler.App\Niffler.App\bin\Debug\Niffler.App.exe.config
+C:\Users\andrewfblake\Documents\cAlgo\Sources\Niffler\Niffler.App\Niffler.App\bin\Debug\Niffler.App.exe
+C:\Users\andrewfblake\Documents\cAlgo\Sources\Niffler\Niffler.App\Niffler.App\bin\Debug\Niffler.App.pdb
+C:\Users\andrewfblake\Documents\cAlgo\Sources\Niffler\Niffler.App\Niffler.App\obj\Debug\Niffler.App.exe
+C:\Users\andrewfblake\Documents\cAlgo\Sources\Niffler\Niffler.App\Niffler.App\obj\Debug\Niffler.App.pdb
+C:\Users\andrewfblake\Documents\cAlgo\Sources\Niffler\Niffler.App\Niffler.App\obj\Debug\Niffler.App.csprojResolveAssemblyReference.cache

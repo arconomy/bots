@@ -14,9 +14,47 @@ namespace Niffler.Bots.Client
     public class Entry
     {
 
+        public static double LastPrice;
 
-        public static void Test()
+     //   Niffler.Bots.Client.Entry.TestOrder(Symbol);
+            public static void TestOrder(Symbol Symbol, Robot Robot)
         {
+
+            // how to send buys and sells to cAlgo from here.....
+            // https://ctdn.com/algos/cbots/show/223
+
+         //   Robot.PlaceLimitOrder(TradeType.Buy, Symbol, 1, 7200);
+
+            
+            
+
+        }
+
+
+        public static void OnTick(Symbol Symbol,Positions P)
+        {
+
+
+            Niffler.Rules.Test.Data = Symbol.Ask;
+
+            if (Niffler.Rules.Test.AreAllPositionsClosed (P) == true)
+            {
+                var d = 3;
+            }
+
+            if (Niffler.Rules.Test.Rule2() == true)
+            {
+                var d = 3;
+            }
+             
+
+        }
+
+            public static void Test()
+        {
+             
+           
+
 
           //  if (!Niffler.Data.Queues.Queue("test").Exists())
             //    Niffler.Data.Queues.Queue("test").Create();
@@ -39,14 +77,15 @@ namespace Niffler.Bots.Client
                     dynamic RecievedKeyLevel = Niffler.Data.Queues.Queue("test").Receive<Niffler.Model.KeyLevel>(ref Properties);
 
 
-                    // Fire off Task without waiting... 
-                    //Task.Factory.StartNew(((Niffler.Model.KeyLevel)K) =>
-                    //{
-                    //    int x = 1;
+                     
+                 //Task(0) =   Task.Factory.StartNew(((Niffler.Model.KeyLevel)K) =>
+                 //   {
+                 //       int x = 1;
 
 
-                    //}, RecievedKeyLevel);
+                 //   }, RecievedKeyLevel);
 
+                 //   System.Threading.Tasks.Task.WaitAll(task);
 
 
 

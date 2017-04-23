@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Niffler.Core", "..\Niffler.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Niffler.Tester", "..\Niffler.Tester\Niffler.Tester\Niffler.Tester.csproj", "{8DCAE913-9020-4AB7-BB5D-9541C1EFD28A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Niffler.App", "..\Niffler.App\Niffler.App\Niffler.App.csproj", "{00E5DBCE-7A9F-4201-A415-0CBE75F7C54E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{8DCAE913-9020-4AB7-BB5D-9541C1EFD28A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8DCAE913-9020-4AB7-BB5D-9541C1EFD28A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8DCAE913-9020-4AB7-BB5D-9541C1EFD28A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{00E5DBCE-7A9F-4201-A415-0CBE75F7C54E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{00E5DBCE-7A9F-4201-A415-0CBE75F7C54E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{00E5DBCE-7A9F-4201-A415-0CBE75F7C54E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{00E5DBCE-7A9F-4201-A415-0CBE75F7C54E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

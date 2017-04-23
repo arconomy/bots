@@ -20,8 +20,8 @@ namespace Niffler.Tester
             Niffler.Bots.Client.Entry.UpdatePosition(null, null,null);
 
             Niffler.Bots.Client.Entry.UpdateAccountAndPositions(null,null);
-             
 
+          //  Niffler.Bots.Client.Entry.OnTick();
 
         }
     }
