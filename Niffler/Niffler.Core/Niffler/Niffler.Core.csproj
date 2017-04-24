@@ -98,7 +98,6 @@
     <Compile Include="Business\KeyLevels.cs" />
     <Compile Include="Business\Positions.cs" />
     <Compile Include="Business\TradingHours.cs" />
-    <Compile Include="Bots\Client\Entry.cs" />
     <Compile Include="Bots\Client\Bot.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="Data\Data.cs" />

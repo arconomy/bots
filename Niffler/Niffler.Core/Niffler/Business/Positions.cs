@@ -26,6 +26,52 @@ namespace Niffler.Business
             Closed
         }
 
+
+        public static void UpdatePositions(IAccount Account, cAlgo.API.Positions Positions )
+        {
+             
+            // Check for any open Positions that are no longer open in cTrader... 
+            List<Model.Position> CurrentOpenPositions = Business.Positions.GetByAccountID(Account.Number, "Opened");
+
+            foreach (Model.Position LocalPosition in CurrentOpenPositions)
+            {
+
+                bool ClosedExternally = true;
+                foreach (cAlgo.API.Position AlgoP in Positions)
+                    if (LocalPosition.ID == AlgoP.Id) ClosedExternally = false;
+
+                if (ClosedExternally)
+                {
+                    LocalPosition.Status = "Closed";
+                    Business.Positions.Save(LocalPosition);
+                    //AB: SEND TO SERVICE BUS to CLOSE Positions...
+                }
+
+            }
+
+
+
+            // For each Open Position, update the SL/TP etc and add it if its not in the Database... 
+            foreach (cAlgo.API.Position AlgoP in Positions)
+            {
+
+                Model.Position LocalPosition = Business.Positions.GetByID(AlgoP.Id);
+
+                // find any changes to syn out to shadows...
+                //if (AlgoP.TakeProfit <> LocalPosition.TakeProfit | AlgoP.StopLoss  <> LocalPosition.StopLoss )
+
+                //Update Postions...
+                 Update(Account, AlgoP, "Opened");
+
+
+            }
+
+
+
+        }
+
+
+
         public static bool Update(IAccount Account, cAlgo.API.Position Position, string Status)
         {
 
@@ -37,16 +83,16 @@ namespace Niffler.Business
             LocalPosition.AccountID = Account.Number;
             LocalPosition.Symbol = Position.SymbolCode;
             LocalPosition.TradeType = Position.TradeType.ToString();
-            LocalPosition.Volume = Position.Volume;
-            LocalPosition.Quantity = Position.Quantity;
-            LocalPosition.EntryPrice = (decimal)Position.EntryPrice;
+            if (Position.Volume != 0) LocalPosition.Volume = Position.Volume;
+            if (Position.Quantity != 0) LocalPosition.Quantity = Position.Quantity;
+            if (Position.EntryPrice != 0) LocalPosition.EntryPrice = (decimal)Position.EntryPrice;
             if (Position.StopLoss != null) LocalPosition.StopLoss = (decimal)Position.StopLoss;
             if (Position.TakeProfit != null) LocalPosition.TakeProfit = (decimal)Position.TakeProfit;
             // LocalPosition.ClosedPrice = "";
-            LocalPosition.Swap = (decimal)Position.Swap;
+            if (Position.Swap != 0) LocalPosition.Swap = (decimal)Position.Swap;
             LocalPosition.Channel = "";
-            LocalPosition.Label = Position.Label;
-            LocalPosition.Comment = Position.Comment;
+            if (Position.Label != null) LocalPosition.Label = Position.Label;
+            if (Position.Comment != null) LocalPosition.Comment = Position.Comment;
             LocalPosition.GrossProfit = (decimal)Position.GrossProfit;
             LocalPosition.NetProfit = (decimal)Position.NetProfit;
             LocalPosition.Pips = Position.Pips;

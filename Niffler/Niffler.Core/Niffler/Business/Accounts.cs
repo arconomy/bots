@@ -20,27 +20,29 @@ namespace Niffler.Business
 
         private static string StoredProcedure = "[Operations].[Accounts]";
 
-        public static bool Update(IAccount Account)
+        public static bool Update(IAccount Account, string Name, string Email)
         {
 
-            Model.Account LocalAccount = GetByID(Account.Number);
+            Model.Account CloudAccount = GetByID(Account.Number);
 
-            if (LocalAccount is null) LocalAccount = new Model.Account();
+            if (CloudAccount is null) CloudAccount = new Model.Account();
 
-            LocalAccount.ID = Account.Number;
-            LocalAccount.Balance = (decimal)Account.Balance;
-            LocalAccount.Currency = Account.Currency;
-            LocalAccount.BrokerName = Account.BrokerName;
-            LocalAccount.Equity = (decimal)Account.Equity;
-            LocalAccount.IsLive = Account.IsLive;
-            LocalAccount.Margin = (decimal)Account.Margin;
-            if (Account.MarginLevel != null) LocalAccount.MarginLevel = (float)Account.MarginLevel;
-            LocalAccount.PreciseLeverage = (float)Account.PreciseLeverage;
-            LocalAccount.UnrealizedGrossProfit = (decimal)Account.UnrealizedGrossProfit;
-            LocalAccount.UnrealizedNetProfit = (decimal)Account.UnrealizedNetProfit;
-            LocalAccount.DateTimeLastModifiedUTC = DateTime.UtcNow;
+            CloudAccount.ID = Account.Number;
+            CloudAccount.Name = Name;
+            CloudAccount.Email = Email;
+            CloudAccount.Balance = (decimal)Account.Balance;
+            CloudAccount.Currency = Account.Currency;
+            CloudAccount.BrokerName = Account.BrokerName;
+            CloudAccount.Equity = (decimal)Account.Equity;
+            CloudAccount.IsLive = Account.IsLive;
+            CloudAccount.Margin = (decimal)Account.Margin;
+            if (Account.MarginLevel != null) CloudAccount.MarginLevel = (float)Account.MarginLevel;
+            CloudAccount.PreciseLeverage = (float)Account.PreciseLeverage;
+            CloudAccount.UnrealizedGrossProfit = (decimal)Account.UnrealizedGrossProfit;
+            CloudAccount.UnrealizedNetProfit = (decimal)Account.UnrealizedNetProfit;
+            CloudAccount.DateTimeLastModifiedUTC = DateTime.UtcNow;
 
-            return Save(LocalAccount);
+            return Save(CloudAccount);
         }
 
         public static bool Save(Model.Account Account)
