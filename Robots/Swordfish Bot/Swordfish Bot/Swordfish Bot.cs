@@ -5,6 +5,8 @@ using cAlgo.API.Indicators;
 using cAlgo.API.Internals;
 using cAlgo.Indicators;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace cAlgo
 {
@@ -101,14 +103,17 @@ namespace cAlgo
         protected bool isSwordfishTerminated = false;
         protected bool isSwordFishReset = true;
         protected bool isReducedRiskTime = false;
+        protected string botId = null;
 
         List<string> debugCSV = new List<string>();
 
         //Performance Reporting
         protected double DayProfitTotal = 0;
         protected double DayPipsTotal = 0;
+
         protected override void OnStart()
         {
+            botId = generateBotId();
             swordFishTimeInfo = new MarketTimeInfo();
             setTimeZone();
             Boli = Indicators.BollingerBands(DataSeriesSource, 2, 20, MovingAverageType.Exponential);
@@ -117,6 +122,13 @@ namespace cAlgo
             Positions.Closed += PositionsOnClosed;
 
             debugCSV.Add("Trade,Profit,Pips,Day,Label,EntryPrice,ClosePrice,SL,TP,Date/Time,OpenedPositionsCount,ClosedPositionsCount,LastPositionEntryPrice,LastClosedPositionEntryPrice,LastProfitPrice,LastPositionLabel,DivideTrailingStopPips,isTrailingStopsActive,isBreakEvenStopLossActive,isHardSLLastClosedPositionEntryPrice,isHardSLLastPositionEntryPrice,isHardSLLastProfitPrice,OpenPriceCaptured,OrdersPlaced,isSwordFishReset,isSwordfishTerminated,isReducedRiskTime");
+        }
+
+        protected string generateBotId()
+        {
+            Random randomIdGenerator = new Random();
+            int id = randomIdGenerator.Next(0, 99999);
+            return id.ToString("00000");
         }
 
 
@@ -141,88 +153,20 @@ namespace cAlgo
                     //Price moves 5pts UP from open then look to set SELL LimitOrders
                     if (OpenPrice + SwordFishTrigger < Symbol.Bid)
                     {
-                        //Place Sell Limit Orders
-                        for (int OrderCount = 0; OrderCount < NumberOfOrders; OrderCount++)
-                        {
-                            //OPTIONAL - Confirm last bar broke the Bollinger Band Top indicating market is overbought
-                            if (checkBollingerBand)
-                            {
-                                if (Boli.Top.Last(0) < MarketSeries.Close.LastValue)
-                                {
-                                    PlaceLimitOrder(TradeType.Sell, Symbol, setVolume(OrderCount, NumberOfOrders), (OpenPrice + OrderEntryOffset + OrderCount * OrderSpacing), swordFishTimeInfo.market + "-SWF#" + OrderCount + "-" + getTimeStamp(), setPendingOrderStopLossPips(OrderCount, NumberOfOrders), TakeProfit * (1 / Symbol.TickSize));
-                                }
-                            }
-                            else
-                            {
-                                //Check that entry price is valid
-                                double EntryPrice = OpenPrice + OrderEntryOffset + OrderCount * OrderSpacing;
-                                if (EntryPrice > Symbol.Ask)
-                                {
-                                    TradeResult SellLimitOrder = PlaceLimitOrder(TradeType.Sell, Symbol, setVolume(OrderCount, NumberOfOrders), EntryPrice, swordFishTimeInfo.market + "-SWF#" + OrderCount + "-" + getTimeStamp(), setPendingOrderStopLossPips(OrderCount, NumberOfOrders), TakeProfit * (1 / Symbol.TickSize));
-                                    if (!SellLimitOrder.IsSuccessful)
-                                        debug("FAILED to place order", SellLimitOrder);
-                                }
-                                else
-                                {
-                                    //Avoid placing all PendingOrders that have been 'jumped' by re-calculating the OrderCount to the equivelant entry point.
-                                    //OrderCount = calculateNewOrderCount(OrderCount, Symbol.Ask);
-                                    TradeResult SellOrder = ExecuteMarketOrder(TradeType.Sell, Symbol, setVolume(OrderCount, NumberOfOrders), swordFishTimeInfo.market + "-SWF-X#" + OrderCount + "-" + getTimeStamp(), setPendingOrderStopLossPips(OrderCount, NumberOfOrders), TakeProfit * (1 / Symbol.TickSize));
-                                    if (!SellOrder.IsSuccessful)
-                                        debug("FAILED to place order", SellOrder);
-                                }
-                            }
-                        }
-                        //All Sell Stop Orders have been placed
-                        OrdersPlaced = true;
+                        placeSellLimitOrders();
                     }
                     //Price moves 5pts DOWN from open then look to set BUY LimitOrders
                     else if (OpenPrice - SwordFishTrigger > Symbol.Ask)
                     {
-                        //Place Buy Limit Orders
-                        for (int OrderCount = 0; OrderCount < NumberOfOrders; OrderCount++)
-                        {
-                            //confirm last bar broke the Bollinger Band Top indicating overbought - OPTIONAL
-                            if (checkBollingerBand)
-                            {
-                                //OPTIONAL - Confirm last bar broke the Bollinger Band Bottom indicating market is oversold
-                                if (Boli.Bottom.Last(0) < MarketSeries.Close.LastValue)
-                                {
-                                    // Place BUY Limit order spaced by OrderSpacing 
-                                    PlaceLimitOrder(TradeType.Buy, Symbol, setVolume(OrderCount, NumberOfOrders), (OpenPrice + OrderEntryOffset + OrderCount * OrderSpacing), swordFishTimeInfo.market + "-SWF#" + OrderCount + "-" + getTimeStamp(), setPendingOrderStopLossPips(OrderCount, NumberOfOrders), TakeProfit * (1 / Symbol.TickSize));
-                                }
-
-                            }
-                            else
-                            {
-                                //Check that entry price is valid
-                                double EntryPrice = OpenPrice - OrderEntryOffset - OrderCount * OrderSpacing;
-                                if (EntryPrice < Symbol.Bid)
-                                {
-                                    TradeResult BuyLimitOrder = PlaceLimitOrder(TradeType.Buy, Symbol, setVolume(OrderCount, NumberOfOrders), EntryPrice, swordFishTimeInfo.market + "-SWF#" + OrderCount + "-" + getTimeStamp(), setPendingOrderStopLossPips(OrderCount, NumberOfOrders), TakeProfit * (1 / Symbol.TickSize));
-                                    if (!BuyLimitOrder.IsSuccessful)
-                                        debug("FAILED to place order", BuyLimitOrder);
-                                }
-                                else
-                                {
-                                    //Avoid placing all PendingOrders that have been 'jumped' by re-calculating the OrderCount to the equivelant entry point.
-                                    OrderCount = calculateNewOrderCount(OrderCount, Symbol.Bid);
-                                    TradeResult BuyOrder = ExecuteMarketOrder(TradeType.Buy, Symbol, setVolume(OrderCount, NumberOfOrders), swordFishTimeInfo.market + "-SWF-X#" + OrderCount + "-" + getTimeStamp(), setPendingOrderStopLossPips(OrderCount, NumberOfOrders), TakeProfit * (1 / Symbol.TickSize));
-                                    if (!BuyOrder.IsSuccessful)
-                                        debug("FAILED to place order", BuyOrder);
-                                }
-                            }
-                        }
-                        //All Buy Stop Orders have been placed
-                        OrdersPlaced = true;
+                        placeBuyLimitOrders();
                     }
                 }
             }
-            //It is outside SwordFish Time
-            else
+            else //It is outside SwordFish Time
             {
                 if (OrdersPlaced)
                 {
-                    if (Positions.Count > 0)
+                    if (OpenedPositionsCount - ClosedPositionsCount > 0)
                     {
                         //Look to reduce risk as Spike retraces
                         ManagePositionRisk();
@@ -250,84 +194,294 @@ namespace cAlgo
                         ResetSwordFish();
                     }
 
-                    //Out of Swordfish time and all positions that opened are now closed
-                    if (OpenedPositionsCount > 0 && OpenedPositionsCount == ClosedPositionsCount)
+                    //Out of Swordfish time and all positions that were opened are now closed
+                    if (OpenedPositionsCount > 0 && OpenedPositionsCount - ClosedPositionsCount == 0)
                         ResetSwordFish();
                 }
-                //No Orders placed therefore reset Swordfish
-                else
+                else //No Orders were placed and it is out of swordfish time therefore reset Swordfish
                 {
                     ResetSwordFish();
                 }
             }
 
+            // If Trailing stop is active update position SL's
             if (isTrailingStopsActive)
             {
-                double newStopLossPips = 0;
-                double newStopLossPrice = 0;
-                double currentStopLossPips = 0;
-                double currentStopLossPrice = 0;
-
-                foreach (Position _p in Positions)
+                List<Task> taskList = new List<Task>();
+                foreach (Position p in Positions)
                 {
-
-                    bool isProtected = _p.StopLoss.HasValue;
-                    if (isProtected)
+                    taskList.Add(Task.Factory.StartNew((Object obj) =>
                     {
-                        currentStopLossPrice = (double)_p.StopLoss;
-                    }
-                    else
-                    {
-                        //Should never happen
-                        Print("WARNING: Trail Activated but No intial STOP LESS set");
-                        currentStopLossPrice = LastPositionEntryPrice;
-                    }
+                        try
+                        {
+                            if (isThisBotId(p.Label))
+                            {
 
-                    if (_p.TradeType == TradeType.Buy)
-                    {
-                        newStopLossPrice = Symbol.Ask - TrailingStopPips / DivideTrailingStopPips;
-                        newStopLossPips = _p.EntryPrice - newStopLossPrice;
-                        currentStopLossPips = _p.EntryPrice - currentStopLossPrice;
+                                double newStopLossPrice = calcTrailingStopLoss(p);
+                                if (newStopLossPrice > 0)
+                                {
+                                    ModifyPositionAsync(p, newStopLossPrice, null, onTradeOperationComplete);
+                                }
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            Print("Failed to Modify Position:" + e.Message);
+                        }
 
-                        //Is newStopLoss more risk than current SL
-                        if (newStopLossPips < currentStopLossPips)
-                            continue;
-
-                        //Is newStopLoss more than the current Ask and therefore not valid
-                        if (newStopLossPrice > Symbol.Ask)
-                            continue;
-
-                        //Is the difference between the newStopLoss and the current SL less than the tick size and therefore not valid
-                        if (currentStopLossPips - newStopLossPips < Symbol.TickSize)
-                            continue;
-                    }
-
-                    if (_p.TradeType == TradeType.Sell)
-                    {
-                        newStopLossPrice = Symbol.Bid + TrailingStopPips / DivideTrailingStopPips;
-                        newStopLossPips = newStopLossPrice - _p.EntryPrice;
-                        currentStopLossPips = currentStopLossPrice - _p.EntryPrice;
-
-                        //Is newStopLoss more risk than current SL
-                        if (newStopLossPips > currentStopLossPips)
-                            continue;
-
-                        //Is newStopLoss more than the current Ask and therefore not valid
-                        if (newStopLossPrice < Symbol.Bid)
-                            continue;
-
-                        //Is the difference between the newStopLoss and the current SL less than the tick size and therefore not valid
-                        if (currentStopLossPips - newStopLossPips < Symbol.TickSize)
-                            continue;
-                    }
-
-                    TradeResult tr = ModifyPosition(_p, newStopLossPrice, null);
-                    if (!tr.IsSuccessful)
-                        debug("FAILED to modify SL", tr);
-
+                    },
+                    p));
                 }
+                Task.WaitAll(taskList.ToArray<Task>());
             }
         }
+
+        protected void setBreakEvens(double breakEvenTriggerPrice)
+        {
+            List<Task> taskList = new List<Task>();
+            foreach (Position p in Positions)
+            {
+                taskList.Add(Task.Factory.StartNew((Object obj) =>
+                {
+                    try
+                    {
+                        if (isThisBotId(p.Label))
+                        {
+                            if (LastPositionTradeType == TradeType.Buy)
+                            {
+                                if (breakEvenTriggerPrice > p.EntryPrice)
+                                {
+
+                                    ModifyPositionAsync(p, p.EntryPrice + HardStopLossBuffer, p.TakeProfit, onTradeOperationComplete);
+
+
+                                }
+                            }
+
+                            if (LastPositionTradeType == TradeType.Sell)
+                            {
+                                if (breakEvenTriggerPrice < p.EntryPrice)
+                                {
+                                    ModifyPositionAsync(p, p.EntryPrice - HardStopLossBuffer, p.TakeProfit, onTradeOperationComplete);
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        Print("Failed to Modify Position:" + e.Message);
+                    }
+                },
+                p));
+            }
+            Task.WaitAll(taskList.ToArray<Task>());
+        }
+
+
+        //calculate Trailing Stop Loss
+        protected double calcTrailingStopLoss(Position position)
+        {
+            double newStopLossPips = 0;
+            double newStopLossPrice = 0;
+            double currentStopLossPips = 0;
+            double currentStopLossPrice = 0;
+
+            bool isProtected = position.StopLoss.HasValue;
+            if (isProtected)
+            {
+                currentStopLossPrice = (double)position.StopLoss;
+            }
+            else
+            {
+                //Should never happen
+                Print("WARNING: Trailing Stop Loss Activated but No intial STOP LESS set");
+                currentStopLossPrice = LastPositionEntryPrice;
+            }
+
+            if (position.TradeType == TradeType.Buy)
+            {
+                newStopLossPrice = Symbol.Ask - TrailingStopPips / DivideTrailingStopPips;
+                newStopLossPips = position.EntryPrice - newStopLossPrice;
+                currentStopLossPips = position.EntryPrice - currentStopLossPrice;
+
+                //Is newStopLoss more risk than current SL
+                if (newStopLossPips < currentStopLossPips)
+                    return 0;
+
+                //Is newStopLoss more than the current Ask and therefore not valid
+                if (newStopLossPrice > Symbol.Ask)
+                    return 0;
+
+                //Is the difference between the newStopLoss and the current SL less than the tick size and therefore not valid
+                if (currentStopLossPips - newStopLossPips < Symbol.TickSize)
+                    return 0;
+            }
+
+            if (position.TradeType == TradeType.Sell)
+            {
+                newStopLossPrice = Symbol.Bid + TrailingStopPips / DivideTrailingStopPips;
+                newStopLossPips = newStopLossPrice - position.EntryPrice;
+                currentStopLossPips = currentStopLossPrice - position.EntryPrice;
+
+                //Is newStopLoss more risk than current SL
+                if (newStopLossPips > currentStopLossPips)
+                    return 0;
+
+                //Is newStopLoss more than the current Ask and therefore not valid
+                if (newStopLossPrice < Symbol.Bid)
+                    return 0;
+
+                //Is the difference between the newStopLoss and the current SL less than the tick size and therefore not valid
+                if (currentStopLossPips - newStopLossPips < Symbol.TickSize)
+                    return 0;
+            }
+
+            return newStopLossPrice;
+        }
+
+
+        //Place Buy Limit Orders
+        protected void placeBuyLimitOrders()
+        {
+            if (checkBollingerBand)
+            {
+                //OPTIONAL - if last bar close value is GREATER than than the Bollinger Band Bottom ( which indicates the market is oversold) then return
+                if (Boli.Bottom.Last(0) < MarketSeries.Close.LastValue)
+                {
+                    return;
+                }
+
+            }
+
+            //Place Buy Limit Orders
+            List<Task> taskList = new List<Task>();
+            for (int OrderCount = 0; OrderCount < NumberOfOrders; OrderCount++)
+            {
+                taskList.Add(Task.Factory.StartNew((Object obj) =>
+                {
+                    try
+                    {
+                        tradeData data = obj as tradeData;
+                        if (data == null)
+                            return;
+
+                        //Check that entry price is valid
+                        if (data.entryPrice < Symbol.Bid)
+                        {
+                            PlaceLimitOrderAsync(data.tradeType, data.symbol, data.volume, data.entryPrice, data.label, data.stopLossPips, data.takeProfitPips, onTradeOperationComplete);
+                        }
+                        else
+                        {
+                            //Tick price has 'jumped' - therefore avoid placing all PendingOrders by re-calculating the OrderCount to the equivelant entry point.
+                            OrderCount = calculateNewOrderCount(OrderCount, Symbol.Bid);
+                            ExecuteMarketOrderAsync(data.tradeType, data.symbol, data.volume, data.label + "X", data.stopLossPips, data.takeProfitPips, onTradeOperationComplete);
+                        }
+                    }
+                    catch(Exception e)
+                    {
+                        Print("Failed to place buy limit order: " + e.Message);
+                    }
+                },
+                new tradeData()
+                {
+                    tradeType = TradeType.Buy,
+                    symbol = Symbol,
+                    volume = setVolume(OrderCount, NumberOfOrders),
+                    entryPrice = calcBuyEntryPrice(OrderCount),
+                    label = botId + "-" + getTimeStamp() + swordFishTimeInfo.market + "-SWF#" + OrderCount,
+                    stopLossPips = setPendingOrderStopLossPips(OrderCount, NumberOfOrders),
+                    takeProfitPips = TakeProfit * (1 / Symbol.TickSize)
+                }));
+            }
+            Task.WaitAll(taskList.ToArray<Task>());
+
+            //All Buy Limit Orders have been placed
+            OrdersPlaced = true;
+        }
+
+        protected double calcBuyEntryPrice(int orderCount)
+        {
+            return OpenPrice - OrderEntryOffset - orderCount * OrderSpacing;
+        }
+
+        // Place Sell Limit Orders
+        protected void placeSellLimitOrders()
+        {
+            //OPTIONAL - - if last bar close value is LESS than than the Bollinger Band Top (which indicates the market is overbought) then return
+            if (checkBollingerBand)
+            {
+                if (Boli.Top.Last(0) > MarketSeries.Close.LastValue)
+                {
+                    return;
+                }
+            }
+
+
+            //Place Sell Limit Orders
+            List<Task> taskList = new List<Task>();
+            for (int OrderCount = 0; OrderCount < NumberOfOrders; OrderCount++)
+            {
+                taskList.Add(Task.Factory.StartNew((Object obj) =>
+                {
+                    try
+                    {
+                        tradeData data = obj as tradeData;
+                        if (data == null)
+                            return;
+
+                        //Check that entry price is valid
+                        if (data.entryPrice > Symbol.Ask)
+                        {
+                            PlaceLimitOrderAsync(data.tradeType, data.symbol, data.volume, data.entryPrice, data.label, data.stopLossPips, data.takeProfitPips, onTradeOperationComplete);
+                        }
+                        else
+                        {
+                            //Tick price has 'jumped' - therefore avoid placing all PendingOrders by re-calculating the OrderCount to the equivelant entry point.
+                            OrderCount = calculateNewOrderCount(OrderCount, Symbol.Ask);
+                            ExecuteMarketOrderAsync(data.tradeType, data.symbol, data.volume, data.label + "X", data.stopLossPips, data.takeProfitPips, onTradeOperationComplete);
+                        }
+                    }
+                    catch(Exception e)
+                    {
+                        Print("Failed to place Sell Limit Order: " + e.Message);
+                    }
+                   
+                },
+                new tradeData()
+                {
+                    tradeType = TradeType.Sell,
+                    symbol = Symbol,
+                    volume = setVolume(OrderCount, NumberOfOrders),
+                    entryPrice = calcSellEntryPrice(OrderCount),
+                    label = botId + "-" + getTimeStamp() + swordFishTimeInfo.market + "-SWF#" + OrderCount,
+                    stopLossPips = setPendingOrderStopLossPips(OrderCount, NumberOfOrders),
+                    takeProfitPips = TakeProfit * (1 / Symbol.TickSize)
+                }));
+            }
+            Task.WaitAll(taskList.ToArray<Task>());
+
+            //All Sell Limit Orders have been placed
+            OrdersPlaced = true;
+        }
+
+
+        protected void onTradeOperationComplete(TradeResult tr)
+        {
+            if (!tr.IsSuccessful)
+            {
+                string msg = "FAILED Trade Operation: " + tr.Error;
+                if (tr.Position != null)
+                    Print(msg, " Position: ", tr.Position.Label, " ", tr.Position.TradeType, " ", Time);
+                if (tr.PendingOrder != null)
+                    Print(msg, " Pending Order: ", tr.PendingOrder.Label, " ", tr.PendingOrder.TradeType, " ", Time);
+            }
+        }
+
+        protected double calcSellEntryPrice(int orderCount)
+        {
+            return OpenPrice + OrderEntryOffset + orderCount * OrderSpacing;
+        }
+
 
         //Calculate a new orderCount number for when tick jumps
         protected int calculateNewOrderCount(int _orderCount, double _currentTickPrice)
@@ -345,47 +499,54 @@ namespace cAlgo
 
         protected void PositionsOnOpened(PositionOpenedEventArgs args)
         {
-            OpenedPositionsCount++;
+            if (isThisBotId(args.Position.Label))
+            {
+                OpenedPositionsCount++;
 
-            //Capture last Position Opened i.e. the furthest away
-            LastPositionTradeType = args.Position.TradeType;
-            LastPositionEntryPrice = args.Position.EntryPrice;
-            LastPositionLabel = args.Position.Label;
+                //Capture last Position Opened i.e. the furthest away
+                LastPositionTradeType = args.Position.TradeType;
+                LastPositionEntryPrice = args.Position.EntryPrice;
+                LastPositionLabel = args.Position.Label;
+            }
+
         }
 
         protected void PositionsOnClosed(PositionClosedEventArgs args)
         {
-            ClosedPositionsCount++;
-
-            DayProfitTotal += args.Position.GrossProfit;
-            DayPipsTotal += args.Position.Pips;
-            debugCSV.Add("TRADE," + args.Position.GrossProfit + "," + args.Position.Pips + "," + Time.DayOfWeek + "," + args.Position.Label + "," + args.Position.EntryPrice + "," + History.FindLast(args.Position.Label, Symbol, args.Position.TradeType).ClosingPrice + "," + args.Position.StopLoss + "," + args.Position.TakeProfit + "," + Time + debugState());
-
-            //Last position's SL has been triggered for a loss - NOT a swordfish
-            if (LastPositionLabel == args.Position.Label && args.Position.GrossProfit < 0)
+            if (isThisBotId(args.Position.Label))
             {
-                Print("CLOSING ALL POSITIONS due to furthest position losing");
-                CloseAllPendingOrders();
-                CloseAllPositions();
-                isSwordfishTerminated = true;
-            }
+                ClosedPositionsCount++;
 
-            //Taking profit
-            if (args.Position.GrossProfit > 0)
-            {
-                //capture last position take profit price
-                setLastProfitPrice(args.Position.TradeType);
+                DayProfitTotal += args.Position.GrossProfit;
+                DayPipsTotal += args.Position.Pips;
+                debugCSV.Add("TRADE," + args.Position.GrossProfit + "," + args.Position.Pips + "," + Time.DayOfWeek + "," + args.Position.Label + "," + args.Position.EntryPrice + "," + History.FindLast(args.Position.Label, Symbol, args.Position.TradeType).ClosingPrice + "," + args.Position.StopLoss + "," + args.Position.TakeProfit + "," + Time + debugState());
 
-                //capture last closed position entry price
-                LastClosedPositionEntryPrice = args.Position.EntryPrice;
-
-                //If the spike has retraced then close all pending and set trailing stop
-                ManagePositionRisk();
-
-                //BreakEven SL triggered in ManageRisk() function
-                if (isBreakEvenStopLossActive)
+                //Last position's SL has been triggered for a loss - NOT a swordfish
+                if (LastPositionLabel == args.Position.Label && args.Position.GrossProfit < 0)
                 {
-                    setBreakEvens(LastProfitPrice);
+                    Print("CLOSING ALL POSITIONS due to furthest position losing");
+                    CloseAllPendingOrders();
+                    CloseAllPositions();
+                    isSwordfishTerminated = true;
+                }
+
+                //Taking profit
+                if (args.Position.GrossProfit > 0)
+                {
+                    //capture last position take profit price
+                    setLastProfitPrice(args.Position.TradeType);
+
+                    //capture last closed position entry price
+                    LastClosedPositionEntryPrice = args.Position.EntryPrice;
+
+                    //If the spike has retraced then close all pending and set trailing stop
+                    ManagePositionRisk();
+
+                    //BreakEven SL triggered in ManageRisk() function
+                    if (isBreakEvenStopLossActive)
+                    {
+                        setBreakEvens(LastProfitPrice);
+                    }
                 }
             }
         }
@@ -504,9 +665,7 @@ namespace cAlgo
             {
                 percentClosed = (ClosedPositionsCount / OpenedPositionsCount) * 100;
             }
-
             return percentClosed;
-
         }
 
 
@@ -518,42 +677,136 @@ namespace cAlgo
                 LastProfitPrice = Symbol.Bid;
         }
 
-
-        protected void setBreakEvens(double breakEvenTriggerPrice)
+        protected bool IsSwordFishTime()
         {
-            TradeResult tr;
-            foreach (Position _p in Positions)
-            {
-                if (LastPositionTradeType == TradeType.Buy)
-                {
-                    if (breakEvenTriggerPrice > _p.EntryPrice)
-                    {
-                        tr = ModifyPosition(_p, _p.EntryPrice + HardStopLossBuffer, _p.TakeProfit);
-                        if (!tr.IsSuccessful)
-                            debug("FAILED to modify", tr);
-                    }
+            return swordFishTimeInfo.IsPlacePendingOrdersTime(IsBacktesting, Server.Time);
+        }
 
-                }
-                if (LastPositionTradeType == TradeType.Sell)
-                {
-                    if (breakEvenTriggerPrice < _p.EntryPrice)
-                    {
-                        tr = ModifyPosition(_p, _p.EntryPrice - HardStopLossBuffer, _p.TakeProfit);
-                        if (!tr.IsSuccessful)
-                            debug("FAILED to modify", tr);
-                    }
-                }
+        protected void SetAllStopLosses(double SLPrice)
+        {
+            switch (LastPositionTradeType)
+            {
+                case TradeType.Buy:
+                    SetStopLossForAllPositions(SLPrice - HardStopLossBuffer);
+                    break;
+                case TradeType.Sell:
+                    SetStopLossForAllPositions(SLPrice + HardStopLossBuffer);
+                    break;
             }
+        }
+
+        //Set a stop loss on the last Pending Order set to catch the break away train that never comes back!
+        protected double setPendingOrderStopLossPips(int _orderCount, int _numberOfOrders)
+        {
+            if (_orderCount == _numberOfOrders - 1)
+            {
+                return FinalOrderStopLoss * (1 / Symbol.TickSize);
+            }
+            else
+            {
+                return 0;
+            }
+        }
+
+        //Increase the volume based on Orders places and volume levels and multiplier until max volume reached
+        protected int setVolume(int _orderCount, int _numberOfOrders)
+        {
+
+            double _orderVolumeLevel = _orderCount / OrderVolumeLevels;
+            double _volume = Math.Pow(VolumeMultipler, _orderVolumeLevel) * Volume;
+
+            if (_volume > VolumeMax)
+            {
+                _volume = VolumeMax;
+            }
+
+            return (int)_volume;
+        }
+
+        protected void CloseAllPendingOrders()
+        {
+            //Close any outstanding pending orders
+            List<Task> taskList = new List<Task>();
+            foreach (PendingOrder po in PendingOrders)
+            {
+                taskList.Add(Task.Factory.StartNew((Object obj) =>
+                {
+                    try
+                    {
+                        if (isThisBotId(po.Label))
+                        {
+                            CancelPendingOrderAsync(po, onTradeOperationComplete);
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        Print("Failed to Cancel Pending Order :" + e.Message);
+                    }
+                },
+                po));
+            }
+            Task.WaitAll(taskList.ToArray<Task>());
+            isPendingOrdersClosed = true;
         }
 
         protected void CloseAllPositions()
         {
-            while (Positions.Count > 0)
+            //Close any outstanding pending orders
+            List<Task> taskList = new List<Task>();
+            foreach (Position p in Positions)
             {
-                TradeResult tr = ClosePosition(Positions[0]);
-                if (!tr.IsSuccessful)
-                    debug("FAILED to close", tr);
+                taskList.Add(Task.Factory.StartNew((Object obj) =>
+                {
+                    try
+                    {
+                        if (isThisBotId(p.Label))
+                        {
+                            ClosePositionAsync(p, onTradeOperationComplete);
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        Print("Failed to Close Position: " + e.Message);
+                    }
+                },
+                p));
             }
+            Task.WaitAll(taskList.ToArray<Task>());
+        }
+
+        protected void SetStopLossForAllPositions(double _stopLossPrice)
+        {
+            List<Task> taskList = new List<Task>();
+            foreach (Position p in Positions)
+            {
+                taskList.Add(Task.Factory.StartNew((Object obj) =>
+               {
+                   try
+                   {
+                       if (isThisBotId(p.Label))
+                       {
+                           ModifyPositionAsync(p, _stopLossPrice, p.TakeProfit, onTradeOperationComplete);
+                       }
+                   }
+                   catch (Exception e)
+                   {
+                       Print("Failed to Modify Position: " + e.Message);
+                   }
+               },
+               p));
+            }
+            Task.WaitAll(taskList.ToArray<Task>());
+        }
+
+
+        //Check whether a position or order is managed by this bot instance.
+        protected bool isThisBotId(string label)
+        {
+            string id = label.Substring(0, 5);
+            if (id.Equals(botId))
+                return true;
+            else
+                return false;
         }
 
         protected void ResetSwordFish()
@@ -631,97 +884,18 @@ namespace cAlgo
             return state;
         }
 
-
-
-        protected bool IsSwordFishTime()
-        {
-            return swordFishTimeInfo.IsPlacePendingOrdersTime(IsBacktesting, Server.Time);
-        }
-
-        protected void SetAllStopLosses(double SLPrice)
-        {
-            switch (LastPositionTradeType)
-            {
-                case TradeType.Buy:
-                    SetStopLossForAllPositions(SLPrice - HardStopLossBuffer);
-                    break;
-                case TradeType.Sell:
-                    SetStopLossForAllPositions(SLPrice + HardStopLossBuffer);
-                    break;
-            }
-        }
-
-        //Set a stop loss on the last Pending Order set to catch the break away train that never comes back!
-        protected double setPendingOrderStopLossPips(int _orderCount, int _numberOfOrders)
-        {
-            if (_orderCount == _numberOfOrders - 1)
-            {
-                return FinalOrderStopLoss * (1 / Symbol.TickSize);
-            }
-            else
-            {
-                return 0;
-            }
-        }
-
-        //Increase the volume based on Orders places and volume levels and multiplier until max volume reached
-        protected int setVolume(int _orderCount, int _numberOfOrders)
-        {
-
-            double _orderVolumeLevel = _orderCount / OrderVolumeLevels;
-            double _volume = Math.Pow(VolumeMultipler, _orderVolumeLevel) * Volume;
-
-            if (_volume > VolumeMax)
-            {
-                _volume = VolumeMax;
-            }
-
-            return (int)_volume;
-        }
-
-        protected void CloseAllPendingOrders()
-        {
-            //Close any outstanding pending orders
-            while (PendingOrders.Count > 0)
-            {
-                TradeResult tr = CancelPendingOrder(PendingOrders[0]);
-                if (!tr.IsSuccessful)
-                    debug("FAILED to cancel", tr);
-
-            }
-            isPendingOrdersClosed = true;
-        }
-
-        protected void SetStopLossForAllPositions(double _stopLossPrice)
-        {
-            foreach (Position _p in Positions)
-            {
-                TradeResult tr = ModifyPosition(_p, _stopLossPrice, _p.TakeProfit);
-                if (!tr.IsSuccessful)
-                    debug("FAILED to modify SL", tr);
-            }
-        }
-
         protected override void OnStop()
         {
             // Put your deinitialization logic here
             System.IO.File.WriteAllLines("C:\\Users\\alist\\Desktop\\" + swordFishTimeInfo.market + "-swordfish.csv", debugCSV.ToArray());
         }
 
-        protected void debug(string msg, TradeResult tr)
+        protected string getTimeStamp(bool isBotId = false)
         {
-            if (tr.Position != null)
-                Print(msg, " Position: ", tr.Position.Label, " ", tr.Position.TradeType, " ", Time);
-            if (tr.PendingOrder != null)
-                Print(msg, " Pending Order: ", tr.PendingOrder.Label, " ", tr.PendingOrder.TradeType, " ", Time);
-        }
-
-
-        protected string getTimeStamp()
-        {
+            if (isBotId)
+                return "ID" + Time.Year + Time.Month + Time.Day + Time.Minute + Time.Second + Time.Millisecond;
             return Time.Year + "-" + Time.Month + "-" + Time.Day;
         }
-
 
         protected void setTimeZone()
         {
@@ -838,6 +1012,17 @@ public struct MarketTimeInfo
         DateTime tzTime = TimeZoneInfo.ConvertTimeFromUtc(_dateTimeUtc, tz);
         return tzTime.TimeOfDay >= closeAll;
     }
+}
+
+class tradeData
+{
+    public TradeType tradeType;
+    public Symbol symbol;
+    public int volume;
+    public double entryPrice;
+    public string label;
+    public double stopLossPips;
+    public double takeProfitPips;
 }
 
 
