@@ -7,7 +7,7 @@ using Niffler;
 
 namespace cAlgo
 {
-    [Indicator(IsOverlay = false, TimeZone = TimeZones.UTC, AccessRights = AccessRights.None)]
+    [Indicator(IsOverlay = true, TimeZone = TimeZones.UTC, AccessRights = AccessRights.FullAccess)]
     public class NifflerKeyLevels : Niffler.Indicators.KeyLevels.Bot
     {
 
@@ -19,41 +19,50 @@ namespace cAlgo
         // Enjoy!
 
 
+        [Output("Daily Open", Color = Colors.Green)]
+        public override IndicatorDataSeries DailyOpenSeries { get; set; }
+
+        [Output("Daily Close", Color = Colors.Red)]
+        public override IndicatorDataSeries DailyCloseSeries { get; set; }
+
+        [Output("Daily High", Color = Colors.Lime)]
+        public override IndicatorDataSeries DailyHighSeries { get; set; }
+
+        [Output("Daily Low", Color = Colors.Lime)]
+        public override IndicatorDataSeries DailyLowSeries { get; set; }
+
+
+        [Output("Daily R1", Color = Colors.Red)]
+        public override IndicatorDataSeries DailyR1Series { get; set; }
+
+        [Output("Daily R2", Color = Colors.Red)]
+        public override IndicatorDataSeries DailyR2Series { get; set; }
+
+        [Output("Daily R3", Color = Colors.Red)]
+        public override IndicatorDataSeries DailyR3Series { get; set; }
+
+
+        [Output("Daily S1", Color = Colors.Green)]
+        public override IndicatorDataSeries DailyS1Series { get; set; }
+
+        [Output("Daily S2", Color = Colors.Green)]
+        public override IndicatorDataSeries DailyS2Series { get; set; }
+
+        [Output("Daily S3", Color = Colors.Green)]
+        public override IndicatorDataSeries DailyS3Series { get; set; }
+
+
+        [Output("Daily CBOL", Color = Colors.Yellow, LineStyle = LineStyle.LinesDots)]
+        public override IndicatorDataSeries DailyCBOLSeries { get; set; }
+
+        [Output("Daily CBOS", Color = Colors.Yellow, LineStyle = LineStyle.LinesDots)]
+        public override IndicatorDataSeries DailyCBOSSeries { get; set; }
+
+        [Output("Daily Pivot", Color = Colors.Gray)]
+        public override IndicatorDataSeries DailyPivotSeries { get; set; }
+
         [Parameter("Source")]
         public override DataSeries Source { get; set; }
-
-        [Parameter("Yesterdays High")]
-        public override double CashHigh { get; set; }
-
-        [Parameter("Yesterdays Low")]
-        public override double CashLow { get; set; }
-
-        [Parameter("Yesterdays Close")]
-        public override double CashClose { get; set; }
-
-        [Parameter("Yesterdays Open")]
-        public override double CashOpen { get; set; }
-
-        [Parameter("Daily ATR")]
-        public override double CashATR { get; set; }
-
-        [Parameter("Weekly High")]
-        public override double WeeklyHigh { get; set; }
-
-        [Parameter("Weekly Low")]
-        public override double WeeklyLow { get; set; }
-
-        [Parameter("Weekly Close")]
-        public override double WeeklyClose { get; set; }
-
-        [Parameter("Monthly High")]
-        public override double MonthlyHigh { get; set; }
-
-        [Parameter("Monthly Low")]
-        public override double MonthlyLow { get; set; }
-
-        [Parameter("Monthly Close")]
-        public override double MonthlyClose { get; set; }
 
 
     }

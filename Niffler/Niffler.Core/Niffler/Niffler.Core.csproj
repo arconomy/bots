@@ -94,11 +94,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Bots\OptionsExpiry\Entry.cs" />
+    <Compile Include="Bots\RandomWalk\Bot.cs" />
     <Compile Include="Business\Accounts.cs" />
     <Compile Include="Business\KeyLevels.cs" />
     <Compile Include="Business\Positions.cs" />
     <Compile Include="Business\TradingHours.cs" />
     <Compile Include="Bots\Client\Bot.cs" />
+    <Compile Include="Common\Notifications.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="Data\Data.cs" />
     <Compile Include="Data\Objects.cs" />
@@ -115,7 +117,6 @@
     <Compile Include="Rules\Test.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Bots\RandomWalk\" />
     <Folder Include="Common\TrailingStop\" />
   </ItemGroup>
   <ItemGroup>

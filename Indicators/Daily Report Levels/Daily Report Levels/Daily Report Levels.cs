@@ -7,13 +7,12 @@ using cAlgo.Indicators;
 
 namespace cAlgo
 {
-    [Indicator(IsOverlay = true, TimeZone = TimeZones.UTC, AccessRights = AccessRights.FullAccess)]
+    [Indicator(IsOverlay = true, TimeZone = TimeZones.UTC, AccessRights = AccessRights.Internet)]
     public class DailyReportLevels : Indicator
     {
 
         [Parameter("Source")]
         public DataSeries Source { get; set; }
-
 
         [Parameter("Yesterdays High")]
         public double CashHigh { get; set; }

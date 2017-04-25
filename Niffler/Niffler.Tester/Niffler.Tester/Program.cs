@@ -13,16 +13,10 @@ namespace Niffler.Tester
         {
 
 
-            Niffler.Bots.Client.Entry.Test();
+        Niffler.Model.KeyLevel     YesterdayKeyLevels = Business.KeyLevels.GetYesterdaysKeyLevels("IC Markets", "UK100");
 
-           // Niffler.Bots.Client.Entry.UpdateAccount(null);
-
-            Niffler.Bots.Client.Entry.UpdatePosition(null, null,null);
-
-            Niffler.Bots.Client.Entry.UpdateAccountAndPositions(null,null);
-
-          //  Niffler.Bots.Client.Entry.OnTick();
-
+            YesterdayKeyLevels = YesterdayKeyLevels;
+             
         }
     }
 }

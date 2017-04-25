@@ -92,10 +92,12 @@ namespace cAlgo
                     Print("Starting buy loop");
                     double Entry = SellStart - i;
                     //  double StopLoss; null as we dont know where it will be....  Semi Manual Bot... 
-                    var result = PlaceLimitOrder(TradeType.Buy, Symbol, ContractSize, Entry, "BUY", null, TakeProfit, MarketSeries.OpenTime.LastValue.AddMinutes(PendingOrderMins));
+                    //  var result = PlaceLimitOrder(TradeType.Buy, Symbol, ContractSize, Entry, "BUY", null, TakeProfit, MarketSeries.OpenTime.LastValue.AddMinutes(PendingOrderMins));
 
-                    if (!result.IsSuccessful)
-                        Print(result.Error);
+                    PlaceLimitOrderAsync(TradeType.Buy, Symbol, ContractSize, Entry, "BUY", null, TakeProfit, MarketSeries.OpenTime.LastValue.AddMinutes(PendingOrderMins), "BarBreak");
+
+                    //if (!result.IsSuccessful)
+                    //    Print(result.Error);
 
                     Print("BUY at " + Entry.ToString() + ", TP: " + TakeProfit.ToString());
 
@@ -110,9 +112,12 @@ namespace cAlgo
                     Print("Starting sell loop");
                     double Entry = BuyStart + i;
                     //  double StopLoss; null as we dont know where it will be....  Semi Manual Bot... 
-                    var result = PlaceLimitOrder(TradeType.Sell, Symbol, ContractSize, Entry, "SELL", null, TakeProfit, MarketSeries.OpenTime.LastValue.AddMinutes(PendingOrderMins));
-                    if (!result.IsSuccessful)
-                        Print(result.Error);
+                    //  var result = PlaceLimitOrder(TradeType.Sell, Symbol, ContractSize, Entry, "SELL", null, TakeProfit, MarketSeries.OpenTime.LastValue.AddMinutes(PendingOrderMins));
+
+                    PlaceLimitOrderAsync(TradeType.Sell, Symbol, ContractSize, Entry, "SELL", null, TakeProfit, MarketSeries.OpenTime.LastValue.AddMinutes(PendingOrderMins), "BarBreak");
+
+                    //  if (!result.IsSuccessful)
+                    //    Print(result.Error);
 
                     Print("SELL at " + Entry.ToString() + ", TP: " + TakeProfit.ToString());
 

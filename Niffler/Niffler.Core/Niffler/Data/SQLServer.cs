@@ -274,6 +274,7 @@ namespace Niffler.Data
 
                         for (int iRetry = 0; iRetry <= _MaxRetries; iRetry++)
                         {
+                                     
                             try
                             {
                                 //some possible issues that could occur?
@@ -294,7 +295,7 @@ namespace Niffler.Data
                                 }
 
                             }
-                            catch  
+                            catch (Exception ex) 
                             {
                                 UserAdapter.Dispose();
                                 Conn.Dispose();

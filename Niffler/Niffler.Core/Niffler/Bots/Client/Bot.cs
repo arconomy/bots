@@ -11,10 +11,14 @@ namespace Niffler.Bots.Client
 {
     public class Bot : cAlgo.API.Robot
     {
+        // Properties
 
         public virtual string TraderName { get; set; }
 
         public virtual string TraderEmail { get; set; }
+
+
+        // Functions 
 
         protected override void OnStart()
         {
@@ -25,8 +29,7 @@ namespace Niffler.Bots.Client
             Positions.Closed += PositionsClosed;
 
             Timer.Start(new TimeSpan(0, 0, 10));
-
-
+             
             //Check and Update Account Status
             Business.Accounts.Update(Account, TraderName, TraderEmail);
 
@@ -64,26 +67,18 @@ namespace Niffler.Bots.Client
             base.OnBar();
         }
 
-
         protected override void OnTick()
         {
 
             base.OnTick();
         }
 
-
         protected override void OnStop()
         {
             Print("Stopped Niffler Client Bot.");
             base.OnStop();
         }
-
-
-
-
-
-
-
+         
 
     }
 
