@@ -162,7 +162,8 @@ namespace cAlgo
                     }
                 }
             }
-            else //It is outside SwordFish Time
+            //It is outside SwordFish Time
+            else
             {
                 if (OrdersPlaced)
                 {
@@ -198,7 +199,8 @@ namespace cAlgo
                     if (OpenedPositionsCount > 0 && OpenedPositionsCount - ClosedPositionsCount == 0)
                         ResetSwordFish();
                 }
-                else //No Orders were placed and it is out of swordfish time therefore reset Swordfish
+                //No Orders were placed and it is out of swordfish time therefore reset Swordfish
+                else
                 {
                     ResetSwordFish();
                 }
@@ -223,14 +225,12 @@ namespace cAlgo
                                     ModifyPositionAsync(p, newStopLossPrice, null, onTradeOperationComplete);
                                 }
                             }
-                        }
-                        catch (Exception e)
+                        } catch (Exception e)
                         {
                             Print("Failed to Modify Position:" + e.Message);
                         }
 
-                    },
-                    p));
+                    }, p));
                 }
                 Task.WaitAll(taskList.ToArray<Task>());
             }
@@ -251,10 +251,7 @@ namespace cAlgo
                             {
                                 if (breakEvenTriggerPrice > p.EntryPrice)
                                 {
-
                                     ModifyPositionAsync(p, p.EntryPrice + HardStopLossBuffer, p.TakeProfit, onTradeOperationComplete);
-
-
                                 }
                             }
 
@@ -266,13 +263,11 @@ namespace cAlgo
                                 }
                             }
                         }
-                    }
-                    catch (Exception e)
+                    } catch (Exception e)
                     {
                         Print("Failed to Modify Position:" + e.Message);
                     }
-                },
-                p));
+                }, p));
             }
             Task.WaitAll(taskList.ToArray<Task>());
         }
@@ -365,13 +360,11 @@ namespace cAlgo
                             OrderCount = calculateNewOrderCount(OrderCount, Symbol.Bid);
                             ExecuteMarketOrderAsync(data.tradeType, data.symbol, data.volume, data.label + "X", data.stopLossPips, data.takeProfitPips, onTradeOperationComplete);
                         }
-                    }
-                    catch(Exception e)
+                    } catch (Exception e)
                     {
                         Print("Failed to place buy limit order: " + e.Message);
                     }
-                },
-                new tradeData()
+                }, new tradeData 
                 {
                     tradeType = TradeType.Buy,
                     symbol = Symbol,
@@ -428,14 +421,12 @@ namespace cAlgo
                             OrderCount = calculateNewOrderCount(OrderCount, Symbol.Ask);
                             ExecuteMarketOrderAsync(data.tradeType, data.symbol, data.volume, data.label + "X", data.stopLossPips, data.takeProfitPips, onTradeOperationComplete);
                         }
-                    }
-                    catch(Exception e)
+                    } catch (Exception e)
                     {
                         Print("Failed to place Sell Limit Order: " + e.Message);
                     }
-                   
-                },
-                new tradeData()
+
+                }, new tradeData 
                 {
                     tradeType = TradeType.Sell,
                     symbol = Symbol,
@@ -575,7 +566,7 @@ namespace cAlgo
                 //Set hard stop losses as soon as Swordfish time is over
                 if (!isHardSLLastPositionEntryPrice && !IsSwordFishTime())
                 {
-                    SetAllStopLosses(LastPositionEntryPrice);
+                    setAllStopLosses(LastPositionEntryPrice);
                     isHardSLLastPositionEntryPrice = true;
                 }
 
@@ -585,7 +576,7 @@ namespace cAlgo
                     //If Hard SL has not been set yet
                     if (!isHardSLLastPositionEntryPrice && LastPositionEntryPrice > 0)
                     {
-                        SetAllStopLosses(LastPositionEntryPrice);
+                        setAllStopLosses(LastPositionEntryPrice);
                         isHardSLLastPositionEntryPrice = true;
                     }
                     //Active Breakeven Stop Losses
@@ -598,7 +589,7 @@ namespace cAlgo
                     //Set hard stop losses
                     if (!isHardSLLastClosedPositionEntryPrice && LastClosedPositionEntryPrice > 0)
                     {
-                        SetAllStopLosses(LastClosedPositionEntryPrice);
+                        setAllStopLosses(LastClosedPositionEntryPrice);
                         isHardSLLastClosedPositionEntryPrice = true;
                     }
                     //Activate Trailing Stop Losses
@@ -611,7 +602,7 @@ namespace cAlgo
                     //Set hard stop losses
                     if (!isHardSLLastProfitPrice && LastProfitPrice > 0)
                     {
-                        SetAllStopLosses(LastProfitPrice);
+                        setAllStopLosses(LastProfitPrice);
                         isHardSLLastProfitPrice = true;
                     }
                 }
@@ -647,7 +638,7 @@ namespace cAlgo
             if (LastPositionTradeType == TradeType.Buy)
             {
                 //Positions are buying
-                percentRetrace = (OpenPrice - Symbol.Bid) / (OpenPrice - LastPositionEntryPrice);
+                percentRetrace = (OpenPrice - Symbol.Ask) / (OpenPrice - LastPositionEntryPrice);
             }
 
             percentRetrace = 1 - percentRetrace;
@@ -680,15 +671,15 @@ namespace cAlgo
             return swordFishTimeInfo.IsPlacePendingOrdersTime(IsBacktesting, Server.Time);
         }
 
-        protected void SetAllStopLosses(double SLPrice)
+        protected void setAllStopLosses(double SLPrice)
         {
             switch (LastPositionTradeType)
             {
                 case TradeType.Buy:
-                    SetStopLossForAllPositions(SLPrice - HardStopLossBuffer);
+                    setStopLossForAllPositions(SLPrice - HardStopLossBuffer);
                     break;
                 case TradeType.Sell:
-                    SetStopLossForAllPositions(SLPrice + HardStopLossBuffer);
+                    setStopLossForAllPositions(SLPrice + HardStopLossBuffer);
                     break;
             }
         }
@@ -735,13 +726,11 @@ namespace cAlgo
                         {
                             CancelPendingOrderAsync(po, onTradeOperationComplete);
                         }
-                    }
-                    catch (Exception e)
+                    } catch (Exception e)
                     {
                         Print("Failed to Cancel Pending Order :" + e.Message);
                     }
-                },
-                po));
+                }, po));
             }
             Task.WaitAll(taskList.ToArray<Task>());
             isPendingOrdersClosed = true;
@@ -761,37 +750,33 @@ namespace cAlgo
                         {
                             ClosePositionAsync(p, onTradeOperationComplete);
                         }
-                    }
-                    catch (Exception e)
+                    } catch (Exception e)
                     {
                         Print("Failed to Close Position: " + e.Message);
                     }
-                },
-                p));
+                }, p));
             }
             Task.WaitAll(taskList.ToArray<Task>());
         }
 
-        protected void SetStopLossForAllPositions(double _stopLossPrice)
+        protected void setStopLossForAllPositions(double _stopLossPrice)
         {
             List<Task> taskList = new List<Task>();
             foreach (Position p in Positions)
             {
                 taskList.Add(Task.Factory.StartNew((Object obj) =>
-               {
-                   try
-                   {
-                       if (isThisBotId(p.Label))
-                       {
-                           ModifyPositionAsync(p, _stopLossPrice, p.TakeProfit, onTradeOperationComplete);
-                       }
-                   }
-                   catch (Exception e)
-                   {
-                       Print("Failed to Modify Position: " + e.Message);
-                   }
-               },
-               p));
+                {
+                    try
+                    {
+                        if (isThisBotId(p.Label))
+                        {
+                            ModifyPositionAsync(p, _stopLossPrice, p.TakeProfit, onTradeOperationComplete);
+                        }
+                    } catch (Exception e)
+                    {
+                        Print("Failed to Modify Position: " + e.Message);
+                    }
+                }, p));
             }
             Task.WaitAll(taskList.ToArray<Task>());
         }

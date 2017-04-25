@@ -1,0 +1,60 @@
+//FTSE (UK100) Configuration
+
+"Initial Order placement trigger from open", DefaultValue = 5
+"Offset from Market Open for First Order", DefaultValue = 9
+"Distance between Orders in Pips", DefaultValue = 1
+"# of Limit Orders", DefaultValue = 40
+"Volume (Lots)", DefaultValue = 10
+"Volume Max (Lots)", DefaultValue = 100
+"# Order placed before Volume multiples", DefaultValue = 5
+"Volume multipler", DefaultValue = 2
+"Take Profit", DefaultValue = 0.5
+"Mins after swordfish period to reduce position risk", DefaultValue = 45
+"Enable Retrace risk management", DefaultValue = true
+"Retrace level 1 Percentage", DefaultValue = 33
+"Retrace level 2 Percentage", DefaultValue = 50
+"Retrace level 3 Percentage", DefaultValue = 66
+"Initial Hard SL for last Order placed", DefaultValue = 5
+"Triggered Hard SL buffer", DefaultValue = 20
+"Trailing SL fixed distance", DefaultValue = 5
+
+
+//DAX (GER30) Configuration - High yield - medium volume
+
+"Initial Order placement trigger from open", DefaultValue = 9
+"Offset from Market Open for First Order", DefaultValue = 10
+"Distance between Orders in Pips", DefaultValue = 1
+"# of Limit Orders", DefaultValue = 50
+"Volume (Lots)", DefaultValue = 10
+"Volume Max (Lots)", DefaultValue = 100
+"# Order placed before Volume multiples", DefaultValue = 5
+"Volume multipler", DefaultValue = 2
+"Take Profit", DefaultValue = 1.1
+"Mins after swordfish period to reduce position risk", DefaultValue = 45
+"Enable Retrace risk management", DefaultValue = true
+"Retrace level 1 Percentage", DefaultValue = 33
+"Retrace level 2 Percentage", DefaultValue = 50
+"Retrace level 3 Percentage", DefaultValue = 66
+"Initial Hard SL for last Order placed", DefaultValue = 5
+"Triggered Hard SL buffer", DefaultValue = 20
+"Trailing SL fixed distance", DefaultValue = 5
+
+//DAX (GER30) Configuration - High Probability, low volume
+
+"Initial Order placement trigger from open", DefaultValue = 7
+"Offset from Market Open for First Order", DefaultValue = 28
+"Distance between Orders in Pips", DefaultValue = 1
+"# of Limit Orders", DefaultValue = 46
+"Volume (Lots)", DefaultValue = 10
+"Volume Max (Lots)", DefaultValue = 100
+"# Order placed before Volume multiples", DefaultValue = 5
+"Volume multipler", DefaultValue = 2
+"Take Profit", DefaultValue = 0.5
+"Mins after swordfish period to reduce position risk", DefaultValue = 45
+"Enable Retrace risk management", DefaultValue = true
+"Retrace level 1 Percentage", DefaultValue = 33
+"Retrace level 2 Percentage", DefaultValue = 50
+"Retrace level 3 Percentage", DefaultValue = 66
+"Initial Hard SL for last Order placed", DefaultValue = 5
+"Triggered Hard SL buffer", DefaultValue = 20
+"Trailing SL fixed distance", DefaultValue = 5
