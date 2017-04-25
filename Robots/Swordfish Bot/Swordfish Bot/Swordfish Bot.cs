@@ -17,11 +17,11 @@ namespace cAlgo
         [Parameter("Source")]
         public DataSeries DataSeriesSource { get; set; }
 
-        [Parameter("Check Bollinger Bollinger Band", DefaultValue = false)]
-        public bool checkBollingerBand { get; set; }
+        [Parameter("Use Bollinger Bollinger Band Entry", DefaultValue = false)]
+        public bool useBollingerBandEntry { get; set; }
 
-        [Parameter("Pips inside Bollinger Band", DefaultValue = 2)]
-        public int targetEntryPips { get; set; }
+        [Parameter("Pips inside Bollinger Band Entry", DefaultValue = 2)]
+        public int targetBolliEntryPips { get; set; }
 
         [Parameter("Initial Order placement trigger from open", DefaultValue = 5)]
         public int SwordFishTrigger { get; set; }
@@ -339,20 +339,9 @@ namespace cAlgo
             return newStopLossPrice;
         }
 
-
         //Place Buy Limit Orders
         protected void placeBuyLimitOrders()
         {
-            if (checkBollingerBand)
-            {
-                //OPTIONAL - if last bar close value is GREATER than than the Bollinger Band Bottom ( which indicates the market is oversold) then return
-                if (Boli.Bottom.Last(0) < MarketSeries.Close.LastValue)
-                {
-                    return;
-                }
-
-            }
-
             //Place Buy Limit Orders
             List<Task> taskList = new List<Task>();
             for (int OrderCount = 0; OrderCount < NumberOfOrders; OrderCount++)
@@ -401,22 +390,21 @@ namespace cAlgo
 
         protected double calcBuyEntryPrice(int orderCount)
         {
-            return OpenPrice - OrderEntryOffset - orderCount * OrderSpacing;
+            //OPTIONAL - Bollinger band indicates whether market is oversold or over bought.
+            if (useBollingerBandEntry)
+            {
+                //Use Bolinger Band limit as first order entry point.
+                return Boli.Bottom.Last(0) + targetBolliEntryPips - orderCount * OrderSpacing;
+            }
+            else
+            {
+                return OpenPrice - OrderEntryOffset - orderCount * OrderSpacing;
+            }
         }
 
         // Place Sell Limit Orders
         protected void placeSellLimitOrders()
         {
-            //OPTIONAL - - if last bar close value is LESS than than the Bollinger Band Top (which indicates the market is overbought) then return
-            if (checkBollingerBand)
-            {
-                if (Boli.Top.Last(0) > MarketSeries.Close.LastValue)
-                {
-                    return;
-                }
-            }
-
-
             //Place Sell Limit Orders
             List<Task> taskList = new List<Task>();
             for (int OrderCount = 0; OrderCount < NumberOfOrders; OrderCount++)
@@ -479,7 +467,17 @@ namespace cAlgo
 
         protected double calcSellEntryPrice(int orderCount)
         {
-            return OpenPrice + OrderEntryOffset + orderCount * OrderSpacing;
+
+            //OPTIONAL - Bollinger band indicates whether market is oversold or over bought.
+            if (useBollingerBandEntry)
+            {
+                //Use Bolinger Band limit as first order entry point.
+                return Boli.Top.Last(0) - targetBolliEntryPips + orderCount * OrderSpacing;
+            }
+            else
+            {
+                return OpenPrice + OrderEntryOffset + orderCount * OrderSpacing;
+            }
         }
 
 
@@ -814,6 +812,8 @@ namespace cAlgo
             if (isSwordFishReset)
                 return;
 
+            reportDay();
+
             //reset position counters
             OpenedPositionsCount = 0;
             ClosedPositionsCount = 0;
@@ -840,17 +840,22 @@ namespace cAlgo
             isSwordFishReset = true;
             isReducedRiskTime = false;
 
-
-            string profit = "";
-            if (DayProfitTotal != 0 && DayPipsTotal != 0)
-            {
-                profit = ("DAY TOTAL," + DayProfitTotal + "," + DayPipsTotal + "," + Time.DayOfWeek + "," + Time);
-                debugCSV.Add(profit);
-            }
-
+            // reset reporting variables
             DayProfitTotal = 0;
             DayPipsTotal = 0;
         }
+
+        protected void reportDay()
+        {
+            string profit = "";
+            if (DayProfitTotal != 0 && DayPipsTotal != 0)
+            {
+                profit = ("DAY TOTAL," + DayProfitTotal + "," + DayPipsTotal + "," + OpenedPositionsCount + "," + Time.DayOfWeek + "," + Time);
+                debugCSV.Add(profit);
+            }
+        }
+
+
 
         protected string debugState()
         {
@@ -887,13 +892,13 @@ namespace cAlgo
         protected override void OnStop()
         {
             // Put your deinitialization logic here
-            System.IO.File.WriteAllLines("C:\\Users\\alist\\Desktop\\" + swordFishTimeInfo.market + "-swordfish.csv", debugCSV.ToArray());
+            System.IO.File.WriteAllLines("C:\\Users\\alist\\Desktop\\swordfish\\" + swordFishTimeInfo.market + "-" + botId + "-" + "swordfish-" + getTimeStamp(true) + ".csv", debugCSV.ToArray());
         }
 
-        protected string getTimeStamp(bool isBotId = false)
+        protected string getTimeStamp(bool unformatted = false)
         {
-            if (isBotId)
-                return "ID" + Time.Year + Time.Month + Time.Day + Time.Minute + Time.Second + Time.Millisecond;
+            if (unformatted)
+                return Time.Year.ToString() + Time.Month + Time.Day + Time.Minute + Time.Second;
             return Time.Year + "-" + Time.Month + "-" + Time.Day;
         }
 
