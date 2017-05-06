@@ -19,13 +19,13 @@ namespace cAlgo
         [Parameter("Modify Pending Orders Every (Seconds)", DefaultValue = 5)]
         public int _modifyPeriod { get; set; }
 
-        [Parameter("Offset from current price for 1st Pending Order", DefaultValue = 2)]
+        [Parameter("Offset from current price for 1st Pending Order", DefaultValue = 1)]
         public int _orderEntryOffset { get; set; }
 
         [Parameter("Distance between Orders", DefaultValue = 0.2)]
         public double _orderSpacing { get; set; }
 
-        [Parameter("# of Limit Orders", DefaultValue = 40)]
+        [Parameter("# of Limit Orders", DefaultValue = 1)]
         public int _numberOfOrders { get; set; }
 
         [Parameter("Volume (Lots)", DefaultValue = 1)]
@@ -40,7 +40,7 @@ namespace cAlgo
         [Parameter("Volume multipler", DefaultValue = 2)]
         public int _volumeMultipler { get; set; }
 
-        [Parameter("Manage Breakout position risk after (Minutes)", DefaultValue = 45)]
+        [Parameter("Manage Breakout position risk after (Minutes)", DefaultValue = 5)]
         public int _breakOutTimePeriod { get; set; }
 
         [Parameter("Stop Loss", DefaultValue = 30)]
@@ -48,8 +48,8 @@ namespace cAlgo
 
         [Parameter("Take Profit", DefaultValue = 3.0)]
         public int _takeProfit { get; set; }
-        
-        [Parameter("Reduce position risk after (Minutes)", DefaultValue = 45)]
+
+        [Parameter("Reduce position risk after (Minutes)", DefaultValue = 15)]
         public int _reducePositionRiskTime { get; set; }
 
         [Parameter("Enable Chase risk management", DefaultValue = true)]
@@ -70,7 +70,7 @@ namespace cAlgo
         [Parameter("Triggered Hard SL buffer", DefaultValue = 20)]
         public double _hardStopLossBuffer { get; set; }
 
-        [Parameter("Trailing SL fixed distance", DefaultValue = 5)]
+        [Parameter("Trailing SL fixed distance", DefaultValue = 1)]
         public double _trailingStopPips { get; set; }
 
         //Price and Position Variables
@@ -88,7 +88,7 @@ namespace cAlgo
         protected double _closedPositionsCount = 0;
         protected double _sellStopOrdersCount = 0;
         protected double _buyStopOrdersCount = 0;
-        
+
         //Stop Loss Variables
         protected double _divideTrailingStopPips = 1;
         protected bool _isTrailingStopsActive = false;
@@ -96,16 +96,16 @@ namespace cAlgo
         protected bool _isHardSLFirstPositionEntryPrice = false;
         protected bool _isHardSLLastProfitPrice = false;
         protected bool _isHardSLLastClosedPositionEntryPrice = false;
-       
+
         //BreakOut State Variables
         protected bool _isPendingBuyStopOrdersClosed = false;
         protected bool _isPendingSellStopOrdersClosed = false;
         protected bool _firstPositionCaptured = false;
         protected bool _buyOrdersPlaced = false;
         protected bool _sellOrdersPlaced = false;
-        
-        protected bool _isbreakOutPeriodSet = false;
-        protected bool _isBreakOutPeriodOver = false;
+
+        protected bool _isBreakOutPeriodSet = false;
+        protected bool _isBreakOutPeriodActive = false;
         protected bool _isReduceRiskTime = false;
         protected bool _isBreakOutReset = true;
         protected bool _isBreakOutTerminated = false;
@@ -123,6 +123,18 @@ namespace cAlgo
         protected double _pipsTotal = 0;
         protected Queue<double> _bidQueue = new Queue<double>(100);
         protected Queue<double> _askQueue = new Queue<double>(100);
+        protected bool _startTickCount = false;
+        protected int _tickCount = 0;
+        protected double buyPrice = 0;
+        protected double sellPrice = 0;
+        protected double buyProfit = 0;
+        protected double sellProfit = 0;
+
+        //Tick Trigger counting
+        protected int _tickTriggerCount = 0;
+        protected int _tickProfitCounter = 0;
+        protected bool _tickTriggerCounting = false;
+
 
         protected override void OnStart()
         {
@@ -130,7 +142,9 @@ namespace cAlgo
             _botId = generateBotId();
             Positions.Opened += PositionsOnOpened;
             Positions.Closed += PositionsOnClosed;
-            Timer.Start(_modifyPeriod);
+            //Timer.Start(_modifyPeriod);
+
+            _debugCSV.Add("TICKER,Ask,Bid,Time,Sell Profit,Buy Profit");
         }
 
         protected string generateBotId()
@@ -149,7 +163,145 @@ namespace cAlgo
 
         protected override void OnTick()
         {
-            //capture last 10 ticks
+
+            //Initiate tick counting queues
+            if (_askQueue.Count < 1)
+            {
+                recordTick();
+                return;
+            }
+          
+            // Check until BreakOutPeriod over
+            if (_isBreakOutPeriodSet)
+            {
+                _isBreakOutPeriodActive = isBreakOutPeriodActive();
+
+                //Capture Buy and Sell Profit from a Jump Tick
+                buyProfit = Symbol.Ask - buyPrice;
+                sellProfit = sellPrice - Symbol.Bid;
+            }
+
+            //Check for reset
+            if (_isBreakOutPeriodSet && !_isBreakOutPeriodActive && !_isBreakOutActive && !_isBreakOutReset)
+            {
+                resetBreakOut();
+            }
+
+            // if _startTickCount then write the next 100 ticks to file
+            if (_startTickCount)
+            {
+                _debugCSV.Add("TICK," + Symbol.Ask + "," + Symbol.Bid + "," + Time + "," + sellProfit + "," + buyProfit);
+
+                _tickCount++;
+
+                if (_tickCount > 100)
+                {
+                    _startTickCount = false;
+                    _tickCount = 0;
+                }
+            }
+
+            // if BIG tick
+            if (Symbol.Ask < _askQueue.Peek() - 3 || Symbol.Bid > _bidQueue.Peek() + 3)
+            {
+                // If _isBreakOutPeriodSet is not set then start a new breakOutPeriod
+                if (!_isBreakOutPeriodSet)
+                {
+                    //Start a new BreakOutPeriod
+                    setBreakOutPeriod(IsBacktesting, Server.Time);
+
+                    sellPrice = Symbol.Ask;
+                    buyPrice = Symbol.Bid;
+                    _debugCSV.Add("TICK-SPIKE," + _askQueue.Peek() + "," + _bidQueue.Peek() + "," + Time);
+                    _debugCSV.Add("," + Symbol.Ask + "," + Symbol.Bid + "," + Time);
+
+                    //Start tick counter
+                    _startTickCount = true;
+                }
+            }
+
+            //If BreakOut is over AND Break Out is not Active (i.e. trade placed)
+            if (_isBreakOutPeriodActive && !_isBreakOutActive && _isBreakOutReset)
+            {
+                //Enter trade based on 5 ticks above level strategy
+                String label = _botId + "-" + getTimeStamp() + _majorsBotTimeInfo._market;
+                if (sellProfit > buyProfit)
+                {
+                    if (checkTrigger(sellProfit))
+                    {
+                        label += "-MJ-SELL#";
+                        ExecuteMarketOrder(TradeType.Sell, Symbol, 100, label, null, 30);
+                        setStopLossForAllPositions(sellPrice);
+                        _isTrailingStopsActive = true;
+                    }
+                }
+                else
+                {
+                    if (checkTrigger(buyProfit))
+                    {
+                        label += "-MJ-BUY#";
+                        ExecuteMarketOrder(TradeType.Buy, Symbol, 100, label, null, 30);
+                        setStopLossForAllPositions(buyPrice);
+                        _isTrailingStopsActive = true;
+                    }
+                }
+            }
+
+            checkTrailingStops();
+
+            /*Check until isReduceRiskTime
+            if (!_isReduceRiskTime)
+            {
+                if (isReduceRiskTime())
+                    _isReduceRiskTime = true;
+            }
+
+            managePositionRisk();
+            */
+
+            recordTick();
+        }
+
+        protected bool checkTrigger(double profit)
+        {
+            //If above profit threshold
+            if(profit > 0.75)
+            {
+                //Start counting ticks
+                if(!_tickTriggerCounting)
+                {
+                    _tickTriggerCounting = true;
+                }
+
+                //If counting ticks and the next tick arrived increment count 
+                if (_tickTriggerCounting && _tickProfitCounter + 1 == _tickCount)
+                {
+                    _tickProfitCounter = _tickCount;
+                    _tickTriggerCount++;
+                }
+                else
+                {
+                    //else reset tick count as this is a new tick counting start
+                    _tickProfitCounter = _tickCount;
+                    _tickTriggerCount = 1;
+                }
+
+            }
+
+            //If 3 consequetive 
+            if (_tickTriggerCount == 3)
+            {
+                _tickTriggerCount = 0;
+                _tickTriggerCounting = false;
+                return true;
+            }
+            return false;
+        }
+
+
+
+        protected void recordTick()
+        {
             _bidQueue.Enqueue(Symbol.Bid);
             _askQueue.Enqueue(Symbol.Ask);
 
@@ -158,92 +310,64 @@ namespace cAlgo
 
             if (_askQueue.Count > 100)
                 _askQueue.Dequeue();
+        }
 
-            // If there is a breakout then manage position with Time and Chase distance
-            if (_isBreakOutActive)
+
+
+        protected void checkTrailingStops()
+        {
+            // If Trailing stop is active update position SL's
+            if (_isTrailingStopsActive)
             {
-                //Is the breakout period over
-                if (!_isbreakOutPeriodSet)
+                List<Task> taskList = new List<Task>();
+                foreach (Position p in Positions)
                 {
-                    _majorsBotTimeInfo.setbreakOut(IsBacktesting, Server.Time);
-                    _isbreakOutPeriodSet = true;
-                }
-
-                //Check until BreakOutPeriod over
-                if (!_isBreakOutPeriodOver)
-                {
-                    if(isBreakOutPeriodOver())
-                        _isBreakOutPeriodOver = true;
-                }
-
-                //Check until isReduceRiskTime
-                if (!_isReduceRiskTime)
-                {
-                    if (isReduceRiskTime())
-                        _isReduceRiskTime = true;
-                }
-
-                managePositionRisk();
-
-                // If Trailing stop is active update position SL's
-                if (_isTrailingStopsActive)
-                {
-                    List<Task> taskList = new List<Task>();
-                    foreach (Position p in Positions)
+                    taskList.Add(Task.Factory.StartNew((Object obj) =>
                     {
-                        taskList.Add(Task.Factory.StartNew((Object obj) =>
+                        try
                         {
-                            try
+                            if (isThisBotId(p.Label))
                             {
-                                if (isThisBotId(p.Label))
-                                {
 
-                                    double newStopLossPrice = calcTrailingStopLoss(p);
-                                    if (newStopLossPrice > 0)
-                                    {
-                                        ModifyPositionAsync(p, newStopLossPrice, null, onTradeOperationError);
-                                    }
+                                double newStopLossPrice = calcTrailingStopLoss(p);
+                                if (newStopLossPrice > 0)
+                                {
+                                    ModifyPositionAsync(p, newStopLossPrice, null, onTradeOperationError);
                                 }
                             }
-                            catch (Exception e)
-                            {
-                                Print("Failed to Modify Position:" + e.Message);
-                            }
+                        }
+                        catch (Exception e)
+                        {
+                            Print("Failed to Modify Position:" + e.Message);
+                        }
 
-                        },
-                        p));
-                    }
-                    Task.WaitAll(taskList.ToArray<Task>());
+                    }, p));
                 }
-
-                //If BreakOutPeriod is over then all Pending Orders will have been cancelled - so if all the positions that were open are closed then breakout can be reset
-                if(_isBreakOutPeriodOver && _closedPositionsCount == _openedPositionsCount)
-                {
-                    resetBreakOut();
-                }
+                Task.WaitAll(taskList.ToArray<Task>());
             }
         }
 
+
         protected void managePositionRisk()
         {
+
             //Ride the lightening until Breakout period is over
-            if (_isBreakOutPeriodOver)
+            if (_isBreakOutPeriodActive)
             {
-                //Close any orders that are still open in the chasing direction - only needs to be done once.
-                if (_firstPositionTradeType == TradeType.Sell && !_isPendingSellStopOrdersClosed)
-                    cancelAllPendingOrders(TradeType.Sell); //TO DO - Watch for reverse - Do we need to close all pending orders here?
-
-                if (_firstPositionTradeType == TradeType.Buy && !_isPendingBuyStopOrdersClosed)
-                    cancelAllPendingOrders(TradeType.Buy); //TO DO - Watch for reverse - Do we need to close all pending orders here?
-
-
                 //Set hard stop losses as soon as BreakOut time is over
                 if (!_isHardSLFirstPositionEntryPrice)
                 {
-                    setAllStopLosses(_firstPositionEntryPrice);
+                    setAllStopLossesWithBuffer(_firstPositionEntryPrice);
                     _isHardSLFirstPositionEntryPrice = true;
                 }
-                return;
+
+                //Close any orders that are still open in the chasing direction - only needs to be done once.
+                if (_firstPositionTradeType == TradeType.Sell && !_isPendingSellStopOrdersClosed)
+                    cancelAllPendingOrders(TradeType.Sell);
+
+                if (_firstPositionTradeType == TradeType.Buy && !_isPendingBuyStopOrdersClosed)
+                    cancelAllPendingOrders(TradeType.Buy);
+                //TO DO - Watch for reverse - Do we need to close all pending orders here?
             }
 
             if (_isChaseEnabled)
@@ -256,7 +380,7 @@ namespace cAlgo
                     //If Hard SL has not been set yet
                     if (!_isHardSLFirstPositionEntryPrice)
                     {
-                        setAllStopLosses(_firstPositionEntryPrice);
+                        setAllStopLossesWithBuffer(_firstPositionEntryPrice);
                         _isHardSLFirstPositionEntryPrice = true;
                     }
                     //Activate Trailing Stop Losses
@@ -268,7 +392,7 @@ namespace cAlgo
                     //Set hard stop losses
                     if (!_isHardSLLastClosedPositionEntryPrice && _lastClosedPositionEntryPrice > 0)
                     {
-                        setAllStopLosses(_lastClosedPositionEntryPrice);
+                        setAllStopLossesWithBuffer(_lastClosedPositionEntryPrice);
                         _isHardSLLastClosedPositionEntryPrice = true;
                     }
                     //Active Breakeven Stop Losses
@@ -281,7 +405,7 @@ namespace cAlgo
                     //Set hard stop losses
                     if (!_isHardSLLastProfitPrice && _lastProfitPrice > 0)
                     {
-                        setAllStopLosses(_lastProfitPrice);
+                        setAllStopLossesWithBuffer(_lastProfitPrice);
                         _isHardSLLastProfitPrice = true;
                     }
                 }
@@ -289,7 +413,7 @@ namespace cAlgo
 
         }
 
-        protected void setAllStopLosses(double SLPrice)
+        protected void setAllStopLossesWithBuffer(double SLPrice)
         {
             switch (_firstPositionTradeType)
             {
@@ -348,7 +472,7 @@ namespace cAlgo
             }
 
             // Check that the chasePercent is not negative
-            if(percentChased > 0)
+            if (percentChased > 0)
             {
                 return percentChased * 100;
             }
@@ -357,13 +481,13 @@ namespace cAlgo
                 return 0;
             }
 
-            
+
         }
 
         //Check if breakout period is over
-        protected bool isBreakOutPeriodOver()
+        protected bool isBreakOutPeriodActive()
         {
-            return _majorsBotTimeInfo.IsReduceRiskTime(IsBacktesting, Server.Time, _breakOutTimePeriod);
+            return _majorsBotTimeInfo.IsBreakOutTime(IsBacktesting, Server.Time, _breakOutTimePeriod);
         }
 
         //Check if breakout period is over
@@ -433,6 +557,31 @@ namespace cAlgo
             return newStopLossPrice;
         }
 
+
+        protected void setBreakOutOrders()
+        {
+            //Get the latest price
+            _lastMidPrice = Symbol.Ask + Symbol.Spread / 2;
+
+            //check status
+            if (!_isBreakOutActive)
+            {
+                if (_isBreakOutReset)
+                {
+                    // Create new Pending Stop Orders
+                    placeSellStopOrders();
+                    placeBuyStopOrders();
+                    _isBreakOutReset = false;
+                }
+                else
+                {
+                    modifyPendingOrders();
+                }
+            }
+        }
+
+
+
         protected override void OnTimer()
         {
 
@@ -456,7 +605,7 @@ namespace cAlgo
             }
         }
 
-        
+
         // Place Buy Stop Orders
         protected void placeBuyStopOrders()
         {
@@ -489,28 +638,28 @@ namespace cAlgo
                         Print("Failed to place Buy Stop Order: " + e.Message);
                     }
 
-                },
-                new tradeData()
+                }, new tradeData
                 {
                     tradeType = TradeType.Buy,
                     symbol = Symbol,
                     volume = setVolume(OrderCount, _numberOfOrders),
                     entryPrice = calcBuyEntryPrice(OrderCount),
                     label = _botId + "-" + getTimeStamp() + _majorsBotTimeInfo._market + "-MJ-BUY#" + formatOrderCount(OrderCount),
-                    stopLossPips = 0, //setHardSPipsForFirstOrder(OrderCount, _numberOfOrders),
+                    stopLossPips = 0,
+                    //setHardSPipsForFirstOrder(OrderCount, _numberOfOrders),
                     takeProfitPips = _takeProfit * (1 / Symbol.TickSize)
                 }));
             }
             Task.WaitAll(taskList.ToArray<Task>());
 
             // Sell Stop Orders have been placed
-            if(_sellStopOrdersCount>0)
+            if (_sellStopOrdersCount > 0)
                 _sellOrdersPlaced = true;
         }
-      
+
         protected double calcBuyEntryPrice(int orderCount)
         {
-                return Symbol.Ask + _orderEntryOffset + orderCount * _orderSpacing;
+            return Symbol.Ask + _orderEntryOffset + orderCount * _orderSpacing;
         }
 
         // Place Sell Stop Orders
@@ -545,22 +694,22 @@ namespace cAlgo
                         Print("Failed to place Sell Stop Order: " + e.Message);
                     }
 
-                },
-                new tradeData()
+                }, new tradeData
                 {
                     tradeType = TradeType.Sell,
                     symbol = Symbol,
                     volume = setVolume(OrderCount, _numberOfOrders),
                     entryPrice = calcSellEntryPrice(OrderCount),
                     label = _botId + "-" + getTimeStamp() + _majorsBotTimeInfo._market + "-MJ-SELL#" + formatOrderCount(OrderCount),
-                    stopLossPips = 0, //setHardSPipsForFirstOrder(OrderCount, _numberOfOrders),
+                    stopLossPips = 0,
+                    //setHardSPipsForFirstOrder(OrderCount, _numberOfOrders),
                     takeProfitPips = _takeProfit * (1 / Symbol.TickSize)
                 }));
             }
             Task.WaitAll(taskList.ToArray<Task>());
 
             // Sell Stop Orders have been placed
-            if(_sellStopOrdersCount>0)
+            if (_sellStopOrdersCount > 0)
                 _sellOrdersPlaced = true;
         }
 
@@ -583,7 +732,7 @@ namespace cAlgo
 
         //Keep a count of the number of Sell Stop Orders successfully placed
         protected void onSellStopTradeOperationComplete(TradeResult tr)
-        { 
+        {
             if (tr.IsSuccessful)
             {
                 _sellStopOrdersCount++;
@@ -607,24 +756,24 @@ namespace cAlgo
             }
         }
 
-         protected double calcSellEntryPrice(int orderCount)
+        protected double calcSellEntryPrice(int orderCount)
         {
             return Symbol.Bid - _orderEntryOffset - orderCount * _orderSpacing;
         }
 
-         //Calculate a new orderCount number for when tick jumps
-         protected int calculateNewOrderCount(int _orderCount, double _currentTickPrice)
-         {
-             double tickJumpIntoRange = Math.Abs(_lastMidPrice - _currentTickPrice) - _orderEntryOffset;
-             double pendingOrderRange = _numberOfOrders * _orderSpacing;
-             double pendingOrdersPercentageJumped = tickJumpIntoRange / pendingOrderRange;
-             double _newOrderCount = _numberOfOrders * pendingOrdersPercentageJumped;
+        //Calculate a new orderCount number for when tick jumps
+        protected int calculateNewOrderCount(int _orderCount, double _currentTickPrice)
+        {
+            double tickJumpIntoRange = Math.Abs(_lastMidPrice - _currentTickPrice) - _orderEntryOffset;
+            double pendingOrderRange = _numberOfOrders * _orderSpacing;
+            double pendingOrdersPercentageJumped = tickJumpIntoRange / pendingOrderRange;
+            double _newOrderCount = _numberOfOrders * pendingOrdersPercentageJumped;
 
-             if (_newOrderCount > _orderCount)
-                 return (int)_newOrderCount;
-             else
-                 return (int)_orderCount;
-         }
+            if (_newOrderCount > _orderCount)
+                return (int)_newOrderCount;
+            else
+                return (int)_orderCount;
+        }
 
         protected void modifyPendingOrders()
         {
@@ -644,7 +793,8 @@ namespace cAlgo
                 }
             }
 
-/*
+        }
+        /*
             List<Task> taskList = new List<Task>();
             foreach (PendingOrder p in PendingOrders)
             {
@@ -674,18 +824,20 @@ namespace cAlgo
                 p));
             }
             Task.WaitAll(taskList.ToArray<Task>());*/
-        }
 
 
         protected int getOrderNumberFromLabel(String label)
         {
             int orderCount;
-            string tmplabel = label.Substring(label.IndexOf('#', 0), 4); //This returns '#12' or '#1-'
-            tmplabel = tmplabel.TrimStart('#'); //strip the '#'
+            string tmplabel = label.Substring(label.IndexOf('#', 0), 4);
+            //This returns '#12' or '#1-'
+            tmplabel = tmplabel.TrimStart('#');
+            //strip the '#'
             if (!int.TryParse(tmplabel, out orderCount))
             {
                 Print("Error: cannot parse as OrderCount as Int: " + label);
-                orderCount = _numberOfOrders; //cannot parse as integer - set to highest orderCount so modify order moves entry to furthest point.
+                orderCount = _numberOfOrders;
+                //cannot parse as integer - set to highest orderCount so modify order moves entry to furthest point.
             }
             return orderCount;
         }
@@ -724,32 +876,39 @@ namespace cAlgo
 
                 debugTrade(args.Position);
 
+                //if all open and closed positions are the equal then breakOut must be closed
+                if (_openedPositionsCount > 0 && _closedPositionsCount == _openedPositionsCount)
+                {
+                    _isBreakOutActive = false;
+                    _isBreakOutReset = false;
+                }
+
                 // first position's SL has been triggered for a loss - NOT breakout anymore
                 if (_firstPositionLabel == args.Position.Label && args.Position.GrossProfit < 0)
                 {
-                    Print("CLOSING ALL POSITIONS due to first position losing");
-                    cancelAllPendingOrders(_firstPositionTradeType);
-                    closeAllPositions();
-                    _isBreakOutActive = false;
+                    //  Print("CLOSING ALL POSITIONS due to first position losing");
+                    //   cancelAllPendingOrders(_firstPositionTradeType);
+                    //   closeAllPositions();
+                    //   _isBreakOutActive = false;
                 }
 
                 //Taking profit
                 if (args.Position.GrossProfit > 0)
                 {
                     //capture last position take profit price
-                    setLastProfitPrice(args.Position.TradeType);
+                    //setLastProfitPrice(args.Position.TradeType);
 
                     //capture last closed position entry price
-                    _lastClosedPositionEntryPrice = args.Position.EntryPrice;
+                    // _lastClosedPositionEntryPrice = args.Position.EntryPrice;
 
                     //If the spike has retraced then close all pending and set trailing stop
-                    managePositionRisk();
+                    //  managePositionRisk();
 
                     //BreakEven SL triggered in ManageRisk() function
-                    if (_isBreakEvenStopLossActive)
-                    {
-                        setBreakEvens(_lastProfitPrice);
-                    }
+                    //  if (_isBreakEvenStopLossActive)
+                    //   {
+                    // setBreakEvens(_lastProfitPrice);
+                    //   }
                 }
             }
         }
@@ -773,15 +932,14 @@ namespace cAlgo
                     {
                         Print("Failed to Cancel Pending Order :" + e.Message);
                     }
-                },
-                po));
+                }, po));
             }
             Task.WaitAll(taskList.ToArray<Task>());
 
-            if(tradeType == TradeType.Buy)
-               _isPendingBuyStopOrdersClosed = true;
+            if (tradeType == TradeType.Buy)
+                _isPendingBuyStopOrdersClosed = true;
 
-            if(tradeType == TradeType.Sell)
+            if (tradeType == TradeType.Sell)
                 _isPendingSellStopOrdersClosed = true;
         }
 
@@ -812,8 +970,7 @@ namespace cAlgo
                     {
                         Print("Failed to Close Position: " + e.Message);
                     }
-                },
-                p));
+                }, p));
             }
             Task.WaitAll(taskList.ToArray<Task>());
         }
@@ -850,8 +1007,7 @@ namespace cAlgo
                     {
                         Print("Failed to Modify Position:" + e.Message);
                     }
-                },
-                p));
+                }, p));
             }
             Task.WaitAll(taskList.ToArray<Task>());
         }
@@ -863,7 +1019,7 @@ namespace cAlgo
             return Time.Year + "-" + Time.Month + "-" + Time.Day;
         }
 
-       
+
         //Increase the volume based on Orders places and volume levels and multiplier until max volume reached
         protected int setVolume(int _orderCount, int _numberOfOrders)
         {
@@ -874,7 +1030,7 @@ namespace cAlgo
             {
                 Volume = _volumeMax;
             }
-            return (int) Volume;
+            return (int)Volume;
         }
 
         //Set a stop loss on the last Pending Order set to catch the break away train that never comes back!
@@ -908,8 +1064,7 @@ namespace cAlgo
                     {
                         Print("Failed to Modify Position: " + e.Message);
                     }
-                },
-               p));
+                }, p));
             }
             Task.WaitAll(taskList.ToArray<Task>());
         }
@@ -925,59 +1080,14 @@ namespace cAlgo
 
         protected void debugHeaders()
         {
-            _debugCSV.Add("Item"
-                + ",Profit"
-                +",Pips"
-                +",Day"
-                +",Label"
-                +",EntryPrice"
-                +",ClosePrice"
-                +",SL"
-                +",TP"
-                +",Date/Time"
-                + ",_openedPositionsCount"
-                +",_closedPositionsCount"
-                +",_sellStopOrdersCount"
-                +",_buyStopOrdersCount"
-                +",_lastMidPrice"
-                +",_lastPositionEntryPrice"
-                +",_lastClosedPositionEntryPrice"
-                +",_lastProfitPrice"
-                +",_lastPositionLabel"
-                +",_firstPositionEntryPrice"
-                +",_firstPositionLabel"
-                +",_divideTrailingStopPips"
-                +",_isTrailingStopsActive"
-                +",_isBreakEvenStopLossActive"
-                +",_isHardSLLastClosedPositionEntryPrice"
-                +",_isHardSLFirstPositionEntryPrice"
-                +",_isHardSLLastProfitPrice"
-                +",_isbreakOutPeriodSet"
-                +",_isBreakOutActive"
-                +",_buyOrdersPlaced"
-                +",_sellOrdersPlaced"
-                +",_isBreakOutReset"
-                +",_isReducedRiskTime"
-                +",_isPendingBuyStopOrdersClosed"
-                +",_isPendingSellStopOrdersClosed"
-                +",_firstPositionCaptured");
+            _debugCSV.Add("Item" + ",Profit" + ",Pips" + ",Day" + ",Label" + ",EntryPrice" + ",ClosePrice" + ",SL" + ",TP" + ",Entry Date/Time" + ",Close Date/Time" + ",_openedPositionsCount" + ",_closedPositionsCount" + ",_sellStopOrdersCount" + ",_buyStopOrdersCount" + ",_lastMidPrice" + ",_lastPositionEntryPrice" + ",_lastClosedPositionEntryPrice" + ",_lastProfitPrice" + ",_lastPositionLabel" + ",_firstPositionEntryPrice" + ",_firstPositionLabel" + ",_divideTrailingStopPips" + ",_isTrailingStopsActive" + ",_isBreakEvenStopLossActive" + ",_isHardSLLastClosedPositionEntryPrice" + ",_isHardSLFirstPositionEntryPrice" + ",_isHardSLLastProfitPrice" + ",_isbreakOutPeriodSet" + ",_isBreakOutActive" + ",_buyOrdersPlaced" + ",_sellOrdersPlaced" + ",_isBreakOutReset" + ",_isReducedRiskTime" + ",_isPendingBuyStopOrdersClosed" + ",_isPendingSellStopOrdersClosed" + ",_firstPositionCaptured");
         }
 
         protected void debugTrade(Position p)
         {
             _profitTotal += p.GrossProfit;
             _pipsTotal += p.Pips;
-            _debugCSV.Add("TRADE"
-                + "," + p.GrossProfit
-                + "," + p.Pips
-                + "," + Time.DayOfWeek
-                + "," + p.Label
-                + "," + p.EntryPrice
-                + "," + History.FindLast(p.Label, Symbol, p.TradeType).ClosingPrice
-                + "," + p.StopLoss
-                + "," + p.TakeProfit
-                + "," + Time
-                + debugState());
+            _debugCSV.Add("TRADE" + "," + p.GrossProfit + "," + p.Pips + "," + Time.DayOfWeek + "," + p.Label + "," + p.EntryPrice + "," + History.FindLast(p.Label, Symbol, p.TradeType).ClosingPrice + "," + p.StopLoss + "," + p.TakeProfit + "," + p.EntryTime + "," + Time + debugState());
         }
 
         protected string debugState()
@@ -1009,8 +1119,8 @@ namespace cAlgo
             state += "," + _isHardSLLastProfitPrice;
 
             // swordfish bot state variables
-            state += "," + _isbreakOutPeriodSet;
-            state += "," + _isBreakOutPeriodOver;
+            state += "," + _isBreakOutPeriodSet;
+            state += "," + _isBreakOutPeriodActive;
             state += "," + _isReduceRiskTime;
             state += "," + _isBreakOutActive;
             state += "," + _buyOrdersPlaced;
@@ -1030,16 +1140,16 @@ namespace cAlgo
             //Cancel any remaining pending orders
             cancelAllPendingOrders(TradeType.Buy);
             cancelAllPendingOrders(TradeType.Sell);
-            
+
             if (_isBreakOutReset)
                 return;
-            
+
             //reset position counters
             _openedPositionsCount = 0;
             _closedPositionsCount = 0;
             _sellStopOrdersCount = 0;
             _buyStopOrdersCount = 0;
-        
+
             //reset risk management variables
             _divideTrailingStopPips = 1;
             _isTrailingStopsActive = false;
@@ -1047,17 +1157,17 @@ namespace cAlgo
             _isHardSLFirstPositionEntryPrice = false;
             _isHardSLLastProfitPrice = false;
             _isHardSLLastClosedPositionEntryPrice = false;
-       
+
             //reset BreakOut State Variables
             _isPendingBuyStopOrdersClosed = false;
             _isPendingSellStopOrdersClosed = false;
             _firstPositionCaptured = false;
             _buyOrdersPlaced = false;
             _sellOrdersPlaced = false;
-        
+
             // bot state variables
-            _isbreakOutPeriodSet = false;
-            _isBreakOutPeriodOver = false;
+            _isBreakOutPeriodSet = false;
+            _isBreakOutPeriodActive = false;
             _isReduceRiskTime = false;
             _isBreakOutReset = true;
             _isBreakOutTerminated = false;
@@ -1087,6 +1197,12 @@ namespace cAlgo
 
             _profitTotal = 0;
             _pipsTotal = 0;
+        }
+
+        protected void setBreakOutPeriod(bool isBackTesting, DateTime serverTime)
+        {
+            _majorsBotTimeInfo.setbreakOut(IsBacktesting, Server.Time);
+            _isBreakOutPeriodSet = true;
         }
 
         protected override void OnStop()
@@ -1140,19 +1256,18 @@ public struct MarketTimeInfo
     public TimeSpan _open;
     public TimeSpan _close;
     public TimeSpan _closeAll;
-    private TimeSpan _breakOutStart;
+    private DateTime _breakOutStart;
 
     public void setbreakOut(bool isBackTesting, DateTime serverTime)
     {
         if (isBackTesting)
         {
-            _breakOutStart = serverTime.TimeOfDay;
+            _breakOutStart = serverTime;
         }
         else
         {
-            _breakOutStart = DateTime.Now.TimeOfDay;
+            _breakOutStart = DateTime.Now;
         }
-
     }
 
 
@@ -1166,6 +1281,19 @@ public struct MarketTimeInfo
         else
         {
             return IsReduceRiskAt(DateTime.UtcNow, reduceRiskTimeFromOpen);
+        }
+    }
+
+    //Time during which Swordfish positions risk should be managed
+    public bool IsBreakOutTime(bool isBackTesting, DateTime serverTime, int reduceRiskTimeFromOpen)
+    {
+        if (isBackTesting)
+        {
+            return IsBreakOutTime(serverTime, reduceRiskTimeFromOpen);
+        }
+        else
+        {
+            return IsBreakOutTime(DateTime.UtcNow, reduceRiskTimeFromOpen);
         }
     }
 
@@ -1194,7 +1322,14 @@ public struct MarketTimeInfo
     public bool IsReduceRiskAt(DateTime dateTimeUtc, int reduceRiskTimeFromOpen)
     {
         DateTime tzTime = TimeZoneInfo.ConvertTimeFromUtc(dateTimeUtc, _tz);
-        return (tzTime.TimeOfDay >= _breakOutStart.Add(TimeSpan.FromMinutes(reduceRiskTimeFromOpen)));
+        return (tzTime <= _breakOutStart.Add(TimeSpan.FromMinutes(reduceRiskTimeFromOpen)));
+    }
+
+    //Is the current time between the time period when BreakOut started and the Reduce Risk Time.
+    public bool IsBreakOutTime(DateTime dateTimeUtc, int reduceRiskTimeFromOpen)
+    {
+        DateTime tzTime = TimeZoneInfo.ConvertTimeFromUtc(dateTimeUtc, _tz);
+        return (tzTime >= _breakOutStart && tzTime <= _breakOutStart.Add(TimeSpan.FromMinutes(reduceRiskTimeFromOpen)));
     }
 
     //Is the current time within the period Swordfish positions can remain open.
@@ -1203,6 +1338,8 @@ public struct MarketTimeInfo
         DateTime tzTime = TimeZoneInfo.ConvertTimeFromUtc(dateTimeUtc, _tz);
         return tzTime.TimeOfDay >= _closeAll;
     }
+
+
 }
 
 
