@@ -29,8 +29,17 @@ namespace cAlgo
         [Parameter("Offset from Market Open for First Order", DefaultValue = 9)]
         public int OrderEntryOffset { get; set; }
 
-        [Parameter("Distance between Orders in Pips", DefaultValue = 1)]
+        [Parameter("Order spacing in Pips", DefaultValue = 1)]
         public int OrderSpacing { get; set; }
+
+        [Parameter("# Order placed before order spacing multiplies", DefaultValue = 10)]
+        public int OrderSpacingLevels { get; set; }
+
+        [Parameter("Order spacing multipler", DefaultValue = 2)]
+        public int OrderSpacingMultipler { get; set; }
+
+        [Parameter("Order spacing max", DefaultValue = 3)]
+        public int OrderSpacingMax { get; set; }
 
         [Parameter("# of Limit Orders", DefaultValue = 40)]
         public int NumberOfOrders { get; set; }
@@ -41,7 +50,7 @@ namespace cAlgo
         [Parameter("Volume Max (Lots)", DefaultValue = 200)]
         public int VolumeMax { get; set; }
 
-        [Parameter("# Order placed before Volume multiples", DefaultValue = 5)]
+        [Parameter("# Order placed before Volume multiplies", DefaultValue = 5)]
         public int OrderVolumeLevels { get; set; }
 
         [Parameter("Volume multipler", DefaultValue = 2)]
@@ -410,7 +419,7 @@ namespace cAlgo
                 {
                     tradeType = TradeType.Buy,
                     symbol = Symbol,
-                    volume = setVolume(OrderCount, NumberOfOrders),
+                    volume = setVolume(OrderCount),
                     entryPrice = calcBuyEntryPrice(OrderCount),
                     label = _botId + "-" + getTimeStamp() + _swordFishTimeInfo.market + "-SWF#" + OrderCount,
                     stopLossPips = setPendingOrderStopLossPips(OrderCount, NumberOfOrders),
@@ -429,13 +438,37 @@ namespace cAlgo
             if (useBollingerBandEntry)
             {
                 //Use Bolinger Band limit as first order entry point.
-                return _boli.Bottom.Last(0) + targetBolliEntryPips - orderCount * OrderSpacing;
+                return _boli.Bottom.Last(0) + targetBolliEntryPips - calcOrderSpacingDistance(orderCount);
             }
             else
             {
-                return _openPrice - OrderEntryOffset - orderCount * OrderSpacing;
+                return _openPrice - OrderEntryOffset -  calcOrderSpacingDistance(orderCount);
             }
         }
+
+        //Returns the distance from the first entry point to an order based on OrderSpacingMultipler and OrderMultiplierLevels until OrderSpacingMax reached
+        protected int calcOrderSpacingDistance(int orderCount)
+        {
+            double orderSpacingLevel = 0;
+            double orderSpacing = 0;
+            double orderSpacingResult = 0;
+
+            for (int i = 1; i <= orderCount; i++)
+            {
+                orderSpacingLevel = i / OrderSpacingLevels;
+                orderSpacing = Math.Pow(OrderSpacingMultipler, orderSpacingLevel) * OrderSpacing;
+
+                if (orderSpacing > OrderSpacingMax)
+                {
+                    orderSpacing = OrderSpacingMax;
+                }
+
+                orderSpacingResult += orderSpacing;
+            }
+
+            return (int) orderSpacingResult;
+        }
+
 
         // Place Sell Limit Orders
         protected void placeSellLimitOrders()
@@ -472,7 +505,7 @@ namespace cAlgo
                 {
                     tradeType = TradeType.Sell,
                     symbol = Symbol,
-                    volume = setVolume(OrderCount, NumberOfOrders),
+                    volume = setVolume(OrderCount),
                     entryPrice = calcSellEntryPrice(OrderCount),
                     label = _botId + "-" + getTimeStamp() + _swordFishTimeInfo.market + "-SWF#" + OrderCount,
                     stopLossPips = setPendingOrderStopLossPips(OrderCount, NumberOfOrders),
@@ -505,11 +538,11 @@ namespace cAlgo
             if (useBollingerBandEntry)
             {
                 //Use Bolinger Band limit as first order entry point.
-                return _boli.Top.Last(0) - targetBolliEntryPips + orderCount * OrderSpacing;
+                return _boli.Top.Last(0) - targetBolliEntryPips + calcOrderSpacingDistance(orderCount);
             }
             else
             {
-                return _openPrice + OrderEntryOffset + orderCount * OrderSpacing;
+                return _openPrice + OrderEntryOffset + calcOrderSpacingDistance(orderCount);
             }
         }
 
@@ -518,7 +551,7 @@ namespace cAlgo
         protected int calculateNewOrderCount(int orderCount, double currentTickPrice)
         {
             double tickJumpIntoRange = Math.Abs(_openPrice - currentTickPrice) - OrderEntryOffset;
-            double pendingOrderRange = NumberOfOrders * OrderSpacing;
+            double pendingOrderRange = NumberOfOrders * calcOrderSpacingDistance(NumberOfOrders);
             double pendingOrdersPercentageJumped = tickJumpIntoRange / pendingOrderRange;
             double newOrderCount = NumberOfOrders * pendingOrdersPercentageJumped;
 
@@ -740,7 +773,7 @@ namespace cAlgo
         }
 
         //Increase the volume based on Orders places and volume levels and multiplier until max volume reached
-        protected int setVolume(int orderCount, int numberOfOrders)
+        protected int setVolume(int orderCount)
         {
 
             double orderVolumeLevel = orderCount / OrderVolumeLevels;
