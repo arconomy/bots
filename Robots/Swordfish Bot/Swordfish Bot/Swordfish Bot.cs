@@ -36,7 +36,7 @@ namespace cAlgo
         public int OrderSpacingLevels { get; set; }
 
         [Parameter("Order spacing multipler", DefaultValue = 2)]
-        public int OrderSpacingMultipler { get; set; }
+        public double OrderSpacingMultipler { get; set; }
 
         [Parameter("Order spacing max", DefaultValue = 3)]
         public int OrderSpacingMax { get; set; }
@@ -54,7 +54,7 @@ namespace cAlgo
         public int OrderVolumeLevels { get; set; }
 
         [Parameter("Volume multipler", DefaultValue = 2)]
-        public int VolumeMultipler { get; set; }
+        public double VolumeMultipler { get; set; }
 
         [Parameter("Take Profit", DefaultValue = 0.5)]
         public double TakeProfit { get; set; }
@@ -442,7 +442,7 @@ namespace cAlgo
             }
             else
             {
-                return _openPrice - OrderEntryOffset -  calcOrderSpacingDistance(orderCount);
+                return _openPrice - OrderEntryOffset - calcOrderSpacingDistance(orderCount);
             }
         }
 
@@ -466,7 +466,7 @@ namespace cAlgo
                 orderSpacingResult += orderSpacing;
             }
 
-            return (int) orderSpacingResult;
+            return (int)orderSpacingResult;
         }
 
 
@@ -551,7 +551,7 @@ namespace cAlgo
         protected int calculateNewOrderCount(int orderCount, double currentTickPrice)
         {
             double tickJumpIntoRange = Math.Abs(_openPrice - currentTickPrice) - OrderEntryOffset;
-            double pendingOrderRange = NumberOfOrders * calcOrderSpacingDistance(NumberOfOrders);
+            double pendingOrderRange = calcOrderSpacingDistance(NumberOfOrders);
             double pendingOrdersPercentageJumped = tickJumpIntoRange / pendingOrderRange;
             double newOrderCount = NumberOfOrders * pendingOrdersPercentageJumped;
 
