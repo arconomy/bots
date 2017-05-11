@@ -5,8 +5,6 @@ using cAlgo.API.Indicators;
 using cAlgo.API.Internals;
 using cAlgo.Indicators;
 using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace cAlgo
 {
@@ -227,10 +225,8 @@ namespace cAlgo
             // If Trailing stop is active update position SL's - Remove TP as trailing position.
             if (_isTrailingStopsActive)
             {
-                List<Task> taskList = new List<Task>();
                 foreach (Position p in Positions)
                 {
-                    taskList.Add(Task.Factory.StartNew((Object obj) =>
                     {
                         try
                         {
@@ -243,14 +239,13 @@ namespace cAlgo
                                     ModifyPositionAsync(p, newStopLossPrice, null, onTradeOperationComplete);
                                 }
                             }
-                        } catch (Exception e)
+                        }
+                        catch (Exception e)
                         {
                             Print("Failed to Modify Position:" + e.Message);
                         }
-
-                    }, p));
+                    }
                 }
-                Task.WaitAll(taskList.ToArray<Task>());
             }
         }
 
@@ -289,38 +284,34 @@ namespace cAlgo
 
         protected void setBreakEvens(double breakEvenTriggerPrice)
         {
-            List<Task> taskList = new List<Task>();
             foreach (Position p in Positions)
             {
-                taskList.Add(Task.Factory.StartNew((Object obj) =>
+                try
                 {
-                    try
+                    if (isThisBotId(p.Label))
                     {
-                        if (isThisBotId(p.Label))
+                        if (_lastPositionTradeType == TradeType.Buy)
                         {
-                            if (_lastPositionTradeType == TradeType.Buy)
+                            if (breakEvenTriggerPrice > p.EntryPrice)
                             {
-                                if (breakEvenTriggerPrice > p.EntryPrice)
-                                {
-                                    ModifyPositionAsync(p, p.EntryPrice + HardStopLossBuffer, p.TakeProfit, onTradeOperationComplete);
-                                }
-                            }
-
-                            if (_lastPositionTradeType == TradeType.Sell)
-                            {
-                                if (breakEvenTriggerPrice < p.EntryPrice)
-                                {
-                                    ModifyPositionAsync(p, p.EntryPrice - HardStopLossBuffer, p.TakeProfit, onTradeOperationComplete);
-                                }
+                                ModifyPositionAsync(p, p.EntryPrice + HardStopLossBuffer, p.TakeProfit, onTradeOperationComplete);
                             }
                         }
-                    } catch (Exception e)
-                    {
-                        Print("Failed to Modify Position:" + e.Message);
+
+                        if (_lastPositionTradeType == TradeType.Sell)
+                        {
+                            if (breakEvenTriggerPrice < p.EntryPrice)
+                            {
+                                ModifyPositionAsync(p, p.EntryPrice - HardStopLossBuffer, p.TakeProfit, onTradeOperationComplete);
+                            }
+                        }
                     }
-                }, p));
+                }
+                catch (Exception e)
+                {
+                    Print("Failed to Modify Position:" + e.Message);
+                }
             }
-            Task.WaitAll(taskList.ToArray<Task>());
         }
 
 
@@ -389,44 +380,41 @@ namespace cAlgo
         protected void placeBuyLimitOrders()
         {
             //Place Buy Limit Orders
-            List<Task> taskList = new List<Task>();
             for (int OrderCount = 0; OrderCount < NumberOfOrders; OrderCount++)
             {
-                taskList.Add(Task.Factory.StartNew((Object obj) =>
+                try
                 {
-                    try
-                    {
-                        tradeData data = obj as tradeData;
-                        if (data == null)
-                            return;
+                    tradeData data = new tradeData
+                                            {
+                                                tradeType = TradeType.Buy,
+                                                symbol = Symbol,
+                                                volume = setVolume(OrderCount),
+                                                entryPrice = calcBuyEntryPrice(OrderCount),
+                                                label = _botId + "-" + getTimeStamp() + _swordFishTimeInfo.market + "-SWF#" + OrderCount,
+                                                stopLossPips = setPendingOrderStopLossPips(OrderCount, NumberOfOrders),
+                                                takeProfitPips = TakeProfit * (1 / Symbol.TickSize)
+                                            };
+                    
+                    if (data == null)
+                        continue;
 
-                        //Check that entry price is valid
-                        if (data.entryPrice < Symbol.Bid)
-                        {
-                            PlaceLimitOrderAsync(data.tradeType, data.symbol, data.volume, data.entryPrice, data.label, data.stopLossPips, data.takeProfitPips, onTradeOperationComplete);
-                        }
-                        else
-                        {
-                            //Tick price has 'jumped' - therefore avoid placing all PendingOrders by re-calculating the OrderCount to the equivelant entry point.
-                            OrderCount = calculateNewOrderCount(OrderCount, Symbol.Bid);
-                            ExecuteMarketOrderAsync(data.tradeType, data.symbol, data.volume, data.label + "X", data.stopLossPips, data.takeProfitPips, onTradeOperationComplete);
-                        }
-                    } catch (Exception e)
+                    //Check that entry price is valid
+                    if (data.entryPrice < Symbol.Bid)
                     {
-                        Print("Failed to place buy limit order: " + e.Message);
+                        PlaceLimitOrderAsync(data.tradeType, data.symbol, data.volume, data.entryPrice, data.label, data.stopLossPips, data.takeProfitPips, onTradeOperationComplete);
                     }
-                }, new tradeData 
+                    else
+                    {
+                        //Tick price has 'jumped' - therefore avoid placing all PendingOrders by re-calculating the OrderCount to the equivelant entry point.
+                        OrderCount = calculateNewOrderCount(OrderCount, Symbol.Bid);
+                        ExecuteMarketOrderAsync(data.tradeType, data.symbol, data.volume, data.label + "X", data.stopLossPips, data.takeProfitPips, onTradeOperationComplete);
+                    }
+                }
+                catch (Exception e)
                 {
-                    tradeType = TradeType.Buy,
-                    symbol = Symbol,
-                    volume = setVolume(OrderCount),
-                    entryPrice = calcBuyEntryPrice(OrderCount),
-                    label = _botId + "-" + getTimeStamp() + _swordFishTimeInfo.market + "-SWF#" + OrderCount,
-                    stopLossPips = setPendingOrderStopLossPips(OrderCount, NumberOfOrders),
-                    takeProfitPips = TakeProfit * (1 / Symbol.TickSize)
-                }));
+                    Print("Failed to place buy limit order: " + e.Message);
+                }
             }
-            Task.WaitAll(taskList.ToArray<Task>());
 
             //All Buy Limit Orders have been placed
             _ordersPlaced = true;
@@ -474,16 +462,22 @@ namespace cAlgo
         protected void placeSellLimitOrders()
         {
             //Place Sell Limit Orders
-            List<Task> taskList = new List<Task>();
             for (int OrderCount = 0; OrderCount < NumberOfOrders; OrderCount++)
             {
-                taskList.Add(Task.Factory.StartNew((Object obj) =>
-                {
                     try
                     {
-                        tradeData data = obj as tradeData;
+                        tradeData data = new tradeData 
+                                                    {
+                                                        tradeType = TradeType.Sell,
+                                                        symbol = Symbol,
+                                                        volume = setVolume(OrderCount),
+                                                        entryPrice = calcSellEntryPrice(OrderCount),
+                                                        label = _botId + "-" + getTimeStamp() + _swordFishTimeInfo.market + "-SWF#" + OrderCount,
+                                                        stopLossPips = setPendingOrderStopLossPips(OrderCount, NumberOfOrders),
+                                                        takeProfitPips = TakeProfit * (1 / Symbol.TickSize)
+                                                    };
                         if (data == null)
-                            return;
+                            continue;
 
                         //Check that entry price is valid
                         if (data.entryPrice > Symbol.Ask)
@@ -500,19 +494,8 @@ namespace cAlgo
                     {
                         Print("Failed to place Sell Limit Order: " + e.Message);
                     }
-
-                }, new tradeData 
-                {
-                    tradeType = TradeType.Sell,
-                    symbol = Symbol,
-                    volume = setVolume(OrderCount),
-                    entryPrice = calcSellEntryPrice(OrderCount),
-                    label = _botId + "-" + getTimeStamp() + _swordFishTimeInfo.market + "-SWF#" + OrderCount,
-                    stopLossPips = setPendingOrderStopLossPips(OrderCount, NumberOfOrders),
-                    takeProfitPips = TakeProfit * (1 / Symbol.TickSize)
-                }));
             }
-            Task.WaitAll(taskList.ToArray<Task>());
+
 
             //All Sell Limit Orders have been placed
             _ordersPlaced = true;
@@ -790,11 +773,8 @@ namespace cAlgo
         protected void CloseAllPendingOrders()
         {
             //Close any outstanding pending orders
-            List<Task> taskList = new List<Task>();
             foreach (PendingOrder po in PendingOrders)
             {
-                taskList.Add(Task.Factory.StartNew((Object obj) =>
-                {
                     try
                     {
                         if (isThisBotId(po.Label))
@@ -805,20 +785,15 @@ namespace cAlgo
                     {
                         Print("Failed to Cancel Pending Order :" + e.Message);
                     }
-                }, po));
             }
-            Task.WaitAll(taskList.ToArray<Task>());
             _isPendingOrdersClosed = true;
         }
 
         protected void CloseAllPositions()
         {
             //Close any outstanding pending orders
-            List<Task> taskList = new List<Task>();
             foreach (Position p in Positions)
             {
-                taskList.Add(Task.Factory.StartNew((Object obj) =>
-                {
                     try
                     {
                         if (isThisBotId(p.Label))
@@ -829,18 +804,13 @@ namespace cAlgo
                     {
                         Print("Failed to Close Position: " + e.Message);
                     }
-                }, p));
             }
-            Task.WaitAll(taskList.ToArray<Task>());
         }
 
         protected void setStopLossForAllPositions(double stopLossPrice)
         {
-            List<Task> taskList = new List<Task>();
             foreach (Position p in Positions)
             {
-                taskList.Add(Task.Factory.StartNew((Object obj) =>
-                {
                     try
                     {
                         if (isThisBotId(p.Label))
@@ -851,9 +821,7 @@ namespace cAlgo
                     {
                         Print("Failed to Modify Position: " + e.Message);
                     }
-                }, p));
             }
-            Task.WaitAll(taskList.ToArray<Task>());
         }
 
 
@@ -987,7 +955,7 @@ namespace cAlgo
                     // Market for swordfish opens at 9:00.
                     _swordFishTimeInfo.open = new TimeSpan(9, 0, 0);
                     // Market for swordfish closes at 9:05.
-                    _swordFishTimeInfo.close = new TimeSpan(9, 5, 0);
+                    _swordFishTimeInfo.close = new TimeSpan(9, 3, 0);
                     // Close all open Swordfish position at 11:29am before US opens.
                     _swordFishTimeInfo.closeAll = new TimeSpan(11, 29, 0);
                     break;
