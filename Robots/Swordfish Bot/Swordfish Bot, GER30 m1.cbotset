@@ -1,0 +1,28 @@
+﻿[ChartParameters]
+Symbol = GER30
+Timeframe = m1
+
+[cBotParameters]
+DataSeriesSource = Close
+useBollingerBandEntry = False
+targetBolliEntryPips = 2
+SwordFishTrigger = 7
+OrderEntryOffset = 11
+OrderSpacing = 2
+OrderSpacingLevels = 10
+OrderSpacingMultipler = 1.5
+OrderSpacingMax = 3
+NumberOfOrders = 15
+Volume = 20
+VolumeMax = 50
+OrderVolumeLevels = 4
+VolumeMultipler = 1.5
+TakeProfit = 0.6
+ReducePositionRiskTime = 45
+retraceEnabled = True
+retraceLevel1 = 33
+retraceLevel2 = 50
+retraceLevel3 = 66
+FinalOrderStopLoss = 5
+HardStopLossBuffer = 20
+TrailingStopPips = 5
