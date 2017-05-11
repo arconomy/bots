@@ -77,7 +77,8 @@ namespace Niffler.Business
 
             Model.Position LocalPosition = GetByID(Position.Id);
 
-            if (LocalPosition is null) LocalPosition = new Model.Position();
+            if (LocalPosition == null)
+            LocalPosition = new Model.Position();
 
             LocalPosition.ID = Position.Id;
             LocalPosition.AccountID = Account.Number;

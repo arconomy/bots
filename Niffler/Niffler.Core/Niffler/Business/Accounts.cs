@@ -25,7 +25,7 @@ namespace Niffler.Business
 
             Model.Account CloudAccount = GetByID(Account.Number);
 
-            if (CloudAccount is null) CloudAccount = new Model.Account();
+            if (CloudAccount == null) CloudAccount = new Model.Account();
 
             CloudAccount.ID = Account.Number;
             CloudAccount.Name = Name;
