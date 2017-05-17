@@ -19,16 +19,16 @@ namespace Niffler.Common.Trade
         private State BotState { get;  set; }
         private Robot Bot { get; set; }
 
-        public StopLossManager(Robot r, State s, double hardStopLossBufferPips, double lastOrderStopLossPips)
+        public StopLossManager(State s, double hardStopLossBufferPips, double lastOrderStopLossPips)
         {
-            Bot = r;
             BotState = s;
+            Bot = BotState.Bot;
             IsBreakEvenStopsActive = false;
             HardStopLossBufferPips = hardStopLossBufferPips;
             LastOrderStopLossPips = lastOrderStopLossPips;
         }
 
-        protected void setSLForAllPositions(double stopLossPrice)
+        public void setSLForAllPositions(double stopLossPrice)
         {
             foreach (Position p in Bot.Positions)
             {
@@ -46,21 +46,28 @@ namespace Niffler.Common.Trade
             }
         }
 
-        protected void setSLWithBufferForAllPositions(double SLPrice)
+        public void setSLWithBufferForAllPositions(double SLPrice)
         {
             switch (BotState.LastPositionTradeType)
             {
                 case TradeType.Buy:
-                    setStopLossForAllPositions(SLPrice - HardStopLossBufferPips);
+                    setSLForAllPositions(SLPrice - HardStopLossBufferPips);
                     break;
                 case TradeType.Sell:
-                    setStopLossForAllPositions(SLPrice + HardStopLossBufferPips);
+                    setSLForAllPositions(SLPrice + HardStopLossBufferPips);
                     break;
             }
         }
 
-        public void setBreakEvenSLForAllPositions(double breakEvenTriggerPrice)
+        public void setBreakEvenSLForAllPositions(double breakEvenTriggerPrice, bool withHardSLBuffer)
         {
+            double SLBufferPips = 0;
+            if(withHardSLBuffer)
+            {
+                SLBufferPips = HardStopLossBufferPips;
+            }
+
+
             foreach (Position p in Bot.Positions)
             {
                 try
@@ -71,7 +78,7 @@ namespace Niffler.Common.Trade
                         {
                             if (breakEvenTriggerPrice > p.EntryPrice)
                             {
-                                Bot.ModifyPositionAsync(p, p.EntryPrice + HardStopLossBufferPips, p.TakeProfit, onTradeOperationComplete);
+                                Bot.ModifyPositionAsync(p, p.EntryPrice + SLBufferPips, p.TakeProfit, onTradeOperationComplete);
                             }
                         }
 
@@ -79,7 +86,7 @@ namespace Niffler.Common.Trade
                         {
                             if (breakEvenTriggerPrice < p.EntryPrice)
                             {
-                                Bot.ModifyPositionAsync(p, p.EntryPrice - HardStopLossBufferPips, p.TakeProfit, onTradeOperationComplete);
+                                Bot.ModifyPositionAsync(p, p.EntryPrice - SLBufferPips, p.TakeProfit, onTradeOperationComplete);
                             }
                         }
                     }

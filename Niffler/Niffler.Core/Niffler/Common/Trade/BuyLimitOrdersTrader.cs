@@ -8,35 +8,30 @@ using cAlgo.API;
 
 namespace Niffler.Common.Trade
 {
-    class BuyLimitOrdersTrader
+    class BuyLimitOrdersTrader : OrdersManager
     {
-
-        private State BotState { get; set; }
-        private Robot Bot { get; set; }
-
-        public BuyLimitOrdersTrader(Robot r, State s)
+        public BuyLimitOrdersTrader(State s, int numberOfOrders, int entryOffSetPips, double defaultTakeProfitPips, double finalOrderStopLossPips)
         {
-            Bot = r;
-            BotState = s;
+            initOrdersManager(s, numberOfOrders, entryOffSetPips, defaultTakeProfitPips, finalOrderStopLossPips);
         }
 
         //Place Buy Limit Orders
-        protected void placeBuyLimitOrders(int numberOfOrders)
+        public void placeBuyLimitOrders()
         {
             //Place Buy Limit Orders
-            for (int OrderCount = 0; OrderCount < numberOfOrders; OrderCount++)
+            for (int OrderCount = 0; OrderCount < NumberOfOrders; OrderCount++)
             {
                 try
                 {
                     TradeData data = new TradeData
                     {
                         tradeType = TradeType.Buy,
-                        symbol = Symbol,
+                        symbol = Bot.Symbol,
                         volume = setVolume(OrderCount),
                         entryPrice = calcBuyEntryPrice(OrderCount),
-                        label = _botId + "-" + getTimeStamp() + _swordFishTimeInfo.market + "-SWF#" + OrderCount,
+                        label = BotState.BotId + "-" + Utils.getTimeStamp() + BotState.getMarketName() + "-SWF#" + OrderCount,
                         stopLossPips = setPendingOrderStopLossPips(OrderCount, NumberOfOrders),
-                        takeProfitPips = TakeProfit * (1 / Symbol.TickSize)
+                        takeProfitPips = DefaultTakeProfitPips * (1 / Bot.Symbol.TickSize)
                     };
 
                     if (data == null)
@@ -50,7 +45,7 @@ namespace Niffler.Common.Trade
                     else
                     {
                         //Tick price has 'jumped' - therefore avoid placing all PendingOrders by re-calculating the OrderCount to the equivelant entry point.
-                        OrderCount = calculateNewOrderCount(OrderCount, Symbol.Bid);
+                        OrderCount = calculateNewOrderCount(OrderCount, Bot.Symbol.Bid);
                         Bot.ExecuteMarketOrderAsync(data.tradeType, data.symbol, data.volume, data.label + "X", data.stopLossPips, data.takeProfitPips, onTradeOperationComplete);
                     }
                 }
@@ -62,6 +57,7 @@ namespace Niffler.Common.Trade
 
             //All Buy Limit Orders have been placed
             BotState.OrdersPlaced = true;
+            resetBollingerBand();
         }
 
         protected double calcBuyEntryPrice(int orderCount)
@@ -69,12 +65,16 @@ namespace Niffler.Common.Trade
             //OPTIONAL - Bollinger band indicates whether market is oversold or over bought.
             if (useBollingerBandEntry)
             {
+                if(EntryBollingerBandPrice == 0)
+                {
+                    EntryBollingerBandPrice = BollingerBand.Bottom.Last(0);
+                }
                 //Use Bolinger Band limit as first order entry point.
-                return _boli.Bottom.Last(0) + targetBolliEntryPips - calcOrderSpacingDistance(orderCount);
+                return EntryBollingerBandPrice - calcOrderSpacingDistance(orderCount);
             }
             else
             {
-                return _openPrice - OrderEntryOffset - calcOrderSpacingDistance(orderCount);
+                return BotState.OpenPrice - EntryOffSetPips - calcOrderSpacingDistance(orderCount);
             }
         }
 

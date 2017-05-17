@@ -130,6 +130,31 @@ namespace cAlgo
             Positions.Opened += PositionsOnOpened;
             Positions.Closed += PositionsOnClosed;
 
+            debugCSV.Add("PARAMETERS");
+            debugCSV.Add("useBollingerBandEntry," + useBollingerBandEntry.ToString());
+            debugCSV.Add("targetBolliEntryPips," + targetBolliEntryPips.ToString());
+            debugCSV.Add("SwordFishTrigger," + SwordFishTrigger.ToString());
+            debugCSV.Add("OrderEntryOffset," + OrderEntryOffset.ToString());
+            debugCSV.Add("OrderSpacing," + OrderSpacing.ToString());
+            debugCSV.Add("OrderSpacingLevels," + OrderSpacingLevels.ToString());
+            debugCSV.Add("OrderSpacingMultipler," + OrderSpacingMultipler.ToString());
+            debugCSV.Add("OrderSpacingMax," + OrderSpacingMax.ToString());
+            debugCSV.Add("NumberOfOrders," + NumberOfOrders.ToString());
+            debugCSV.Add("Volume," + Volume.ToString());
+            debugCSV.Add("VolumeMax," + VolumeMax.ToString());
+            debugCSV.Add("OrderVolumeLevels," + OrderVolumeLevels.ToString());
+            debugCSV.Add("VolumeMultipler," + VolumeMultipler.ToString());
+            debugCSV.Add("TakeProfit," + TakeProfit.ToString());
+            debugCSV.Add("ReducePositionRiskTime," + ReducePositionRiskTime.ToString());
+            debugCSV.Add("retraceEnabled," + retraceEnabled.ToString());
+            debugCSV.Add("retraceLevel1," + retraceLevel1.ToString());
+            debugCSV.Add("retraceLevel2," + retraceLevel2.ToString());
+            debugCSV.Add("retraceLevel3," + retraceLevel3.ToString());
+            debugCSV.Add("FinalOrderStopLoss," + FinalOrderStopLoss.ToString());
+            debugCSV.Add("HardStopLossBuffer," + HardStopLossBuffer.ToString());
+            debugCSV.Add("TrailingStopPips," + TrailingStopPips.ToString());
+            debugCSV.Add("--------------------------");
+
             debugCSV.Add("Trade,Profit,Pips,Day,Label,EntryPrice,ClosePrice,SL,TP,Date/Time,OpenedPositionsCount,ClosedPositionsCount,LastPositionEntryPrice,LastClosedPositionEntryPrice,LastProfitPrice,LastPositionLabel,DivideTrailingStopPips,isTrailingStopsActive,isBreakEvenStopLossActive,isHardSLLastClosedPositionEntryPrice,isHardSLLastPositionEntryPrice,isHardSLLastProfitPrice,OpenPriceCaptured,OrdersPlaced,isSwordFishReset,isSwordfishTerminated,isReducedRiskTime");
         }
 

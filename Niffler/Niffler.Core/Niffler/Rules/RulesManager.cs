@@ -3,11 +3,27 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Niffler.Common;
+using Niffler.Common.Trade;
 
 namespace Niffler.Rules
 {
     class RulesManager
     {
+
+        //TO DO = The RulesManager should be a 'Client' created in the context of the TradeStrategy which determines the Factory to created
+        // The SwfRuleFactory will create the Rule Objects for each of the Rules it uses
+        // The DiviFactory will create the Rules Objects for each of the Rules it uses
+        // The Rules Objects can be created by either Factory
+
+        private OrdersManager OrdersManager;
+        private PositionsManager PositionsManager;
+
+        public RulesManager(State s, OrdersManager ordersManager)
+        {
+            OrdersManager = ordersManager;
+            PositionsManager = new PositionsManager(s);
+        }
 
 
 

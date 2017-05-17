@@ -11,22 +11,34 @@ namespace Niffler.Common.Market
 {
     class SpikeManager
     {
-        protected double SpikePeakPips = 0;
-        protected double SpikePeakPrice = 0;
-        public bool SpikePeakCaptured { get; set; }
         private State BotState;
         private Robot Bot;
+        private Spike Spike;
 
-        public SpikeManager(Robot r, State s)
+        public SpikeManager(State s)
         {
-            Bot = r;
             BotState = s;
-            SpikePeakCaptured = false;
+            Bot = BotState.Bot;
+        }
+
+        public void reset()
+        {
+            Spike = null;
+        }
+
+        public bool isSpikeCaptured()
+        {
+            return Spike.isCaptured();
         }
 
         //TO DO: Refactor where the a Spike Object is created and managed.
         public void captureSpike()
         {
+            if(Spike == null)
+            {
+                Spike = new Spike();
+            }
+
             //Capture the highest point of the Spike within Swordfish Time
             if (BotState.OpenedPositionsCount > 0)
             {
@@ -35,35 +47,30 @@ namespace Niffler.Common.Market
                     case TradeType.Buy:
                         {
                             //If we are buying then spike is down so look for prices less than current spikePeakPrice
-                            if (Bot.Symbol.Bid < SpikePeakPrice || SpikePeakPrice == 0)
+                            if (Bot.Symbol.Bid < Spike.PeakPrice || !Spike.isCaptured())
                             {
-                                SpikePeakPrice = Bot.Symbol.Bid;
-                                SpikePeakPips = BotState.OpenPrice - Bot.Symbol.Bid;
+                                Spike.setPeak(Bot.Symbol.Bid, BotState.OpenPrice - Bot.Symbol.Bid);
                             }
                             break;
                         }
                     case TradeType.Sell:
                         {
                             //If we are selling then spike is up so look for prices more than current spikePeakPrice
-                            if (Bot.Symbol.Ask > SpikePeakPrice || SpikePeakPrice == 0)
+                            if (Bot.Symbol.Ask > Spike.PeakPrice || !Spike.isCaptured())
                             {
-                                SpikePeakPrice = Bot.Symbol.Ask;
-                                SpikePeakPips = Bot.Symbol.Ask - BotState.OpenPrice;
+                                Spike.setPeak(Bot.Symbol.Ask, Bot.Symbol.Ask - BotState.OpenPrice);
                             }
-
                             break;
                         }
                 }
             }
-            if (SpikePeakPips > 0)
-                SpikePeakCaptured = true;
         }
 
         //Return the greater retrace of the percentage price or percent closed positions
         protected double calculateRetraceFactor()
         {
             double retraceFactor = 0;
-            double percentClosed = calculatePercentageClosed();
+            double percentClosed = BotState.calcPercentOfPositionsClosed();
             double percentRetrace = calculatePercentageRetrace();
             if (percentClosed <= percentRetrace)
             {
@@ -82,13 +89,13 @@ namespace Niffler.Common.Market
             if (BotState.LastPositionTradeType == TradeType.Sell)
             {
                 //Position are Selling
-                percentRetrace = (Symbol.Bid - _openPrice) / (BotState.LastPositionEntryPrice - _openPrice);
+                percentRetrace = (Bot.Symbol.Bid - BotState.OpenPrice) / (Spike.PeakPrice - BotState.OpenPrice);
             }
 
             if (BotState.LastPositionTradeType == TradeType.Buy)
             {
                 //Positions are buying
-                percentRetrace = (_openPrice - Symbol.Ask) / (_openPrice - BotState.LastPositionEntryPrice);
+                percentRetrace = (BotState.OpenPrice - Bot.Symbol.Ask) / (BotState.OpenPrice - Spike.PeakPrice);
             }
 
             percentRetrace = 1 - percentRetrace;

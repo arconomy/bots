@@ -9,119 +9,208 @@ namespace Niffler.Common.Market
 {
     class MarketInfo
     {
-        private String market;
-        public TimeZoneInfo tz;
-        public TimeSpan open;
-        public TimeSpan close;
-        public TimeSpan closeAll;
+        private TimeZoneInfo TimeZone;
+        private TimeSpan OpenTime; //  Open time for Bot to place new trades (not necessarily same as the actual market open)
+        private TimeSpan CloseTime; // Close time for Bot to place new trades (not necessarily same as the actual market close)
+        private TimeSpan ReduceRiskTime; // ReduceRisk time for Bot to manage trades (not necessarily same as the actual market close) 
+        private TimeSpan TerminateTime; // Terminate Bot activity after this time
+        private int CloseAfterMinutes; // Closed for Bot to place new trades after minutes
+        private int ReduceRiskAfterMinutes; // ReduceRisk time for Bot to manage trades after minutes
+        private int TerminateAfterMinutes; // Terminate Bot activity after minutes
+        private bool IsBackTesting;
+        private Robot Bot;
+        private bool UseCloseTime;
+        private bool UseReduceRiskTime;
+        private bool UseTerminateTime;
 
+        public String MarketName { get; set; }
 
-        protected bool IsSwordFishTime()
+        //Construtor to initialise with Times
+        public MarketInfo(Robot bot, TimeSpan openTime, TimeSpan closeTime, TimeSpan reduceRiskTime, TimeSpan terminateTime)
         {
-            return _swordFishTimeInfo.IsPlacePendingOrdersTime(IsBacktesting, Server.Time);
+            InitMarketInfo(bot);
+            OpenTime = openTime;
+            CloseTime = closeTime;
+            UseCloseTime = true;
+            ReduceRiskTime = reduceRiskTime;
+            UseReduceRiskTime = true;
+            TerminateTime = terminateTime;
+            UseTerminateTime = true;
         }
 
-        //Is the current time within the period Swordfish Pending Orders can be placed
-        public bool IsPlacePendingOrdersTime(bool isBackTesting, DateTime serverTime)
+        //Construtor to initialise with close, reduce risk and terminate minutes after Open time
+        public MarketInfo(Robot bot, TimeSpan openTime, int closeAfterMinutes, int reduceRiskAfterMinutes, int terminateAfterMinutes)
         {
-            if (isBackTesting)
-            {
-                return IsOpenAt(serverTime);
-            }
-            else
-            {
-                return IsOpenAt(DateTime.UtcNow);
-            }
+            InitMarketInfo(bot);
+            OpenTime = openTime;
+            SetMinsAfterOpen(closeAfterMinutes, reduceRiskAfterMinutes, terminateAfterMinutes);
         }
 
-        //Time during which Swordfish positions risk should be managed
-        public bool IsReduceRiskTime(bool isBackTesting, DateTime serverTime, int reduceRiskTimeFromOpen)
+        //Construtor to initialise with default Market Opening, Close and Terminate times
+        public MarketInfo(Robot bot)
         {
-            if (isBackTesting)
-            {
-                return IsReduceRiskAt(serverTime, reduceRiskTimeFromOpen);
-            }
-            else
-            {
-                return IsReduceRiskAt(DateTime.UtcNow, reduceRiskTimeFromOpen);
-            }
+            InitMarketInfo(bot);
+            SetDefaultMarketTimes(bot.Symbol.Code);
         }
 
-        //Is the current time within the period Swordfish positions can remain open.
-        public bool IsCloseAllPositionsTime(bool isBackTesting, DateTime serverTime)
+        private void SetMinsAfterOpen(int closeAfterMinutes, int reduceRiskAfterMinutes, int terminateAfterMinutes)
         {
-
-            if (isBackTesting)
-            {
-                return IsCloseAllAt(serverTime);
-            }
-            else
-            {
-                return IsCloseAllAt(DateTime.UtcNow);
-            }
+            SetCloseAfterMinutes(closeAfterMinutes);
+            SetReduceRiskAfterMinutes(reduceRiskAfterMinutes);
+            SetTerminateAfterMinutes(terminateAfterMinutes);
         }
 
-        //Is the current time within the period Swordfish Pending Orders can be placed.
-        public bool IsOpenAt(DateTime dateTimeUtc)
+        public void SetCloseAfterMinutes(int closeAfterMinutes) { CloseAfterMinutes = closeAfterMinutes; UseCloseTime = false; }
+        public void SetReduceRiskAfterMinutes(int reduceRiskAfterMinutes) { ReduceRiskAfterMinutes = reduceRiskAfterMinutes; UseReduceRiskTime = false; }
+        public void SetTerminateAfterMinutes(int terminateAfterMinutes) { TerminateAfterMinutes = terminateAfterMinutes; UseTerminateTime = false; }
+
+        private void InitMarketInfo(Robot bot)
         {
-            DateTime tzTime = TimeZoneInfo.ConvertTimeFromUtc(dateTimeUtc, tz);
-            return (tzTime.TimeOfDay >= open & tzTime.TimeOfDay <= close);
+            Bot = bot;
+            IsBackTesting = Bot.IsBacktesting;
+            SetTimeZone();
         }
 
-        //Is the current time after the time period when risk should be reduced.
-        public bool IsReduceRiskAt(DateTime dateTimeUtc, int reduceRiskTimeFromOpen)
+        private void SetDefaultMarketTimes(string symbolCode)
         {
-            DateTime tzTime = TimeZoneInfo.ConvertTimeFromUtc(dateTimeUtc, tz);
-            return (tzTime.TimeOfDay >= open.Add(TimeSpan.FromMinutes(reduceRiskTimeFromOpen)));
-        }
-
-        //Is the current time within the period Swordfish positions can remain open.
-        public bool IsCloseAllAt(DateTime dateTimeUtc)
-        {
-            DateTime tzTime = TimeZoneInfo.ConvertTimeFromUtc(dateTimeUtc, tz);
-            return tzTime.TimeOfDay >= closeAll;
-        }
-
-        protected void setTimeZone()
-        {
-
-            switch (Symbol.Code)
+            switch (symbolCode)
             {
                 case "UK100":
-                    // Instantiate a MarketTimeInfo object.
-                    _swordFishTimeInfo.market = "FTSE";
-                    _swordFishTimeInfo.tz = TimeZoneInfo.FindSystemTimeZoneById("GMT Standard Time");
-                    // Market for swordfish trades opens at 8:00am.
-                    _swordFishTimeInfo.open = new TimeSpan(8, 0, 0);
-                    // Market for swordfish trades closes at 8:05am.
-                    _swordFishTimeInfo.close = new TimeSpan(8, 5, 0);
-                    // Close all open Swordfish position at 11:29am before US opens.
-                    _swordFishTimeInfo.closeAll = new TimeSpan(11, 29, 0);
+                    OpenTime = new TimeSpan(8, 0, 0);
+                    CloseTime = new TimeSpan(8, 5, 0);
+                    UseCloseTime = true;
+                    ReduceRiskTime = new TimeSpan(8, 45, 0);
+                    UseReduceRiskTime = true;
+                    TerminateTime = new TimeSpan(11, 29, 0);
+                    UseTerminateTime = true;
+                    break;
 
-                    break;
                 case "GER30":
-                    _swordFishTimeInfo.market = "DAX";
-                    _swordFishTimeInfo.tz = TimeZoneInfo.FindSystemTimeZoneById("W. Europe Standard Time");
-                    // Market for swordfish opens at 9:00.
-                    _swordFishTimeInfo.open = new TimeSpan(9, 0, 0);
-                    // Market for swordfish closes at 9:05.
-                    _swordFishTimeInfo.close = new TimeSpan(9, 3, 0);
-                    // Close all open Swordfish position at 11:29am before US opens.
-                    _swordFishTimeInfo.closeAll = new TimeSpan(11, 29, 0);
+                    OpenTime = new TimeSpan(9, 0, 0);
+                    CloseTime = new TimeSpan(9, 3, 0);
+                    UseCloseTime = true;
+                    ReduceRiskTime = new TimeSpan(8, 45, 0);
+                    UseReduceRiskTime = true;
+                    TerminateTime = new TimeSpan(11, 29, 0);
+                    UseTerminateTime = true;
                     break;
+
                 case "HK50":
-                    _swordFishTimeInfo.market = "HSI";
-                    _swordFishTimeInfo.tz = TimeZoneInfo.FindSystemTimeZoneById("China Standard Time");
-                    // Market for swordfish opens at 9:00.
-                    _swordFishTimeInfo.open = new TimeSpan(9, 30, 0);
-                    // Market for swordfish closes at 9:05.
-                    _swordFishTimeInfo.close = new TimeSpan(9, 35, 0);
-                    // Close all open Swordfish positions
-                    _swordFishTimeInfo.closeAll = new TimeSpan(11, 30, 0);
+                    OpenTime = new TimeSpan(9, 30, 0);
+                    CloseTime = new TimeSpan(9, 35, 0);
+                    UseCloseTime = true;
+                    ReduceRiskTime = new TimeSpan(10, 15, 0);
+                    UseReduceRiskTime = true;
+                    TerminateTime = new TimeSpan(12, 0, 0);
+                    UseTerminateTime = true;
+                    break;
+            }
+        }
+
+        private void SetTimeZone()
+        {
+            switch (Bot.Symbol.Code)
+            {
+                case "UK100":
+                    MarketName = "FTSE";
+                    TimeZone = TimeZoneInfo.FindSystemTimeZoneById("GMT Standard Time");
+                    break;
+
+                case "GER30":
+                    MarketName = "DAX";
+                    TimeZone = TimeZoneInfo.FindSystemTimeZoneById("W. Europe Standard Time");
+                    break;
+
+                case "HK50":
+                    MarketName = "HSI";
+                    TimeZone = TimeZoneInfo.FindSystemTimeZoneById("China Standard Time");
                     break;
             }
         }
 
 
+        private DateTime getTimeNow()
+        {
+            if (IsBackTesting)
+            {
+                return Bot.Server.Time;
+            }
+            else
+            {
+                return DateTime.UtcNow;
+            }
+        }
+
+        //Is the current time within the Open time and the Close time period
+        public bool IsBotTradingOpen()
+        {
+            if(UseCloseTime)
+            {
+                return IsTimeBetweenOpenAnd(getTimeNow(),CloseTime);
+            }
+            else
+            {
+                return IsMinsAfterOpenTime(getTimeNow(),CloseAfterMinutes);
+            }
+        }
+
+        //Is the current time after the Reduce Risk Time
+        public bool IsAfterReduceRiskTime()
+        {
+            if(UseReduceRiskTime)
+            {
+                return IsTimeAfter(getTimeNow(), ReduceRiskTime);
+            }
+            else
+            {
+                return IsMinsAfterOpenTime(getTimeNow(), ReduceRiskAfterMinutes);
+            }
+
+        }
+
+        //Is the current time after the Close Time
+        public bool IsAfterCloseTime()
+        {
+            if (UseCloseTime)
+            {
+                return IsTimeAfter(getTimeNow(), CloseTime);
+            }
+            else
+            {
+                return IsMinsAfterOpenTime(getTimeNow(), CloseAfterMinutes);
+            }
+                
+        }
+
+        //Is the current time after the terminate activity time
+        public bool IsAfterTerminateTime()
+        {
+            if (UseTerminateTime)
+            {
+                return IsTimeAfter(getTimeNow(), TerminateTime);
+            }
+            else
+            {
+                return IsMinsAfterOpenTime(getTimeNow(), TerminateAfterMinutes);
+            }
+        }
+
+        public bool IsTimeBetweenOpenAnd(DateTime dateTimeUtc, TimeSpan timeToTest)
+        {
+            DateTime tzTime = TimeZoneInfo.ConvertTimeFromUtc(dateTimeUtc, TimeZone);
+            return (tzTime.TimeOfDay >= OpenTime & tzTime.TimeOfDay <= timeToTest);
+        }
+
+        public bool IsMinsAfterOpenTime(DateTime dateTimeUtc, int mins)
+        {
+            DateTime tzTime = TimeZoneInfo.ConvertTimeFromUtc(dateTimeUtc, TimeZone);
+            return (tzTime.TimeOfDay >= OpenTime.Add(TimeSpan.FromMinutes(mins)));
+        }
+
+        public bool IsTimeAfter(DateTime dateTimeUtc, TimeSpan timeToTest)
+        {
+            DateTime tzTime = TimeZoneInfo.ConvertTimeFromUtc(dateTimeUtc, TimeZone);
+            return tzTime.TimeOfDay >= timeToTest;
+        }
     }
 }

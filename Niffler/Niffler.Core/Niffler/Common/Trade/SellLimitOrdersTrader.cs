@@ -5,44 +5,40 @@ using System.Text;
 using System.Threading.Tasks;
 using cAlgo;
 using cAlgo.API;
+using Niffler.Common;
 
 namespace Niffler.Common.Trade
 {
-    class SellLimitOrdersTrader
+    class SellLimitOrdersTrader : OrdersManager
     {
-
-        private State BotState { get; set; }
-        private Robot Bot { get; set; }
-
-        public SellLimitOrdersTrader(Robot r, State s)
+        public SellLimitOrdersTrader(State s, int numberOfOrders, int entryOffSetPips, double defaultTakeProfitPips, double finalOrderStopLossPips)
         {
-            Bot = r;
-            BotState = s;
+            initOrdersManager(s, numberOfOrders, entryOffSetPips, defaultTakeProfitPips, finalOrderStopLossPips);
         }
 
         // Place Sell Limit Orders
-        protected void placeSellLimitOrders(int numberOfOrders)
+        public void placeSellLimitOrders()
         {
             //Place Sell Limit Orders
-            for (int OrderCount = 0; OrderCount < numberOfOrders; OrderCount++)
+            for (int OrderCount = 0; OrderCount < NumberOfOrders; OrderCount++)
             {
                 try
                 {
                     TradeData data = new TradeData
                     {
                         tradeType = TradeType.Sell,
-                        symbol = Symbol,
+                        symbol = Bot.Symbol,
                         volume = setVolume(OrderCount),
                         entryPrice = calcSellEntryPrice(OrderCount),
-                        label = _botId + "-" + getTimeStamp() + _swordFishTimeInfo.market + "-SWF#" + OrderCount,
+                        label = BotState.BotId + "-" + Utils.getTimeStamp() + BotState.getMarketName() + "-SWF#" + OrderCount,
                         stopLossPips = setPendingOrderStopLossPips(OrderCount, NumberOfOrders),
-                        takeProfitPips = TakeProfit * (1 / Symbol.TickSize)
+                        takeProfitPips = DefaultTakeProfitPips * (1 / Bot.Symbol.TickSize)
                     };
                     if (data == null)
                         continue;
 
                     //Check that entry price is valid
-                    if (data.entryPrice > Symbol.Ask)
+                    if (data.entryPrice > Bot.Symbol.Ask)
                     {
                         Bot.PlaceLimitOrderAsync(data.tradeType, data.symbol, data.volume, data.entryPrice, data.label, data.stopLossPips, data.takeProfitPips, onTradeOperationComplete);
                     }
@@ -61,6 +57,7 @@ namespace Niffler.Common.Trade
 
             //All Sell Limit Orders have been placed
             BotState.OrdersPlaced = true;
+            resetBollingerBand();
         }
 
         protected double calcSellEntryPrice(int orderCount)
@@ -69,26 +66,18 @@ namespace Niffler.Common.Trade
             //OPTIONAL - Bollinger band indicates whether market is oversold or over bought.
             if (useBollingerBandEntry)
             {
+                if (EntryBollingerBandPrice == 0)
+                {
+                    EntryBollingerBandPrice = BollingerBand.Top.Last(0);
+                }
                 //Use Bolinger Band limit as first order entry point.
-                return _boli.Top.Last(0) - targetBolliEntryPips + calcOrderSpacingDistance(orderCount);
+                return EntryBollingerBandPrice + calcOrderSpacingDistance(orderCount);
             }
             else
             {
-                return BotState.OpenPrice + BotState.OrderEntryOffset + calcOrderSpacingDistance(orderCount);
+                return BotState.OpenPrice + EntryOffSetPips + calcOrderSpacingDistance(orderCount);
             }
         }
-
-        protected void onTradeOperationComplete(TradeResult tr)
-        {
-            if (!tr.IsSuccessful)
-            {
-                string msg = "FAILED Trade Operation: " + tr.Error;
-                if (tr.Position != null)
-                    Print(msg, " Position: ", tr.Position.Label, " ", tr.Position.TradeType, " ", Time);
-                if (tr.PendingOrder != null)
-                    Print(msg, " Pending Order: ", tr.PendingOrder.Label, " ", tr.PendingOrder.TradeType, " ", Time);
-            }
-        }
-
+        
     }
 }

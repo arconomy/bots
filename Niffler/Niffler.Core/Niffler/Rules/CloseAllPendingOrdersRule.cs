@@ -10,14 +10,15 @@ using Niffler.Common;
 
 namespace Niffler.Rules
 {
-    class AllPositionsClosedRule : IRule
+    class CloseAllPendingOrdersRule : IRule
     {
 
         public bool execute(Robot Bot, State BotState)
         {
-            // Execute the rule logic
-            if (Bot.Positions.Count < 0)
+            // If it is after CloseTime then close all positions
+            if (BotState.IsAfterCloseTime)
             {
+                CloseAllPendingOrders();
                 BotState.IsReset = true;
             }
 

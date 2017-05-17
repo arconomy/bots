@@ -12,32 +12,41 @@ namespace Niffler.Common.Trade
 {
     class PositionsManager
     { 
-
         private State BotState { get; set; }
         private Robot Bot { get; set; }
 
-        public PositionsManager(Robot r, State s)
+        public PositionsManager(State s)
         {
-            Bot = r;
             BotState = s;
+            Bot = BotState.Bot;
         }
 
-        protected void CloseAllPositions()
+        public void closeAllPositions()
         {
             //Close any outstanding pending orders
-            foreach (Position p in Positions)
+            foreach (Position p in Bot.Positions)
             {
                 try
                 {
-                    if (isThisBotId(p.Label))
+                    if (BotState.isThisBotId(p.Label))
                     {
-                        ClosePositionAsync(p, onTradeOperationComplete);
+                        Bot.ClosePositionAsync(p, onTradeOperationComplete);
                     }
                 }
                 catch (Exception e)
                 {
-                    Print("Failed to Close Position: " + e.Message);
+                    Bot.Print("Failed to Close Position: " + e.Message);
                 }
+            }
+            BotState.IsTerminated = true;
+        }
+
+        protected void onTradeOperationComplete(TradeResult tr)
+        {
+            if (!tr.IsSuccessful)
+            {
+                string msg = "FAILED Trade Operation for Position: " + tr.Error;
+                Bot.Print(msg, " Pending Order: ", tr.Position.Label, " ", tr.Position.TradeType, " ", System.DateTime.Now);
             }
         }
 

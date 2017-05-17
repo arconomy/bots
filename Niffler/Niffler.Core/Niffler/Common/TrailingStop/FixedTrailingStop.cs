@@ -18,12 +18,12 @@ namespace Niffler.Common.TrailingStop
         private State BotState { get; set; }
         private Robot Bot { get; set; }
 
-        public FixedTrailingStop(Robot r, State s, double trailingStopPips)
+        public FixedTrailingStop(State s, double trailingStopPips)
         {
-            IsActive = false;
-            Bot = r;
-            TrailingStopPips = trailingStopPips;
+            Bot = BotState.Bot;
             BotState = s;
+            TrailingStopPips = trailingStopPips;
+            IsActive = false;
         }
 
         // If Trailing stop is active update position SL's - Remove TP as trailing position.

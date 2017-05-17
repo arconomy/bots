@@ -95,21 +95,21 @@
   <ItemGroup>
     <Compile Include="Bots\OptionsExpiry\Entry.cs" />
     <Compile Include="Bots\RandomWalk\Bot.cs" />
-    <Compile Include="Bots\Swordfish\Bot.cs" />
+    <Compile Include="Bots\Swordfish\swf.cs" />
     <Compile Include="Business\Accounts.cs" />
     <Compile Include="Business\KeyLevels.cs" />
     <Compile Include="Business\Positions.cs" />
     <Compile Include="Business\TradingHours.cs" />
     <Compile Include="Bots\Client\Bot.cs" />
+    <Compile Include="Common\BackTest\ProfitReporter.cs" />
     <Compile Include="Common\Utils.cs" />
     <Compile Include="Common\Market\MarketInfo.cs" />
     <Compile Include="Common\Market\Spike.cs" />
     <Compile Include="Common\Market\SpikeManager.cs" />
-    <Compile Include="Common\Debug.cs" />
     <Compile Include="Common\Notifications.cs" />
     <Compile Include="Common\State.cs" />
     <Compile Include="Common\Trade\PositionsManager.cs" />
-    <Compile Include="Common\Trade\OrderManager.cs" />
+    <Compile Include="Common\Trade\OrdersManager.cs" />
     <Compile Include="Common\Trade\SellLimitOrdersTrader.cs" />
     <Compile Include="Common\Trade\BuyLimitOrdersTrader.cs" />
     <Compile Include="Common\Trade\TradeData.cs" />
@@ -130,7 +130,7 @@
     <Compile Include="Bots\Shadow\Entry.cs" />
     <Compile Include="Rules\IRule.cs" />
     <Compile Include="Rules\RulesManager.cs" />
-    <Compile Include="Rules\AllPositionsClosedRule.cs" />
+    <Compile Include="Rules\CloseAllPendingOrdersRule.cs" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
