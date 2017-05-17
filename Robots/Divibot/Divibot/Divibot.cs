@@ -420,7 +420,7 @@ namespace cAlgo
                 _dayPipsTotal += args.Position.Pips;
                 debugCSV.Add("TRADE," + args.Position.GrossProfit + "," + args.Position.Pips + "," + Time.DayOfWeek + "," + args.Position.Label + "," + args.Position.EntryPrice + "," + History.FindLast(args.Position.Label, Symbol, args.Position.TradeType).ClosingPrice + "," + args.Position.StopLoss + "," + args.Position.TakeProfit + "," + Time + debugState());
 
-                //Last position's SL has been triggered for a loss - NOT a swordfish
+                //Last position's SL has been triggered for a loss - NOT going down!
                 if (_lastPositionLabel == args.Position.Label && args.Position.GrossProfit < 0)
                 {
                     Print("CLOSING ALL POSITIONS due to furthest position losing");
@@ -555,11 +555,11 @@ namespace cAlgo
         {
 
             double orderVolumeLevel = orderCount / OrderVolumeLevels;
-            double volume = Math.Pow(VolumeMultipler, orderVolumeLevel) * Volume;
+            double volume = VolumeMax / Math.Pow(VolumeMultipler, orderVolumeLevel);
 
-            if (volume > VolumeMax)
+            if (volume < Volume)
             {
-                volume = VolumeMax;
+                volume = Volume;
             }
 
             return (int)volume;
