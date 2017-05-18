@@ -14,11 +14,27 @@ namespace Niffler.Common.Market
         private State BotState;
         private Robot Bot;
         private Spike Spike;
+        public int Level1 { get; set; }
+        public int Level2 { get; set; }
+        public int Level3 { get; set; }
+        private int RetraceFactor { get; set; }
+
 
         public SpikeManager(State s)
         {
             BotState = s;
             Bot = BotState.Bot;
+            Level1 = 33;
+            Level2 = 50;
+            Level3 = 66;
+        }
+
+
+        public void reduceLevelsBy50Percent()
+        {
+            Level1 /= 2;
+            Level2 /= 2;
+            Level3 /= 2;
         }
 
         public void reset()
@@ -67,7 +83,7 @@ namespace Niffler.Common.Market
         }
 
         //Return the greater retrace of the percentage price or percent closed positions
-        protected double calculateRetraceFactor()
+        public void calculateRetraceFactor()
         {
             double retraceFactor = 0;
             double percentClosed = BotState.calcPercentOfPositionsClosed();
@@ -80,7 +96,7 @@ namespace Niffler.Common.Market
             {
                 retraceFactor = percentClosed;
             }
-            return retraceFactor;
+            RetraceFactor = (int) retraceFactor;
         }
 
         protected double calculatePercentageRetrace()

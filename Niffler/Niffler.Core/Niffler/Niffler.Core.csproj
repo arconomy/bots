@@ -128,11 +128,20 @@
     <Compile Include="Model\TradingHour.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Bots\Shadow\Entry.cs" />
+    <Compile Include="Rules\Swordfish\ReduceRiskAfterCloseTimeRule.cs" />
+    <Compile Include="Rules\Swordfish\AllRetraceRules.cs" />
+    <Compile Include="Rules\Swordfish\SetStopLossesAfterReduceRiskTimeRule.cs" />
+    <Compile Include="Rules\Swordfish\ReduceRetraceLevelsAfterReduceRiskTimeRule.cs" />
+    <Compile Include="Rules\Swordfish\RetracedToLevel3Rule.cs" />
+    <Compile Include="Rules\Swordfish\RetracedToLevel2Rule.cs" />
+    <Compile Include="Rules\Swordfish\RetracedToLevel1Rule.cs" />
     <Compile Include="Rules\IRule.cs" />
     <Compile Include="Rules\RulesManager.cs" />
-    <Compile Include="Rules\CloseAllPendingOrdersRule.cs" />
+    <Compile Include="Rules\Swordfish\CloseAllPendingOrdersRule.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Rules\Dividend\" />
+  </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />

@@ -10,10 +10,8 @@ namespace Niffler.Common.Trade
 {
     class BuyLimitOrdersTrader : OrdersManager
     {
-        public BuyLimitOrdersTrader(State s, int numberOfOrders, int entryOffSetPips, double defaultTakeProfitPips, double finalOrderStopLossPips)
-        {
-            initOrdersManager(s, numberOfOrders, entryOffSetPips, defaultTakeProfitPips, finalOrderStopLossPips);
-        }
+        public BuyLimitOrdersTrader(State botState, int numberOfOrders, int entryOffSetPips, double defaultTakeProfitPips, double finalOrderStopLossPips) 
+            : base(botState,  numberOfOrders,  entryOffSetPips,  defaultTakeProfitPips, finalOrderStopLossPips) { }
 
         //Place Buy Limit Orders
         public void placeBuyLimitOrders()

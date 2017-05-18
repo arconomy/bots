@@ -9,7 +9,7 @@ using cAlgo.API.Indicators;
 
 namespace Niffler.Common.Trade
 {
-    class OrdersManager
+    abstract class OrdersManager
     {
         protected State BotState { get; set; }
         protected Robot Bot { get; set; }
@@ -36,7 +36,7 @@ namespace Niffler.Common.Trade
         protected BollingerBands BollingerBand;
 
 
-        protected void initOrdersManager(State s, int numberOfOrders, int entryOffSetPips, double defaultTakeProfitPips, double finalOrderStopLossPips)
+        public OrdersManager(State s, int numberOfOrders, int entryOffSetPips, double defaultTakeProfitPips, double finalOrderStopLossPips)
         { 
             BotState = s;
             Bot = BotState.Bot;

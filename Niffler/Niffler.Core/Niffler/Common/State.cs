@@ -11,7 +11,14 @@ namespace Niffler.Common
 {
     class State
     {
-        public int id { get; set; }
+        // Define the Type of Bot this State manages
+        public enum BotType
+        {
+            SWORDFISH,
+            DIVIDEND,
+        };
+
+        public BotType Type { get; }
 
         //Stop Loss Variables
         public bool IsHardSLLastProfitPrice { get; set; }
@@ -50,6 +57,7 @@ namespace Niffler.Common
         public State(Robot r)
         {
             reset();
+            Type = BotType.SWORDFISH;
             Bot = r;
             MarketInfo = new MarketInfo(Bot);
             ProfitReporter = new ProfitReporter(this);

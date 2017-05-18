@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Niffler.Common;
 using Niffler.Common.Trade;
+using Niffler.Common.Market;
 
 namespace Niffler.Rules
 {
@@ -16,34 +17,67 @@ namespace Niffler.Rules
         // The DiviFactory will create the Rules Objects for each of the Rules it uses
         // The Rules Objects can be created by either Factory
 
-        private OrdersManager OrdersManager;
-        private PositionsManager PositionsManager;
+        public OrdersManager OrdersManager { get; }
+        public PositionsManager PositionsManager { get; }
+        public SpikeManager SpikeManager { get; }
+        public StopLossManager StopLossManager { get; }
+        public State BotState { get; }
+        private List<IRule> Rules;
 
-        public RulesManager(State s, OrdersManager ordersManager)
+        public RulesManager(State botState, OrdersManager ordersManager, SpikeManager spikeManager, StopLossManager stopLossManager)
         {
+            BotState = botState;
             OrdersManager = ordersManager;
-            PositionsManager = new PositionsManager(s);
+            PositionsManager = new PositionsManager(BotState);
+            SpikeManager = spikeManager;
+            StopLossManager = stopLossManager;
+            Rules = getRules();
         }
 
+        private List<IRule> getRules()
+        {
+            switch (BotState.Type)
+            {
+                case State.BotType.SWORDFISH:
+                    {
+                        //Create Swordfish Bot Rules
+                        return new List<IRule>
+                        {
+                            new CloseAllPendingOrders(this)
+                        };
+                    }
+                case State.BotType.DIVIDEND:
+                    {
+                        //Create Dividend Bot Rules
+                        return new List<IRule>
+                        {
+                            new CloseAllPendingOrders(this)
+                        };
+                    }
+                default:
+                    return new List<IRule> { };
+            }
 
+        }
 
-        public void executeRule(Rule rule)
+        public void executeRule(IRule rule)
         {
 
         }
-
 
         public void executeAllRules()
         {
+            CloseAllPendingOrdersRule.execute();
 
-            //Close any positions that have not been triggered
-            if (!BotState.IsPendingOrdersClosed)
-                CloseAllPendingOrders();
+            //Calculate spike retrace factor
+            SpikeManager.calculateRetraceFactor();
 
-            if (retraceEnabled)
-            {
-                //Calculate spike retrace factor
-                double retraceFactor = calculateRetraceFactor();
+            //Execute rulles that impact retrace levels
+            ReduceRetraceLevelsAfterReduceRiskTime.execute();
+
+            //execute All Retrace Rules
+            ReduceRetraceLevelsAfterReduceRiskTime.execute();
+
 
                 if (BotState.IsReducedRiskTime)
                 {

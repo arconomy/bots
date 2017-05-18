@@ -66,9 +66,6 @@ namespace Niffler.Bots.Swordfish
         [Parameter("Mins after swordfish period to reduce position risk", DefaultValue = 45)]
         public int CloseAfterMins { get; set; }
 
-        [Parameter("Enable Retrace risk management", DefaultValue = true)]
-        public bool retraceEnabled { get; set; }
-
         [Parameter("Retrace level 1 Percentage", DefaultValue = 33)]
         public int RetraceLevel1 { get; set; }
 
@@ -108,15 +105,13 @@ namespace Niffler.Bots.Swordfish
 
             SellLimitOrdersTrader = new SellLimitOrdersTrader(BotState, NumberOfOrders, OrderEntryOffset, DefaultTakeProfit, FinalOrderStopLoss);
             BuyLimitOrdersTrader = new BuyLimitOrdersTrader(BotState, NumberOfOrders, OrderEntryOffset, DefaultTakeProfit, FinalOrderStopLoss);
+            StopLossManager = new StopLossManager(BotState, HardStopLossBuffer, FinalOrderStopLoss);
 
-            RulesManager = new RulesManager(BotState, BuyLimitOrdersTrader);
+            RulesManager = new RulesManager(BotState, BuyLimitOrdersTrader, SpikeManager, StopLossManager);
 
-            
             TrailingStop = new FixedTrailingStop(BotState, TrailingStopPips);
-            StopLossManager = new StopLossManager(BotState, HardStopLossBuffer, FinalOrderStopLoss);      
+             
             
-            
-
             Positions.Opened += PositionsOnOpened;
             Positions.Closed += PositionsOnClosed;
         }
@@ -162,7 +157,7 @@ namespace Niffler.Bots.Swordfish
                         {
 
                             //If positions were opened on the last tick at close time then may not have recorded a spike peak
-                            if (!SpikeManager.IsSpikeCaptured())
+                            if (!SpikeManager.isSpikeCaptured())
                                 SpikeManager.captureSpike();
 
                             //Check the state based on the time from open
