@@ -10,18 +10,17 @@ using Niffler.Common;
 
 namespace Niffler.Rules
 {
-    class ReduceRiskAfterCloseTimeRule : IRule
+    class TerminateTimeCloseAllPositionsReset : IRule
     {
-        public ReduceRiskAfterCloseTimeRule(RulesManager rulesManager) : base(rulesManager) {}
+        public TerminateTimeCloseAllPositionsReset(RulesManager rulesManager, int priority) : base(rulesManager, priority) { }
 
-        //Set hard stop losses as soon as Swordfish time is over
-        override public void execute()
+        //If trades still open at Terminate Time then take the hit and close remaining positions
+        override protected void execute()
         {
-           
-            if (BotState.IsAfterCloseTime && !BotState.IsHardSLLastPositionEntryPrice)
+            if(BotState.IsAfterTerminateTime)
             {
-                StopLossManager.setSLWithBufferForAllPositions(BotState.LastPositionEntryPrice);
-                BotState.IsHardSLLastPositionEntryPrice = true;
+                PositionsManager.closeAllPositions();
+                RulesManager.reset();
             }
         }
 

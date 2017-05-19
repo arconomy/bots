@@ -10,15 +10,18 @@ using Niffler.Common;
 
 namespace Niffler.Rules
 {
-    class RetracedToLevel1 : IRule
+    class ReduceRiskTimeSetTrailingStop : IRule
     {
-        public RetracedToLevel1(RulesManager rulesManager) : base(rulesManager) {}
+        public ReduceRiskTimeSetTrailingStop(RulesManager rulesManager, int priority) : base(rulesManager, priority) { }
 
-        // If it is after CloseTime and remaining pending orders have not been closed then close all pending orders
-        override public void execute()
+        //If it is after reduce risk time then set the fixed trailing stop 
+        override protected void execute()
         {
-
-               
+            if (BotState.IsAfterReducedRiskTime)
+            {
+                FixedTrailingStop.IsActive = true;
+                ExecuteOnceOnly();
+            }
         }
 
         override public void reportExecution()

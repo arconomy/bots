@@ -7,12 +7,3 @@ C:\Users\andrewfblake\Documents\cAlgo\Sources\Niffler\Niffler.App\Niffler.App\bi
 C:\Users\andrewfblake\Documents\cAlgo\Sources\Niffler\Niffler.App\Niffler.App\obj\Debug\Niffler.App.exe
 C:\Users\andrewfblake\Documents\cAlgo\Sources\Niffler\Niffler.App\Niffler.App\obj\Debug\Niffler.App.pdb
 C:\Users\andrewfblake\Documents\cAlgo\Sources\Niffler\Niffler.App\Niffler.App\obj\Debug\Niffler.App.csprojResolveAssemblyReference.cache
-C:\Users\alist\Documents\cAlgo\Sources\Niffler\Niffler.App\Niffler.App\bin\Debug\Niffler.App.exe.config
-C:\Users\alist\Documents\cAlgo\Sources\Niffler\Niffler.App\Niffler.App\bin\Debug\Niffler.App.exe
-C:\Users\alist\Documents\cAlgo\Sources\Niffler\Niffler.App\Niffler.App\bin\Debug\Niffler.App.pdb
-C:\Users\alist\Documents\cAlgo\Sources\Niffler\Niffler.App\Niffler.App\obj\Debug\Niffler.App.csprojResolveAssemblyReference.cache
-C:\Users\alist\Documents\cAlgo\Sources\Niffler\Niffler.App\Niffler.App\obj\Debug\Niffler.App.Main.resources
-C:\Users\alist\Documents\cAlgo\Sources\Niffler\Niffler.App\Niffler.App\obj\Debug\Niffler.App.Properties.Resources.resources
-C:\Users\alist\Documents\cAlgo\Sources\Niffler\Niffler.App\Niffler.App\obj\Debug\Niffler.App.csproj.GenerateResource.Cache
-C:\Users\alist\Documents\cAlgo\Sources\Niffler\Niffler.App\Niffler.App\obj\Debug\Niffler.App.exe
-C:\Users\alist\Documents\cAlgo\Sources\Niffler\Niffler.App\Niffler.App\obj\Debug\Niffler.App.pdb

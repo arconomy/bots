@@ -10,15 +10,20 @@ using Niffler.Common;
 
 namespace Niffler.Rules
 {
-    class RetracedToLevel2 : IRule
+    class ReduceRiskTimeReduceRetraceLevels : IRule
     {
-        public RetracedToLevel2(RulesManager rulesManager) : base(rulesManager) { }
+        public ReduceRiskTimeReduceRetraceLevels(RulesManager rulesManager, int priority) : base(rulesManager, priority) { }
 
-        // If it is after CloseTime and remaining pending orders have not been closed then close all pending orders
-        override public void execute()
+        // If it is after Reduce Risk Time then reduce retrace levels by 50%
+        override protected void execute()
         {
 
-
+            if (BotState.IsAfterReducedRiskTime)
+            {
+                //Reduce all retrace limits
+                SpikeManager.reduceLevelsBy50Percent();
+                ExecuteOnceOnly();
+            }
         }
 
         override public void reportExecution()

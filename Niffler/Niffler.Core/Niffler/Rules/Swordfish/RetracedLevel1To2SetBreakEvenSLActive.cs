@@ -10,17 +10,19 @@ using Niffler.Common;
 
 namespace Niffler.Rules
 {
-    class CloseAllPendingOrders : IRule
+    class RetracedLevel1To2SetBreakEvenSLActive : IRule
     {
-        public CloseAllPendingOrders(RulesManager rulesManager) : base(rulesManager) {}
+        public RetracedLevel1To2SetBreakEvenSLActive(RulesManager rulesManager, int priority) : base(rulesManager, priority) { }
 
-        // If it is after CloseTime and remaining pending orders have not been closed then close all pending orders
-        override public void execute()
+        //Set BreakEven SL if Spike has retraced between than retraceLevel1 and retraceLevel2
+        override protected void execute()
         {
-            if (!BotState.IsPendingOrdersClosed && BotState.IsAfterCloseTime)
+            //Calculate spike retrace factor
+            SpikeManager.calculateRetraceFactor();
+
+            if (SpikeManager.IsRetraceBetweenLevel1AndLevel2())
             {
-                OrdersManager.closeAllPendingOrders();
-                BotState.IsReset = true;
+                BotState.IsBreakEvenStopLossActive = true;
             }
         }
 

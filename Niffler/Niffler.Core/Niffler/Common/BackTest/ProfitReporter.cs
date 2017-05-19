@@ -6,23 +6,36 @@ using System.Threading.Tasks;
 using cAlgo;
 using cAlgo.API;
 using cAlgo.API.Internals;
+using Niffler.Common.Market;
 
 namespace Niffler.Common.BackTest
 {
-    class ProfitReporter
+    class ProfitReporter : IResetState
     {
 
-        private State BotState { get; set; }
-        private Robot Bot { get; set; }
+        private State BotState;
+        private Robot Bot;
+        private SpikeManager SpikeManager;
         private double ProfitTotal = 0;
         private double PipsTotal = 0;
         private List<string> TradeResults = new List<string>();
         private List<string> TotalsResults = new List<string>();
 
-        public ProfitReporter(State s)
+        public ProfitReporter(State s, SpikeManager spikeManager)
         {
             BotState = s;
             Bot = BotState.Bot;
+            SpikeManager = spikeManager;
+        }
+
+        public void reset()
+        {
+            reportTotals();
+
+            // reset reporting variables
+            ProfitTotal = 0;
+            PipsTotal = 0;
+
         }
 
 
@@ -66,7 +79,7 @@ namespace Niffler.Common.BackTest
             BotState.getStateSnapShotHeaders();
         }
 
-        public void reportTotals(State botState)
+        public void reportTotals()
         {
                
                 if (ProfitTotal != 0 && PipsTotal != 0)
@@ -74,20 +87,12 @@ namespace Niffler.Common.BackTest
                      TotalsResults.Add(
                          ProfitTotal + "," + 
                          PipsTotal + "," + 
-                         botState.OpenedPositionsCount + "," +
-                         _spikePeakPips + "," + 
+                         BotState.OpenedPositionsCount + "," +
+                         SpikeManager.getSpikePeakPips() + "," + 
                          System.DateTime.Now.DayOfWeek + "," + 
                          System.DateTime.Now
                          );
                 }
-
-
-                // reset reporting variables
-                ProfitTotal = 0;
-                PipsTotal = 0;
-                
-                _spikePeakPips = 0;
-                _spikePeakPrice = 0;
             }
         }
 

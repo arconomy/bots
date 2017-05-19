@@ -10,11 +10,12 @@ using cAlgo.API.Indicators;
 
 namespace Niffler.Common.TrailingStop
 {
-    class FixedTrailingStop
+    class FixedTrailingStop : IResetState
     {
 
-        public bool IsActive { get; set; }
-        public double TrailingStopPips { get; set; }
+        private bool IsActive { get; set; }
+        private double TrailingStopPips { get; set; }
+        private double ResetTrailingStopPips { get; set; }
         private State BotState { get; set; }
         private Robot Bot { get; set; }
 
@@ -23,7 +24,19 @@ namespace Niffler.Common.TrailingStop
             Bot = BotState.Bot;
             BotState = s;
             TrailingStopPips = trailingStopPips;
+            ResetTrailingStopPips = trailingStopPips;
             IsActive = false;
+        }
+
+        public void reset()
+        {
+            IsActive = false;
+            TrailingStopPips = ResetTrailingStopPips;
+        }
+
+        public void activate()
+        {
+            IsActive = true;
         }
 
         // If Trailing stop is active update position SL's - Remove TP as trailing position.

@@ -10,15 +10,24 @@ using Niffler.Common;
 
 namespace Niffler.Rules
 {
-    class RetracedToLevel3 : IRule
+    class RetracedLevel3PlusReduceHardSLBuffer : IRule
     {
-        public RetracedToLevel3(RulesManager rulesManager) : base(rulesManager) { }
+        public RetracedLevel3PlusReduceHardSLBuffer(RulesManager rulesManager, int priority) : base(rulesManager, priority) { }
 
         // If it is after CloseTime and remaining pending orders have not been closed then close all pending orders
-        override public void execute()
+        override protected void execute()
         {
+            //Calculate spike retrace factor
+            SpikeManager.calculateRetraceFactor();
 
-
+            if (SpikeManager.IsRetraceGreaterThanLevel3())
+            {
+                if (BotState.LastProfitPositionClosePrice > 0)
+                {
+                    StopLossManager.reduceHardSLBufferBy50Percent();
+                    ExecuteOnceOnly();
+                }
+            }
         }
 
         override public void reportExecution()

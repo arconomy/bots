@@ -6,10 +6,11 @@ using System.Threading.Tasks;
 using Niffler.Common;
 using Niffler.Common.Trade;
 using Niffler.Common.Market;
+using Niffler.Common.TrailingStop;
 
 namespace Niffler.Rules
 {
-    class RulesManager
+    class RulesManager : IResetState
     {
 
         //TO DO = The RulesManager should be a 'Client' created in the context of the TradeStrategy which determines the Factory to created
@@ -21,16 +22,18 @@ namespace Niffler.Rules
         public PositionsManager PositionsManager { get; }
         public SpikeManager SpikeManager { get; }
         public StopLossManager StopLossManager { get; }
+        public FixedTrailingStop FixedTrailingStop { get;}
         public State BotState { get; }
         private List<IRule> Rules;
 
-        public RulesManager(State botState, OrdersManager ordersManager, SpikeManager spikeManager, StopLossManager stopLossManager)
+        public RulesManager(State botState, OrdersManager ordersManager, SpikeManager spikeManager, StopLossManager stopLossManager, FixedTrailingStop fixedTrailingStop)
         {
             BotState = botState;
             OrdersManager = ordersManager;
             PositionsManager = new PositionsManager(BotState);
             SpikeManager = spikeManager;
             StopLossManager = stopLossManager;
+            FixedTrailingStop = fixedTrailingStop;
             Rules = getRules();
         }
 
@@ -43,15 +46,29 @@ namespace Niffler.Rules
                         //Create Swordfish Bot Rules
                         return new List<IRule>
                         {
-                            new CloseAllPendingOrders(this)
-                        };
+                            new CloseTimeCancelPendingOrders(this,1),
+                            new CloseTimeSetHardSLToLastPositionEntryWithBuffer(this,2),
+                            new CloseTimeNoPositionsOpenReset(this,3),
+                            new ReduceRiskTimeReduceRetraceLevels(this,3),
+                            new ReduceRiskTimeSetHardSLToLastProfitPositionCloseWithBuffer(this,4),
+                            new ReduceRiskTimeSetTrailingStop(this,5),
+                            new RetracedLevel1To2SetHardSLToLastProfitPositionEntryWithBuffer(this,6),
+                            new RetracedLevel1To2SetBreakEvenSLActive(this,7),
+                            new RetracedLevel2To3SetHardSLToLastProfitPositionEntry(this,8),
+                            new RetracedLevel2To3SetHardSLToLastProfitPositionEntry(this, 9),
+                            new RetracedLevel3PlusReduceHardSLBuffer(this,10),
+                            new RetracedLevel3PlusSetHardSLToLastProfitPositionCloseWithBuffer(this,11),
+                            new SetBreakEvenSLPastLastProfitPositionEntry(this,12),
+                            new SetFixedTrailingStop(this,13),
+                            new TerminateTimeCloseAllPositionsReset(this,14)
+                        }.OrderBy(rule => rule.Priority).ToList();
                     }
                 case State.BotType.DIVIDEND:
                     {
                         //Create Dividend Bot Rules
                         return new List<IRule>
                         {
-                            new CloseAllPendingOrders(this)
+                            new CloseTimeCancelPendingOrders(this,1)
                         };
                     }
                 default:
@@ -62,78 +79,22 @@ namespace Niffler.Rules
 
         public void executeRule(IRule rule)
         {
-
+            rule.run();
         }
 
-        public void executeAllRules()
+        public void runAllRules()
         {
-            CloseAllPendingOrdersRule.execute();
-
-            //Calculate spike retrace factor
-            SpikeManager.calculateRetraceFactor();
-
-            //Execute rulles that impact retrace levels
-            ReduceRetraceLevelsAfterReduceRiskTime.execute();
-
-            //execute All Retrace Rules
-            ReduceRetraceLevelsAfterReduceRiskTime.execute();
-
-
-                if (BotState.IsReducedRiskTime)
-                {
-                    //reset HARD SL Limits with reduced SL's
-                    BotState.IsHardSLLastPositionEntryPrice = true;
-
-                    //Reduce all retrace limits
-                    RetraceLevel1 = RetraceLevel1 / 2;
-                    RetraceLevel2 = RetraceLevel2 / 2;
-                    RetraceLevel3 = RetraceLevel3 / 2;
-                }
-
-                //Set hard stop losses as soon as Swordfish time is over
-                if (!BotState.IsHardSLLastPositionEntryPrice && !IsSwordFishTime())
-                {
-                    StopLossManager.setSLWithBufferForAllPositions(BotState.LastPositionEntryPrice);
-                    BotState.IsHardSLLastPositionEntryPrice = true;
-                }
-
-                //Set hard stop losses and activate Trail if Spike has retraced between than retraceLevel1 and retraceLevel2
-                if (BotState.IsReducedRiskTime || (RetraceLevel2 > retraceFactor && retraceFactor > RetraceLevel1))
-                {
-                    //If Hard SL has not been set yet
-                    if (!BotState.IsHardSLLastPositionEntryPrice && BotState.LastPositionEntryPrice > 0)
-                    {
-                        StopLossManager.setSLWithBufferForAllPositions(BotState.LastPositionEntryPrice);
-                        BotState.IsHardSLLastPositionEntryPrice = true;
-                    }
-                    //Active Breakeven Stop Losses
-                    BotState.IsBreakEvenStopLossActive = true;
-                }
-
-                //Set harder SL and active BreakEven if it has retraced between than retraceLevel2 and retraceLevel3
-                if (BotState.IsReducedRiskTime || (RetraceLevel3 > retraceFactor && retraceFactor > RetraceLevel2))
-                {
-                    //Set hard stop losses
-                    if (!BotState.IsHardSLLastClosedPositionEntryPrice && BotState.LastClosedPositionEntryPrice > 0)
-                    {
-                        StopLossManager.setSLForAllPositions(BotState.LastClosedPositionEntryPrice);
-                        BotState.IsHardSLLastClosedPositionEntryPrice = true;
-                    }
-                    //Activate Trailing Stop Losses
-                    TrailingStop.IsActive = true;
-                }
-
-                //Set hardest SL if Spike retraced past retraceLevel3
-                if (BotState.IsReducedRiskTime || retraceFactor > retraceLevel3)
-                {
-                    //Set hard stop losses
-                    if (!BotState.IsHardSLLastProfitPrice && BotState.LastProfitPrice > 0)
-                    {
-                        setAllStopLosses(BotState.LastProfitPrice);
-                        BotState.IsHardSLLastProfitPrice = true;
-                    }
-                }
-            }
+            Rules.ForEach(IRule => IRule.run());
         }
+
+        public void reset()
+        {
+            SpikeManager.reset();
+            FixedTrailingStop.reset();
+            BotState.reset();
+
+            BotState.IsReset();
+        }
+
     }
 }

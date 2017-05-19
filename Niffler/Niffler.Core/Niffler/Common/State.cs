@@ -9,7 +9,7 @@ using Niffler.Common.BackTest;
 
 namespace Niffler.Common
 {
-    class State
+    class State : IResetState
     {
         // Define the Type of Bot this State manages
         public enum BotType
@@ -19,14 +19,9 @@ namespace Niffler.Common
         };
 
         public BotType Type { get; }
+        public string BotId { get; set; }
 
-        //Stop Loss Variables
-        public bool IsHardSLLastProfitPrice { get; set; }
-        public bool IsHardSLLastPositionEntryPrice { get; set; }
-        public bool IsHardSLLastClosedPositionEntryPrice { get; set; }
-        public bool IsBreakEvenStopLossActive { get; set; }
-
-        //Swordfish State Variables
+        //State Variables
         public bool IsPendingOrdersClosed { get; set; }
         public bool OpenPriceCaptured { get; set; }
         public bool OrdersPlaced { get; set; }
@@ -36,19 +31,17 @@ namespace Niffler.Common
         public bool IsAfterReducedRiskTime { get; set; }
         public bool IsAfterTerminateTime { get; set; }
 
-        public string BotId { get; set; }
-
         //Price and Position Variables
         public double OpenPrice { get; set; }
         public string LastPositionLabel { get; set; }
         public TradeType LastPositionTradeType { get; set; }
-        public double LastPositionEntryPrice { get; set; }
 
+        public double LastPositionEntryPrice { get; set; }
         public double LastProfitPositionEntryPrice { get; set; }
         public double LastProfitPositionClosePrice { get; set; }
+        public double OpenedPositionsCount { get; set; }
+        public double ClosedPositionsCount { get; set; }
 
-        public double OpenedPositionsCount = 0;
-        public double ClosedPositionsCount = 0;
         public Robot Bot { get; set; }
         private MarketInfo MarketInfo;
         private ProfitReporter ProfitReporter;
@@ -59,9 +52,10 @@ namespace Niffler.Common
             reset();
             Type = BotType.SWORDFISH;
             Bot = r;
+            BotId = generateBotId();
             MarketInfo = new MarketInfo(Bot);
-            ProfitReporter = new ProfitReporter(this);
             SpikeManager = new SpikeManager(this);
+            ProfitReporter = new ProfitReporter(this, SpikeManager);
         }
 
         public string getMarketName()
@@ -86,18 +80,9 @@ namespace Niffler.Common
                 IsAfterTerminateTime = true;
         }
 
-        protected void reset()
+        public void reset()
         {
-            if (IsReset)
-                return;
-
             ProfitReporter.reportTotals(this);
-
-            //Set default Stop Loss Variables
-            IsHardSLLastProfitPrice = false;
-            IsHardSLLastPositionEntryPrice = false;
-            IsHardSLLastClosedPositionEntryPrice = false;
-            IsBreakEvenStopLossActive = false;
 
             //Set default Swordfish State Variables
             IsPendingOrdersClosed = false;
@@ -108,38 +93,19 @@ namespace Niffler.Common
             IsAfterCloseTime = false;
             IsAfterReducedRiskTime = false;
             IsAfterTerminateTime = false;
-            BotId = generateBotId();
-
+            
             //Price and Position Variables
+            OpenPrice = 0;
+            LastPositionLabel = "NO LAST POSITION SET";
+            LastPositionEntryPrice = 0;
+            LastProfitPositionEntryPrice = 0;
+            LastProfitPositionClosePrice = 0;
             OpenedPositionsCount = 0;
             ClosedPositionsCount = 0;
 
-            //reset Last Position variables
-            LastPositionLabel = "NO LAST POSITION SET";
-            LastPositionEntryPrice = 0;
-            LastClosedPositionEntryPrice = 0;
-            LastProfitPrice = 0;
-
-            //reset risk management variables
-            IsBreakEvenStopLossActive = false;
-            IsHardSLLastClosedPositionEntryPrice = false;
-            IsHardSLLastPositionEntryPrice = false;
-            IsHardSLLastProfitPrice = false;
-
-            //ResetTrailingStops
-            _divideTrailingStopPips = 1;
-            IsActive = false;
-
-            // swordfish bot state variables
-            OpenPriceCaptured = false;
-            OrdersPlaced = false;
-            IsPendingOrdersClosed = false;
-            IsTerminated = false;
-            IsReset = true;
-            IsReducedRiskTime = false;
-
-            //Reset reporting and Spike variables
-        }
+            //Reset reporting
+            ProfitReporter.reset();
+    }
 
 
         private string generateBotId()
@@ -205,9 +171,9 @@ namespace Niffler.Common
 
             // risk management variables
             state += "," + IsBreakEvenStopLossActive;
-            state += "," + IsHardSLLastClosedPositionEntryPrice;
+            state += "," + IsHardSLLastProfitPositionEntryPrice;
             state += "," + IsHardSLLastPositionEntryPrice;
-            state += "," + IsHardSLLastProfitPrice;
+            state += "," + IsHardSLLastProfitPositionClosePrice;
 
             // swordfish bot state variables
             state += "," + OpenPriceCaptured;

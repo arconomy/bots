@@ -107,11 +107,8 @@ namespace Niffler.Bots.Swordfish
             BuyLimitOrdersTrader = new BuyLimitOrdersTrader(BotState, NumberOfOrders, OrderEntryOffset, DefaultTakeProfit, FinalOrderStopLoss);
             StopLossManager = new StopLossManager(BotState, HardStopLossBuffer, FinalOrderStopLoss);
 
-            RulesManager = new RulesManager(BotState, BuyLimitOrdersTrader, SpikeManager, StopLossManager);
+            RulesManager = new RulesManager(BotState, BuyLimitOrdersTrader, SpikeManager, StopLossManager, new FixedTrailingStop(BotState, TrailingStopPips));
 
-            TrailingStop = new FixedTrailingStop(BotState, TrailingStopPips);
-             
-            
             Positions.Opened += PositionsOnOpened;
             Positions.Closed += PositionsOnClosed;
         }
@@ -151,6 +148,9 @@ namespace Niffler.Bots.Swordfish
                 //It is outside SwordFish Time
                 else
                 {
+
+                    //TO DO: NEED TO APPLY THE RULES 'ARE ORDERS ARE PLACED' and 'ARE ORDERS OPEN' TO ALL THE RULES THEY APPLIES TO
+                    // DO NOT CHAIN RULES - EVERY RULE SHOULD BE ABLE TO EXECUTE IN ISOLATION
                     if (BotState.OrdersPlaced)
                     {
                         if (BotState.positionsRemainOpen())
@@ -163,20 +163,8 @@ namespace Niffler.Bots.Swordfish
                             //Check the state based on the time from open
                             BotState.checkTimeState();
 
-                            //Look to reduce risk as Spike retraces
-                            RulesManager.runAll(); //ManagePositionRisk();
-
-                            //Positions still open after ReducePositionRiskTime
-                            //Reduce Trailing Stop Loss by 50%
-                            // DivideTrailingStopPips = 2;
-
-
-                            RulesManager.executeRule("SWF-TerminateTime");
-                            //If trades still open at ClosingAllTime then take the hit and close remaining positions
-                            if (BotState.IsAfterTerminateTime)
-                            {
-                                PositionsManager.closeAllPositions();
-                            }
+                            //ManagePositionRisk();
+                            RulesManager.runAllRules();
                         }
                         else
                         {

@@ -10,12 +10,13 @@ using cAlgo.API.Indicators;
 
 namespace Niffler.Common.Trade
 {
-    class StopLossManager
+    class StopLossManager : IResetState
     {
 
-        public bool IsBreakEvenStopsActive { get; set; }
-        public double HardStopLossBufferPips { get; set; }
-        public double LastOrderStopLossPips { get; set; }
+        private bool IsBreakEvenStopsActive { get; set; }
+        private double HardStopLossBufferPips { get; set; }
+        private double ResetHardStopLossBufferPips { get; set; }
+        private double LastOrderStopLossPips { get; set; }
         private State BotState { get;  set; }
         private Robot Bot { get; set; }
 
@@ -25,7 +26,13 @@ namespace Niffler.Common.Trade
             Bot = BotState.Bot;
             IsBreakEvenStopsActive = false;
             HardStopLossBufferPips = hardStopLossBufferPips;
+            ResetHardStopLossBufferPips = hardStopLossBufferPips;
             LastOrderStopLossPips = lastOrderStopLossPips;
+        }
+
+        public void reset()
+        {
+            HardStopLossBufferPips = ResetHardStopLossBufferPips;
         }
 
         public void setSLForAllPositions(double stopLossPrice)
@@ -44,6 +51,11 @@ namespace Niffler.Common.Trade
                     Bot.Print("FAILED to modify Stop Loss : " + e.Message);
                 }
             }
+        }
+
+        public void reduceHardSLBufferBy50Percent()
+        {
+            HardStopLossBufferPips /= 2;
         }
 
         public void setSLWithBufferForAllPositions(double SLPrice)

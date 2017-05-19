@@ -10,15 +10,18 @@ using Niffler.Common;
 
 namespace Niffler.Rules
 {
-    class RetracedToLevel3 : IRule
+    class CloseTimeCancelPendingOrders : IRule
     {
-        public RetracedToLevel3(RulesManager rulesManager) : base(rulesManager) { }
+        public CloseTimeCancelPendingOrders(RulesManager rulesManager, int priority) : base(rulesManager,priority) {}
 
         // If it is after CloseTime and remaining pending orders have not been closed then close all pending orders
-        override public void execute()
+        override protected void execute()
         {
-
-
+            if (!BotState.IsPendingOrdersClosed && BotState.IsAfterCloseTime)
+            {
+                OrdersManager.closeAllPendingOrders();
+                ExecuteOnceOnly();
+            }
         }
 
         override public void reportExecution()

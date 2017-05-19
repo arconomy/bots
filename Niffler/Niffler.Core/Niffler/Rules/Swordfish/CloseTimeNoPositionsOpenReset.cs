@@ -10,21 +10,17 @@ using Niffler.Common;
 
 namespace Niffler.Rules
 {
-    class ReduceRetraceLevelsAfterReduceRiskTime : IRule
+    class CloseTimeNoPositionsOpenReset : IRule
     {
-        public ReduceRetraceLevelsAfterReduceRiskTime(RulesManager rulesManager) : base(rulesManager) {}
+        public CloseTimeNoPositionsOpenReset(RulesManager rulesManager, int priority) : base(rulesManager,priority) {}
 
         // If it is after CloseTime and remaining pending orders have not been closed then close all pending orders
-        override public void execute()
+        override protected void execute()
         {
-
-            if (BotState.IsAfterReducedRiskTime)
+            if (!BotState.IsPendingOrdersClosed && BotState.IsAfterCloseTime)
             {
-                //reset HARD SL Limits with reduced SL's
-                BotState.IsHardSLLastPositionEntryPrice = true;
-
-                //Reduce all retrace limits
-                SpikeManager.reduceLevelsBy50Percent();
+                OrdersManager.closeAllPendingOrders();
+                RulesManager.reset();
             }
         }
 

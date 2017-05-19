@@ -9,7 +9,7 @@ using cAlgo.API.Internals;
 
 namespace Niffler.Common.Market
 {
-    class SpikeManager
+    class SpikeManager : IResetState
     {
         private State BotState;
         private Robot Bot;
@@ -18,7 +18,6 @@ namespace Niffler.Common.Market
         public int Level2 { get; set; }
         public int Level3 { get; set; }
         private int RetraceFactor { get; set; }
-
 
         public SpikeManager(State s)
         {
@@ -29,12 +28,57 @@ namespace Niffler.Common.Market
             Level3 = 66;
         }
 
+        public bool IsRetraceBetweenLevel1AndLevel2()
+        {
+            return Level1 < RetraceFactor && RetraceFactor < Level2;
+        }
+
+        public bool IsRetraceBetweenLevel2AndLevel3()
+        {
+            return Level2 < RetraceFactor && RetraceFactor < Level3;
+        }
+
+        public bool IsRetraceGreaterThanLevel3()
+        {
+            return Level3 < RetraceFactor;
+        }
+
+        public bool IsRetraceLessThanLevel1()
+        {
+            return Level1 > RetraceFactor;
+        }
 
         public void reduceLevelsBy50Percent()
         {
             Level1 /= 2;
             Level2 /= 2;
             Level3 /= 2;
+        }
+
+        public double getSpikePeakPips()
+        {
+            if(isSpikeCaptured())
+            {
+                return Spike.PeakPips;
+            }
+            else
+            {
+                return 0;
+            }
+            
+        }
+
+        public double getSpikePeakPrice()
+        {
+            if (isSpikeCaptured())
+            {
+                return Spike.PeakPrice;
+            }
+            else
+            {
+                return 0;
+            }
+
         }
 
         public void reset()

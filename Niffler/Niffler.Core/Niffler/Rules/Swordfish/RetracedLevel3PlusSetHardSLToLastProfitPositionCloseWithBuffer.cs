@@ -10,21 +10,22 @@ using Niffler.Common;
 
 namespace Niffler.Rules
 {
-    class SetStopLossesAfterReduceRiskTimeRule : IRule
+    class RetracedLevel3PlusSetHardSLToLastProfitPositionCloseWithBuffer : IRule
     {
-        public SetStopLossesAfterReduceRiskTimeRule(RulesManager rulesManager) : base(rulesManager) {}
+        public RetracedLevel3PlusSetHardSLToLastProfitPositionCloseWithBuffer(RulesManager rulesManager, int priority) : base(rulesManager, priority) { }
 
         // If it is after CloseTime and remaining pending orders have not been closed then close all pending orders
-        override public void execute()
+        override protected void execute()
         {
+            //Calculate spike retrace factor
+            SpikeManager.calculateRetraceFactor();
 
-            if (BotState.IsAfterReducedRiskTime)
+            if (SpikeManager.IsRetraceGreaterThanLevel3())
             {
-                //reset HARD SL Limits with reduced SL's
-                BotState.IsHardSLLastPositionEntryPrice = true;
-
-                //Reduce all retrace limits
-                SpikeManager.reduceLevelsBy50Percent();
+                if (BotState.LastProfitPositionClosePrice > 0)
+                {
+                    StopLossManager.setSLWithBufferForAllPositions(BotState.LastProfitPositionClosePrice);
+                }
             }
         }
 
