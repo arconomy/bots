@@ -12,21 +12,24 @@ namespace Niffler.Rules
 {
     class RetracedLevel1To2SetHardSLToLastProfitPositionEntryWithBuffer : IRule
     {
-        public RetracedLevel1To2SetHardSLToLastProfitPositionEntryWithBuffer(RulesManager rulesManager, int priority) : base(rulesManager, priority) { }
+        public RetracedLevel1To2SetHardSLToLastProfitPositionEntryWithBuffer(int priority) : base(priority) { }
 
         //If Spike retrace is greater than Level 1 but less than Level 2 set SL to last profit position entry price plus buffer
         override protected void execute()
         {
-            //Calculate spike retrace factor
-            SpikeManager.calculateRetraceFactor();
-
-            //Set hard stop losses and activate Trail if Spike has retraced between than retraceLevel1 and retraceLevel2
-            if (SpikeManager.IsRetraceBetweenLevel1AndLevel2())
+            if (BotState.OrdersPlaced && BotState.positionsRemainOpen())
             {
-                //If Hard SL has not been set yet
-                if (BotState.LastProfitPositionEntryPrice > 0)
+                //Calculate spike retrace factor
+                SpikeManager.calculateRetraceFactor();
+
+                //Set hard stop losses and activate Trail if Spike has retraced between than retraceLevel1 and retraceLevel2
+                if (SpikeManager.IsRetraceBetweenLevel1AndLevel2())
                 {
-                    StopLossManager.setSLWithBufferForAllPositions(BotState.LastProfitPositionEntryPrice);
+                    //If Hard SL has not been set yet
+                    if (BotState.LastProfitPositionEntryPrice > 0)
+                    {
+                        StopLossManager.setSLWithBufferForAllPositions(BotState.LastProfitPositionEntryPrice);
+                    }
                 }
             }
         }

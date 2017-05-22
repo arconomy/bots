@@ -22,6 +22,13 @@ namespace Niffler.Common.Market
         private bool UseCloseTime;
         private bool UseReduceRiskTime;
         private bool UseTerminateTime;
+        private bool IsTradeMonday = true;
+        private bool IsTradeTuesday = true;
+        private bool IsTradeWednesday = true;
+        private bool IsTradeThursday = true;
+        private bool IsTradeFriday = true;
+        private bool IsTradeSaturday = false;
+        private bool IsTradeSunday = false;
 
         public String MarketName { get; set; }
 
@@ -63,6 +70,18 @@ namespace Niffler.Common.Market
         public void SetCloseAfterMinutes(int closeAfterMinutes) { CloseAfterMinutes = closeAfterMinutes; UseCloseTime = false; }
         public void SetReduceRiskAfterMinutes(int reduceRiskAfterMinutes) { ReduceRiskAfterMinutes = reduceRiskAfterMinutes; UseReduceRiskTime = false; }
         public void SetTerminateAfterMinutes(int terminateAfterMinutes) { TerminateAfterMinutes = terminateAfterMinutes; UseTerminateTime = false; }
+        public void SetTradingDays(bool mon,bool tues,bool wed,bool thurs,bool fri,bool sat, bool, bool sun)
+        {
+            IsTradeMonday = mon;
+            IsTradeTuesday = tues;
+            IsTradeWednesday = wed;
+            IsTradeThursday = thurs;
+            IsTradeFriday = fri;
+            IsTradeSaturday = sat;
+            IsTradeSunday = sun;
+        }
+
+
 
         private void InitMarketInfo(Robot bot)
         {
@@ -128,7 +147,6 @@ namespace Niffler.Common.Market
             }
         }
 
-
         private DateTime getTimeNow()
         {
             if (IsBackTesting)
@@ -144,13 +162,16 @@ namespace Niffler.Common.Market
         //Is the current time within the Open time and the Close time period
         public bool IsBotTradingOpen()
         {
-            if(UseCloseTime)
+
+            DateTime dateTimeNow = getTimeNow();
+
+            if (UseCloseTime)
             {
-                return IsTimeBetweenOpenAnd(getTimeNow(),CloseTime);
+                return IsTradingDay(dateTimeNow.DayOfWeek) && IsTimeBetweenOpenAnd(dateTimeNow, CloseTime);
             }
             else
             {
-                return IsMinsAfterOpenTime(getTimeNow(),CloseAfterMinutes);
+                return IsTradingDay(dateTimeNow.DayOfWeek) && IsMinsAfterOpenTime(dateTimeNow, CloseAfterMinutes);
             }
         }
 
@@ -212,5 +233,30 @@ namespace Niffler.Common.Market
             DateTime tzTime = TimeZoneInfo.ConvertTimeFromUtc(dateTimeUtc, TimeZone);
             return tzTime.TimeOfDay >= timeToTest;
         }
+
+
+        public bool IsTradingDay(DayOfWeek day)
+        {
+            switch(day)
+            {
+                case DayOfWeek.Monday:
+                    return IsTradeMonday;
+                case DayOfWeek.Tuesday:
+                    return IsTradeTuesday;
+                case DayOfWeek.Wednesday:
+                    return IsTradeWednesday;
+                case DayOfWeek.Thursday:
+                    return IsTradeThursday;
+                case DayOfWeek.Friday:
+                    return IsTradeFriday;
+                case DayOfWeek.Saturday:
+                    return IsTradeSaturday;
+                case DayOfWeek.Sunday:
+                    return IsTradeSunday;
+                default:
+                    return false;
+            }
+        }
+
     }
 }

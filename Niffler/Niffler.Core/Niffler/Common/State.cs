@@ -118,12 +118,17 @@ namespace Niffler.Common
 
         public bool positionsRemainOpen()
         {
-            return OpenedPositionsCount - ClosedPositionsCount> 0;
+            return OpenedPositionsCount > 0 && OpenedPositionsCount - ClosedPositionsCount > 0;
         }
 
-        public bool allPositionsClosed()
+        public bool positionsAllClosed()
         {
             return OpenedPositionsCount > 0 && OpenedPositionsCount - ClosedPositionsCount == 0;
+        }
+
+        public bool positionsNotOpened()
+        {
+            return OpenedPositionsCount == 0;
         }
 
 

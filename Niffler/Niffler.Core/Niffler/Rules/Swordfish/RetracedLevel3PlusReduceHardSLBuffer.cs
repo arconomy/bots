@@ -12,20 +12,23 @@ namespace Niffler.Rules
 {
     class RetracedLevel3PlusReduceHardSLBuffer : IRule
     {
-        public RetracedLevel3PlusReduceHardSLBuffer(RulesManager rulesManager, int priority) : base(rulesManager, priority) { }
+        public RetracedLevel3PlusReduceHardSLBuffer(int priority) : base(priority) { }
 
         // If it is after CloseTime and remaining pending orders have not been closed then close all pending orders
         override protected void execute()
         {
-            //Calculate spike retrace factor
-            SpikeManager.calculateRetraceFactor();
-
-            if (SpikeManager.IsRetraceGreaterThanLevel3())
+            if (BotState.OrdersPlaced && BotState.positionsRemainOpen())
             {
-                if (BotState.LastProfitPositionClosePrice > 0)
+                //Calculate spike retrace factor
+                SpikeManager.calculateRetraceFactor();
+
+                if (SpikeManager.IsRetraceGreaterThanLevel3())
                 {
-                    StopLossManager.reduceHardSLBufferBy50Percent();
-                    ExecuteOnceOnly();
+                    if (BotState.LastProfitPositionClosePrice > 0)
+                    {
+                        StopLossManager.reduceHardSLBufferBy50Percent();
+                        ExecuteOnceOnly();
+                    }
                 }
             }
         }

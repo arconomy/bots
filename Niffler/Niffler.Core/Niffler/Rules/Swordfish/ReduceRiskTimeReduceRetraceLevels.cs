@@ -12,7 +12,7 @@ namespace Niffler.Rules
 {
     class ReduceRiskTimeReduceRetraceLevels : IRule
     {
-        public ReduceRiskTimeReduceRetraceLevels(RulesManager rulesManager, int priority) : base(rulesManager, priority) { }
+        public ReduceRiskTimeReduceRetraceLevels(int priority) : base(priority) { }
 
         // If it is after Reduce Risk Time then reduce retrace levels by 50%
         override protected void execute()
@@ -20,9 +20,12 @@ namespace Niffler.Rules
 
             if (BotState.IsAfterReducedRiskTime)
             {
-                //Reduce all retrace limits
-                SpikeManager.reduceLevelsBy50Percent();
-                ExecuteOnceOnly();
+                if(BotState.OrdersPlaced && BotState.positionsRemainOpen())
+                {
+                    //Reduce all retrace limits
+                    SpikeManager.reduceLevelsBy50Percent();
+                    ExecuteOnceOnly();
+                }
             }
         }
 

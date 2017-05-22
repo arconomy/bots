@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Niffler.Common.Trade;
 using Niffler.Common.Market;
 using Niffler.Common.TrailingStop;
+using Niffler.Common.BackTest;
 
 namespace Niffler.Rules
 {
@@ -17,28 +18,44 @@ namespace Niffler.Rules
         protected Robot Bot;
         protected RulesManager RulesManager;
         protected PositionsManager PositionsManager;
+        protected SellLimitOrdersTrader SellLimitOrdersTrader;
+        protected BuyLimitOrdersTrader BuyLimitOrdersTrader;
         protected OrdersManager OrdersManager;
         protected SpikeManager SpikeManager;
         protected StopLossManager StopLossManager;
         protected FixedTrailingStop FixedTrailingStop;
+        protected MarketInfo MarketInfo;
+        protected ProfitReporter ProfitReporter;
         public int Priority { get; set; }
         protected int ExecutionCount;
         protected bool ExecuteOnce;
+        protected bool Initialised;
 
-        public IRule(RulesManager rulesManager, int priority)
+        public IRule(int priority)
         {
+            Priority = priority;
+        }
+
+        public void init(RulesManager rulesManager)
+        {
+            RulesManager = rulesManager;
             BotState = rulesManager.BotState;
             Bot = BotState.Bot;
+            MarketInfo = BotState.getMarketInfo();
             PositionsManager = rulesManager.PositionsManager;
-            OrdersManager = rulesManager.OrdersManager;
+            SellLimitOrdersTrader = rulesManager.SellLimitOrdersTrader;
+            BuyLimitOrdersTrader = rulesManager.BuyLimitOrdersTrader;
             SpikeManager = rulesManager.SpikeManager;
             StopLossManager = rulesManager.StopLossManager;
             FixedTrailingStop = rulesManager.FixedTrailingStop;
-            Priority = priority;
+            Initialised = true;
         }
 
         public void run()
         {
+            if (!Initialised)
+                return;
+
             if(!ExecuteOnce)
             {
                 ExecutionCount++;

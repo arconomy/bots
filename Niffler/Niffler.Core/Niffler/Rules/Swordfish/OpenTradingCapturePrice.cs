@@ -10,14 +10,25 @@ using Niffler.Common;
 
 namespace Niffler.Rules
 {
-    class SetFixedTrailingStop : IRule
+    class OpenTradingCapturePrice : IRule
     {
-        public SetFixedTrailingStop(RulesManager rulesManager, int priority) : base(rulesManager, priority) { }
+        public OpenTradingCapturePrice(int priority) : base(priority) { }
 
-        //If BreakEven SL is Active then set BreakEven Stop Losses for all orders if the current price is past the entry point of the Last position to close with profit
+        //Get the Opening price for the trading period
         override protected void execute()
         {
-            FixedTrailingStop.chase();
+            if (MarketInfo.IsBotTradingOpen())
+            {
+                BotState.OpenPrice = Bot.MarketSeries.Close.LastValue;
+                BotState.OpenPriceCaptured = true;
+
+                //Update Reset flag as ready to trade
+                if (BotState.IsReset)
+                    BotState.IsReset = false;
+
+                ExecuteOnceOnly();
+            }
+            
         }
 
         override public void reportExecution()

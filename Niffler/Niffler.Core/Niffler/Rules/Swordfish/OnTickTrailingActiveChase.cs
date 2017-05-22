@@ -10,19 +10,14 @@ using Niffler.Common;
 
 namespace Niffler.Rules
 {
-    class CloseTimeSetHardSLToLastPositionEntryWithBuffer : IRule
+    class OnTickTrailingActiveChase : IRule
     {
-        public CloseTimeSetHardSLToLastPositionEntryWithBuffer(int priority) : base(priority) { }
+        public OnTickTrailingActiveChase(int priority) : base(priority) {}
 
-        //After CLose time set hard stop losses at last position entry price with Buffer
+        //If the Trail is active then chase.
         override protected void execute()
         {
-           
-            if (BotState.IsAfterCloseTime)
-            {
-                StopLossManager.setSLWithBufferForAllPositions(BotState.LastPositionEntryPrice);
-                ExecuteOnceOnly();
-            }
+            FixedTrailingStop.chase();
         }
 
         override public void reportExecution()

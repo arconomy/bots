@@ -12,17 +12,20 @@ namespace Niffler.Rules
 {
     class RetracedLevel1To2SetBreakEvenSLActive : IRule
     {
-        public RetracedLevel1To2SetBreakEvenSLActive(RulesManager rulesManager, int priority) : base(rulesManager, priority) { }
+        public RetracedLevel1To2SetBreakEvenSLActive(int priority) : base(priority) { }
 
         //Set BreakEven SL if Spike has retraced between than retraceLevel1 and retraceLevel2
         override protected void execute()
         {
-            //Calculate spike retrace factor
-            SpikeManager.calculateRetraceFactor();
-
-            if (SpikeManager.IsRetraceBetweenLevel1AndLevel2())
+            if (BotState.OrdersPlaced && BotState.positionsRemainOpen())
             {
-                BotState.IsBreakEvenStopLossActive = true;
+                //Calculate spike retrace factor
+                SpikeManager.calculateRetraceFactor();
+
+                if (SpikeManager.IsRetraceBetweenLevel1AndLevel2())
+                {
+                    StopLossManager.IsBreakEvenStopLossActive = true;
+                }
             }
         }
 

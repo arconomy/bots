@@ -7,24 +7,21 @@ using cAlgo.API;
 using cAlgo.API.Indicators;
 using cAlgo.API.Internals;
 using Niffler.Common;
-using Niffler.Common.TrailingStop;
 
 namespace Niffler.Rules
 {
-    class RetracedLevel2To3SetFixedTrailingStop : IRule
+    class OnPositionClosedInProfitSetBreakEvenWithBufferIfActive : IRuleOnPositionEvent
     {
-        public RetracedLevel2To3SetFixedTrailingStop(int priority) : base(priority) { }
+        public OnPositionClosedInProfitSetBreakEvenWithBufferIfActive(int priority) : base(priority) {}
 
-        //If Spike retrace is greater than Level 2 but less than Level 3 set Fixed Trailing Stop
-        override protected void execute()
+        //If BreakEven SL is active set breakeven SL + Buffer
+        override protected void execute(Position position)
         {
-            if (BotState.OrdersPlaced && BotState.positionsRemainOpen())
+            if (BotState.isThisBotId(position.Label))
             {
-                if (SpikeManager.IsRetraceBetweenLevel2AndLevel3())
+                if (StopLossManager.IsBreakEvenStopLossActive)
                 {
-                    //Activate Trailing Stop Losses
-                    FixedTrailingStop.activate();
-                    ExecuteOnceOnly();
+                    StopLossManager.setBreakEvenSLForAllPositions(BotState.LastProfitPositionEntryPrice, true);
                 }
             }
         }

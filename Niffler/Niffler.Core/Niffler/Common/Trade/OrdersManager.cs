@@ -18,6 +18,7 @@ namespace Niffler.Common.Trade
         protected double EntryBollingerBandPrice;
         protected int NumberOfOrders;
         protected int EntryOffSetPips;
+        public int EntryTriggerOrderPlacementPips { get; }
         protected double DefaultTakeProfitPips;
         protected double FinalOrderStopLossPips;
 
@@ -36,7 +37,7 @@ namespace Niffler.Common.Trade
         protected BollingerBands BollingerBand;
 
 
-        public OrdersManager(State s, int numberOfOrders, int entryOffSetPips, double defaultTakeProfitPips, double finalOrderStopLossPips)
+        public OrdersManager(State s, int numberOfOrders, int entryTriggerOrderPlacementPips, int entryOffSetPips, double defaultTakeProfitPips, double finalOrderStopLossPips)
         { 
             BotState = s;
             Bot = BotState.Bot;
@@ -44,6 +45,7 @@ namespace Niffler.Common.Trade
             EntryOffSetPips = entryOffSetPips;
             DefaultTakeProfitPips = defaultTakeProfitPips;
             FinalOrderStopLossPips = finalOrderStopLossPips;
+            EntryTriggerOrderPlacementPips = entryTriggerOrderPlacementPips;
         }
 
         public void setVolumeMultipler(int multiplyVolumeEveryNthOrder, double volumeMultipler, int maxVolumeLots, int baseVolumeLots)

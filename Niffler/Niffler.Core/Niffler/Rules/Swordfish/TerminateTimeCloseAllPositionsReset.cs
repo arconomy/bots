@@ -12,7 +12,7 @@ namespace Niffler.Rules
 {
     class TerminateTimeCloseAllPositionsReset : IRule
     {
-        public TerminateTimeCloseAllPositionsReset(RulesManager rulesManager, int priority) : base(rulesManager, priority) { }
+        public TerminateTimeCloseAllPositionsReset(int priority) : base(priority) { }
 
         //If trades still open at Terminate Time then take the hit and close remaining positions
         override protected void execute()

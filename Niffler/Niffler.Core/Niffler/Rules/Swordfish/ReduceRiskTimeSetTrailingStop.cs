@@ -12,15 +12,18 @@ namespace Niffler.Rules
 {
     class ReduceRiskTimeSetTrailingStop : IRule
     {
-        public ReduceRiskTimeSetTrailingStop(RulesManager rulesManager, int priority) : base(rulesManager, priority) { }
+        public ReduceRiskTimeSetTrailingStop(int priority) : base(priority) { }
 
         //If it is after reduce risk time then set the fixed trailing stop 
         override protected void execute()
         {
             if (BotState.IsAfterReducedRiskTime)
             {
-                FixedTrailingStop.IsActive = true;
-                ExecuteOnceOnly();
+                if (BotState.OrdersPlaced && BotState.positionsRemainOpen())
+                {
+                    FixedTrailingStop.activate();
+                    ExecuteOnceOnly();
+                }
             }
         }
 

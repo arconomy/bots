@@ -12,7 +12,7 @@ namespace Niffler.Rules
 {
     class CloseTimeCancelPendingOrders : IRule
     {
-        public CloseTimeCancelPendingOrders(RulesManager rulesManager, int priority) : base(rulesManager,priority) {}
+        public CloseTimeCancelPendingOrders(int priority) : base(priority) {}
 
         // If it is after CloseTime and remaining pending orders have not been closed then close all pending orders
         override protected void execute()

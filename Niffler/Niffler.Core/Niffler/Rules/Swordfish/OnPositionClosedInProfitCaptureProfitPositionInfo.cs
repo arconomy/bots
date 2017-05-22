@@ -7,24 +7,23 @@ using cAlgo.API;
 using cAlgo.API.Indicators;
 using cAlgo.API.Internals;
 using Niffler.Common;
-using Niffler.Common.TrailingStop;
 
 namespace Niffler.Rules
 {
-    class RetracedLevel2To3SetFixedTrailingStop : IRule
+    class OnPositionClosedInProfitCaptureProfitPositionInfo : IRuleOnPositionEvent
     {
-        public RetracedLevel2To3SetFixedTrailingStop(int priority) : base(priority) { }
+        public OnPositionClosedInProfitCaptureProfitPositionInfo(int priority) : base(priority) {}
 
-        //If Spike retrace is greater than Level 2 but less than Level 3 set Fixed Trailing Stop
-        override protected void execute()
+        //Report closing position trade
+        override protected void execute(Position position)
         {
-            if (BotState.OrdersPlaced && BotState.positionsRemainOpen())
+            if (BotState.isThisBotId(position.Label))
             {
-                if (SpikeManager.IsRetraceBetweenLevel2AndLevel3())
+                //Taking profit
+                if (position.GrossProfit > 0)
                 {
-                    //Activate Trailing Stop Losses
-                    FixedTrailingStop.activate();
-                    ExecuteOnceOnly();
+                    //capture last position take profit price
+                    BotState.captureLastProfitPositionPrices(position);
                 }
             }
         }

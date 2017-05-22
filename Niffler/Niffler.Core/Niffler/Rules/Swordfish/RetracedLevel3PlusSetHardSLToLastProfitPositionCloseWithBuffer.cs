@@ -12,19 +12,22 @@ namespace Niffler.Rules
 {
     class RetracedLevel3PlusSetHardSLToLastProfitPositionCloseWithBuffer : IRule
     {
-        public RetracedLevel3PlusSetHardSLToLastProfitPositionCloseWithBuffer(RulesManager rulesManager, int priority) : base(rulesManager, priority) { }
+        public RetracedLevel3PlusSetHardSLToLastProfitPositionCloseWithBuffer(int priority) : base(priority) { }
 
         // If it is after CloseTime and remaining pending orders have not been closed then close all pending orders
         override protected void execute()
         {
-            //Calculate spike retrace factor
-            SpikeManager.calculateRetraceFactor();
-
-            if (SpikeManager.IsRetraceGreaterThanLevel3())
+            if (BotState.OrdersPlaced && BotState.positionsRemainOpen())
             {
-                if (BotState.LastProfitPositionClosePrice > 0)
+                //Calculate spike retrace factor
+                SpikeManager.calculateRetraceFactor();
+
+                if (SpikeManager.IsRetraceGreaterThanLevel3())
                 {
-                    StopLossManager.setSLWithBufferForAllPositions(BotState.LastProfitPositionClosePrice);
+                    if (BotState.LastProfitPositionClosePrice > 0)
+                    {
+                        StopLossManager.setSLWithBufferForAllPositions(BotState.LastProfitPositionClosePrice);
+                    }
                 }
             }
         }

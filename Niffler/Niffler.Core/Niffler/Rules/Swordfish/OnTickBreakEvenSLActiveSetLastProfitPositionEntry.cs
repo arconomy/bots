@@ -10,16 +10,19 @@ using Niffler.Common;
 
 namespace Niffler.Rules
 {
-    class SetBreakEvenSLPastLastProfitPositionEntry : IRule
+    class OnTickBreakEvenSLActiveSetLastProfitPositionEntry : IRule
     {
-        public SetBreakEvenSLPastLastProfitPositionEntry(RulesManager rulesManager, int priority) : base(rulesManager, priority) { }
+        public OnTickBreakEvenSLActiveSetLastProfitPositionEntry(int priority) : base(priority) { }
 
         //If BreakEven SL is Active then set BreakEven Stop Losses for all orders if the current price is past the entry point of the Last position to close with profit
         override protected void execute()
         {
-            if (BotState.IsBreakEvenStopLossActive)
+            if (BotState.OrdersPlaced && BotState.positionsRemainOpen())
             {
-                StopLossManager.setBreakEvenSLForAllPositions(BotState.LastProfitPositionEntryPrice, true);
+                if (StopLossManager.IsBreakEvenStopLossActive)
+                {
+                    StopLossManager.setBreakEvenSLForAllPositions(BotState.LastProfitPositionEntryPrice, true);
+                }
             }
         }
 

@@ -10,18 +10,16 @@ using Niffler.Common;
 
 namespace Niffler.Rules
 {
-    class CloseTimeSetHardSLToLastPositionEntryWithBuffer : IRule
+    class OnTickTrailingStopActiveSetFixedTrailingSL : IRule
     {
-        public CloseTimeSetHardSLToLastPositionEntryWithBuffer(int priority) : base(priority) { }
+        public OnTickTrailingStopActiveSetFixedTrailingSL(int priority) : base(priority) { }
 
-        //After CLose time set hard stop losses at last position entry price with Buffer
+        //If BreakEven SL is Active then set BreakEven Stop Losses for all orders if the current price is past the entry point of the Last position to close with profit
         override protected void execute()
         {
-           
-            if (BotState.IsAfterCloseTime)
+            if (BotState.OrdersPlaced && BotState.positionsRemainOpen())
             {
-                StopLossManager.setSLWithBufferForAllPositions(BotState.LastPositionEntryPrice);
-                ExecuteOnceOnly();
+                FixedTrailingStop.chase();
             }
         }
 

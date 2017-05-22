@@ -10,17 +10,17 @@ using Niffler.Common;
 
 namespace Niffler.Rules
 {
-    class CloseTimeNoPositionsOpenReset : IRule
+    class OnPositionClosedReportTrade : IRuleOnPositionEvent
     {
-        public CloseTimeNoPositionsOpenReset(RulesManager rulesManager, int priority) : base(rulesManager,priority) {}
+        public OnPositionClosedReportTrade(int priority) : base(priority) {}
 
-        // If it is after CloseTime and remaining pending orders have not been closed then close all pending orders
-        override protected void execute()
+        //Report closing position trade
+        override protected void execute(Position position)
         {
-            if (!BotState.IsPendingOrdersClosed && BotState.IsAfterCloseTime)
+            if (BotState.isThisBotId(position.Label))
             {
-                OrdersManager.closeAllPendingOrders();
-                RulesManager.reset();
+                BotState.ClosedPositionsCount++;
+                ProfitReporter.reportTrade(position);
             }
         }
 

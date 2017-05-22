@@ -7,6 +7,7 @@ using Niffler.Common;
 using Niffler.Common.Trade;
 using Niffler.Common.Market;
 using Niffler.Common.TrailingStop;
+using cAlgo.API;
 
 namespace Niffler.Rules
 {
@@ -18,62 +19,81 @@ namespace Niffler.Rules
         // The DiviFactory will create the Rules Objects for each of the Rules it uses
         // The Rules Objects can be created by either Factory
 
-        public OrdersManager OrdersManager { get; }
+        public SellLimitOrdersTrader SellLimitOrdersTrader { get; }
+        public BuyLimitOrdersTrader BuyLimitOrdersTrader { get; }
         public PositionsManager PositionsManager { get; }
         public SpikeManager SpikeManager { get; }
         public StopLossManager StopLossManager { get; }
         public FixedTrailingStop FixedTrailingStop { get;}
         public State BotState { get; }
-        private List<IRule> Rules;
+        private List<IRule> OnTickRules;
+        private List<IRuleOnPositionEvent> OnPositionOpenedRules;
+        private List<IRuleOnPositionEvent> OnPositionClosedRules;
+        private List<IRule> OnTimerRules;
+        private List<IRule> OnBarRules;
 
-        public RulesManager(State botState, OrdersManager ordersManager, SpikeManager spikeManager, StopLossManager stopLossManager, FixedTrailingStop fixedTrailingStop)
+        public RulesManager(State botState, SellLimitOrdersTrader sellLimitOrdersTrader, BuyLimitOrdersTrader buyLimitOrdersTrader, SpikeManager spikeManager, StopLossManager stopLossManager, FixedTrailingStop fixedTrailingStop)
         {
             BotState = botState;
-            OrdersManager = ordersManager;
+            SellLimitOrdersTrader = sellLimitOrdersTrader;
+            BuyLimitOrdersTrader = buyLimitOrdersTrader;
             PositionsManager = new PositionsManager(BotState);
             SpikeManager = spikeManager;
             StopLossManager = stopLossManager;
             FixedTrailingStop = fixedTrailingStop;
-            Rules = getRules();
         }
 
-        private List<IRule> getRules()
+
+        public void setOnTickRules(List<IRule> rules)
         {
-            switch (BotState.Type)
-            {
-                case State.BotType.SWORDFISH:
-                    {
-                        //Create Swordfish Bot Rules
-                        return new List<IRule>
-                        {
-                            new CloseTimeCancelPendingOrders(this,1),
-                            new CloseTimeSetHardSLToLastPositionEntryWithBuffer(this,2),
-                            new CloseTimeNoPositionsOpenReset(this,3),
-                            new ReduceRiskTimeReduceRetraceLevels(this,3),
-                            new ReduceRiskTimeSetHardSLToLastProfitPositionCloseWithBuffer(this,4),
-                            new ReduceRiskTimeSetTrailingStop(this,5),
-                            new RetracedLevel1To2SetHardSLToLastProfitPositionEntryWithBuffer(this,6),
-                            new RetracedLevel1To2SetBreakEvenSLActive(this,7),
-                            new RetracedLevel2To3SetHardSLToLastProfitPositionEntry(this,8),
-                            new RetracedLevel2To3SetHardSLToLastProfitPositionEntry(this, 9),
-                            new RetracedLevel3PlusReduceHardSLBuffer(this,10),
-                            new RetracedLevel3PlusSetHardSLToLastProfitPositionCloseWithBuffer(this,11),
-                            new SetBreakEvenSLPastLastProfitPositionEntry(this,12),
-                            new SetFixedTrailingStop(this,13),
-                            new TerminateTimeCloseAllPositionsReset(this,14)
-                        }.OrderBy(rule => rule.Priority).ToList();
-                    }
-                case State.BotType.DIVIDEND:
-                    {
-                        //Create Dividend Bot Rules
-                        return new List<IRule>
-                        {
-                            new CloseTimeCancelPendingOrders(this,1)
-                        };
-                    }
-                default:
-                    return new List<IRule> { };
-            }
+            initialiseRules(rules);
+            OnTickRules = rules.OrderBy(rule => rule.Priority).ToList();
+        }
+
+        public void setOnPositionClosedRules(List<IRuleOnPositionEvent> rules)
+        {
+            initialiseRules(rules.ConvertAll(x => (IRule)x));
+            OnPositionClosedRules = rules.OrderBy(rule => rule.Priority).ToList();
+        }
+
+        public void setOnPositionOpenedRules(List<IRuleOnPositionEvent> rules)
+        {
+            initialiseRules(rules.ConvertAll(x => (IRule)x));
+            OnPositionOpenedRules = rules.OrderBy(rule => rule.Priority).ToList();
+        }
+
+        private void initialiseRules(List<IRule> rules)
+        {
+            rules.ForEach(rule => rule.init(this));
+        }
+
+        public void onTick()
+        {
+            //Check the state based on the time from open
+            BotState.checkTimeState();
+
+            //Run the onTick Rules
+            runAllRules(OnTickRules);
+        }
+
+        //Run the onBar Rules
+        public void onBar()
+        {
+            runAllRules(OnBarRules);
+        }
+
+        public void onPositionClosed(Position position)
+        {
+            runAllPositionRules(OnPositionClosedRules, position);
+        }
+
+        public void onPositionOpened(Position position)
+        {
+            runAllPositionRules(OnPositionOpenedRules, position);
+        }
+
+        public void onTimer()
+        {
 
         }
 
@@ -82,9 +102,14 @@ namespace Niffler.Rules
             rule.run();
         }
 
-        public void runAllRules()
+        public void runAllPositionRules(List<IRuleOnPositionEvent> rules,Position position)
         {
-            Rules.ForEach(IRule => IRule.run());
+            rules.ForEach(IRuleOnPositionEvent => IRuleOnPositionEvent.run(position));
+        }
+
+        public void runAllRules(List<IRule> rules)
+        {
+            rules.ForEach(IRule => IRule.run());
         }
 
         public void reset()
@@ -92,8 +117,6 @@ namespace Niffler.Rules
             SpikeManager.reset();
             FixedTrailingStop.reset();
             BotState.reset();
-
-            BotState.IsReset();
         }
 
     }

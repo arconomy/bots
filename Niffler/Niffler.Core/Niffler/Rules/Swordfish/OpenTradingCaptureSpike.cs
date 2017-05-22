@@ -10,18 +10,16 @@ using Niffler.Common;
 
 namespace Niffler.Rules
 {
-    class CloseTimeSetHardSLToLastPositionEntryWithBuffer : IRule
+    class OpenTradingCaptureSpike : IRule
     {
-        public CloseTimeSetHardSLToLastPositionEntryWithBuffer(int priority) : base(priority) { }
+        public OpenTradingCaptureSpike(int priority) : base(priority) {}
 
-        //After CLose time set hard stop losses at last position entry price with Buffer
+        // If Trading time then capture spike
         override protected void execute()
         {
-           
-            if (BotState.IsAfterCloseTime)
+            if (MarketInfo.IsBotTradingOpen())
             {
-                StopLossManager.setSLWithBufferForAllPositions(BotState.LastPositionEntryPrice);
-                ExecuteOnceOnly();
+                SpikeManager.captureSpike();
             }
         }
 

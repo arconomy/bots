@@ -13,7 +13,7 @@ namespace Niffler.Common.Trade
     class StopLossManager : IResetState
     {
 
-        private bool IsBreakEvenStopsActive { get; set; }
+        public bool IsBreakEvenStopLossActive { get; set; }
         private double HardStopLossBufferPips { get; set; }
         private double ResetHardStopLossBufferPips { get; set; }
         private double LastOrderStopLossPips { get; set; }
@@ -24,7 +24,7 @@ namespace Niffler.Common.Trade
         {
             BotState = s;
             Bot = BotState.Bot;
-            IsBreakEvenStopsActive = false;
+            IsBreakEvenStopLossActive = false;
             HardStopLossBufferPips = hardStopLossBufferPips;
             ResetHardStopLossBufferPips = hardStopLossBufferPips;
             LastOrderStopLossPips = lastOrderStopLossPips;

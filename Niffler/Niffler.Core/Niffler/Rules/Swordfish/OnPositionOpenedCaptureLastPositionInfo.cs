@@ -10,18 +10,19 @@ using Niffler.Common;
 
 namespace Niffler.Rules
 {
-    class CloseTimeSetHardSLToLastPositionEntryWithBuffer : IRule
+    class OnPositionOpenedCaptureLastPositionInfo : IRuleOnPositionEvent
     {
-        public CloseTimeSetHardSLToLastPositionEntryWithBuffer(int priority) : base(priority) { }
+        public OnPositionOpenedCaptureLastPositionInfo(int priority) : base(priority) {}
 
-        //After CLose time set hard stop losses at last position entry price with Buffer
-        override protected void execute()
+        //Capture last Position Opened
+        override protected void execute(Position position)
         {
-           
-            if (BotState.IsAfterCloseTime)
+            if (BotState.isThisBotId(position.Label))
             {
-                StopLossManager.setSLWithBufferForAllPositions(BotState.LastPositionEntryPrice);
-                ExecuteOnceOnly();
+                BotState.OpenedPositionsCount++;
+                BotState.LastPositionTradeType = position.TradeType;
+                BotState.LastPositionEntryPrice = position.EntryPrice;
+                BotState.LastPositionLabel = position.Label;
             }
         }
 

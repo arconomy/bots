@@ -10,17 +10,16 @@ using Niffler.Common;
 
 namespace Niffler.Rules
 {
-    class CloseTimeSetHardSLToLastPositionEntryWithBuffer : IRule
+    class CloseTimeNoPositionsRemainOpenReset : IRule
     {
-        public CloseTimeSetHardSLToLastPositionEntryWithBuffer(int priority) : base(priority) { }
+        public CloseTimeNoPositionsRemainOpenReset(int priority) : base(priority) {}
 
-        //After CLose time set hard stop losses at last position entry price with Buffer
+        // If it is after CloseTime and remaining pending orders have not been closed then close all pending orders
         override protected void execute()
         {
-           
-            if (BotState.IsAfterCloseTime)
+            if (BotState.IsPendingOrdersClosed && BotState.positionsAllClosed() && BotState.IsAfterCloseTime)
             {
-                StopLossManager.setSLWithBufferForAllPositions(BotState.LastPositionEntryPrice);
+                RulesManager.reset();
                 ExecuteOnceOnly();
             }
         }
