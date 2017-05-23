@@ -15,11 +15,11 @@ namespace Niffler.Rules
         public ReduceRiskTimeSetTrailingStop(int priority) : base(priority) { }
 
         //If it is after reduce risk time then set the fixed trailing stop 
-        override protected void execute()
+        override protected void Execute()
         {
             if (BotState.IsAfterReducedRiskTime)
             {
-                if (BotState.OrdersPlaced && BotState.positionsRemainOpen())
+                if (BotState.OrdersPlaced && BotState.PositionsRemainOpen())
                 {
                     FixedTrailingStop.activate();
                     ExecuteOnceOnly();
@@ -27,7 +27,7 @@ namespace Niffler.Rules
             }
         }
 
-        override public void reportExecution()
+        override public void ReportExecution()
         {
             // report stats on rule execution 
             // e.g. execution rate, last position rule applied to, number of positions impacted by rule

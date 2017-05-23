@@ -85,9 +85,7 @@ namespace Niffler.Bots.Swordfish
         public double TrailingStopPips { get; set; }
 
         private State BotState;
-        private FixedTrailingStop TrailingStop;
         private StopLossManager StopLossManager;
-        private SpikeManager SpikeManager;
         private MarketInfo SwfMarketInfo;
         private SellLimitOrdersTrader SellLimitOrdersTrader;
         private BuyLimitOrdersTrader BuyLimitOrdersTrader;
@@ -98,7 +96,7 @@ namespace Niffler.Bots.Swordfish
             Positions.Opened += OnPositionOpened;
             Positions.Closed += OnPositionClosed;
             BotState = new State(this);
-            SwfMarketInfo = BotState.getMarketInfo();
+            SwfMarketInfo = BotState.GetMarketInfo();
             SwfMarketInfo.SetCloseAfterMinutes(CloseAfterMins);
             SwfMarketInfo.SetReduceRiskAfterMinutes(ReduceRiskAfterMins);
 
@@ -106,38 +104,38 @@ namespace Niffler.Bots.Swordfish
             BuyLimitOrdersTrader = new BuyLimitOrdersTrader(BotState, NumberOfOrders, TriggerOrderPlacementPips, OrderEntryOffset, DefaultTakeProfit, FinalOrderStopLoss);
             StopLossManager = new StopLossManager(BotState, HardStopLossBuffer, FinalOrderStopLoss);
 
-            RulesManager = new RulesManager(BotState, SellLimitOrdersTrader, BuyLimitOrdersTrader, SpikeManager, StopLossManager, new FixedTrailingStop(BotState, TrailingStopPips));
+            RulesManager = new RulesManager(BotState, SellLimitOrdersTrader, BuyLimitOrdersTrader, StopLossManager, new FixedTrailingStop(BotState, TrailingStopPips));
 
-            RulesManager.setOnTickRules(new List<IRule>
+            RulesManager.SetOnTickRules(new List<IRule>
                 {
                     new OpenTradingCapturePrice(1),
                     new OpenTradingCaptureSpike(2),
-                    new OpenTradingPlaceLimitOrders(2),
-                    new CloseTimeCancelPendingOrders(3),
-                    new CloseTimeSetHardSLToLastPositionEntryWithBuffer(4),
-                    new CloseTimeNoPositionsOpenedReset(5),
-                    new CloseTimeNoPositionsRemainOpenReset(5),
-                    new ReduceRiskTimeReduceRetraceLevels(6),
-                    new ReduceRiskTimeSetHardSLToLastProfitPositionCloseWithBuffer(7),
-                    new ReduceRiskTimeSetTrailingStop(8),
-                    new RetracedLevel1To2SetHardSLToLastProfitPositionEntryWithBuffer(9),
-                    new RetracedLevel1To2SetBreakEvenSLActive(10),
-                    new RetracedLevel2To3SetHardSLToLastProfitPositionEntry(11),
-                    new RetracedLevel2To3SetHardSLToLastProfitPositionEntry(12),
-                    new RetracedLevel3PlusReduceHardSLBuffer(13),
-                    new RetracedLevel3PlusSetHardSLToLastProfitPositionCloseWithBuffer(14),
-                    new OnTickBreakEvenSLActiveSetLastProfitPositionEntry(15),
-                    new OnTickTrailingStopActiveSetFixedTrailingSL(16),
-                    new OnTickTrailingActiveChase(17),
-                    new TerminateTimeCloseAllPositionsReset(17)
+                    new OpenTradingPlaceLimitOrders(3),
+                    new CloseTimeCancelPendingOrders(4),
+                    new CloseTimeSetHardSLToLastPositionEntryWithBuffer(5),
+                    new CloseTimeNoPositionsOpenedReset(6),
+                    new CloseTimeNoPositionsRemainOpenReset(7),
+                    new ReduceRiskTimeReduceRetraceLevels(8),
+                    new ReduceRiskTimeSetHardSLToLastProfitPositionCloseWithBuffer(9),
+                    new ReduceRiskTimeSetTrailingStop(10),
+                    new RetracedLevel1To2SetHardSLToLastProfitPositionEntryWithBuffer(11),
+                    new RetracedLevel1To2SetBreakEvenSLActive(12),
+                    new RetracedLevel2To3SetHardSLToLastProfitPositionEntry(13),
+                    new RetracedLevel2To3SetHardSLToLastProfitPositionEntry(14),
+                    new RetracedLevel3PlusReduceHardSLBuffer(15),
+                    new RetracedLevel3PlusSetHardSLToLastProfitPositionCloseWithBuffer(16),
+                    new OnTickBreakEvenSLActiveSetLastProfitPositionEntry(17),
+                    new OnTickTrailingStopActiveSetFixedTrailingSL(18),
+                    new OnTickTrailingActiveChase(19),
+                    new TerminateTimeCloseAllPositionsReset(20)
             });
 
-            RulesManager.setOnPositionOpenedRules(new List<IRuleOnPositionEvent>
+            RulesManager.SetOnPositionOpenedRules(new List<IRuleOnPositionEvent>
                 {
                     new OnPositionOpenedCaptureLastPositionInfo(1)
             });
 
-            RulesManager.setOnPositionClosedRules(new List<IRuleOnPositionEvent>
+            RulesManager.SetOnPositionClosedRules(new List<IRuleOnPositionEvent>
                 {
                     new OnPositionClosedReportTrade(1),
                     new OnPositionClosedLastEntryPositionStopLossTriggeredCloseAll(2),
@@ -148,17 +146,17 @@ namespace Niffler.Bots.Swordfish
 
         protected override void OnTick()
         {
-            RulesManager.onTick();
+            RulesManager.OnTick();
         }
 
         protected void OnPositionOpened(PositionOpenedEventArgs args)
         {
-            RulesManager.onPositionOpened(args.Position);
+            RulesManager.OnPositionOpened(args.Position);
         }
 
         protected void OnPositionClosed(PositionClosedEventArgs args)
         {
-            RulesManager.onPositionClosed(args.Position);
+            RulesManager.OnPositionClosed(args.Position);
         }
 
         protected override void OnStop()

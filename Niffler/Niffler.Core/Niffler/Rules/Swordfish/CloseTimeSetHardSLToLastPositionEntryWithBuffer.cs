@@ -15,17 +15,17 @@ namespace Niffler.Rules
         public CloseTimeSetHardSLToLastPositionEntryWithBuffer(int priority) : base(priority) { }
 
         //After CLose time set hard stop losses at last position entry price with Buffer
-        override protected void execute()
+        override protected void Execute()
         {
            
             if (BotState.IsAfterCloseTime)
             {
-                StopLossManager.setSLWithBufferForAllPositions(BotState.LastPositionEntryPrice);
+                StopLossManager.SetSLWithBufferForAllPositions(BotState.LastPositionEntryPrice);
                 ExecuteOnceOnly();
             }
         }
 
-        override public void reportExecution()
+        override public void ReportExecution()
         {
             // report stats on rule execution 
             // e.g. execution rate, last position rule applied to, number of positions impacted by rule

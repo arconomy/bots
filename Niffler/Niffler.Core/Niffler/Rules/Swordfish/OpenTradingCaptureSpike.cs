@@ -15,15 +15,15 @@ namespace Niffler.Rules
         public OpenTradingCaptureSpike(int priority) : base(priority) {}
 
         // If Trading time then capture spike
-        override protected void execute()
+        override protected void Execute()
         {
             if (MarketInfo.IsBotTradingOpen())
             {
-                SpikeManager.captureSpike();
+                SpikeManager.CaptureSpike();
             }
         }
 
-        override public void reportExecution()
+        override public void ReportExecution()
         {
             // report stats on rule execution 
             // e.g. execution rate, last position rule applied to, number of positions impacted by rule

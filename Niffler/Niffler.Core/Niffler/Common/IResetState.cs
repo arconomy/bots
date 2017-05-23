@@ -8,6 +8,6 @@ namespace Niffler.Common
 {
     interface IResetState
     {
-        void reset();
+        void Reset();
     }
 }

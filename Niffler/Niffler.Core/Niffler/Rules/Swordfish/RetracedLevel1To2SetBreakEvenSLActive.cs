@@ -15,12 +15,12 @@ namespace Niffler.Rules
         public RetracedLevel1To2SetBreakEvenSLActive(int priority) : base(priority) { }
 
         //Set BreakEven SL if Spike has retraced between than retraceLevel1 and retraceLevel2
-        override protected void execute()
+        override protected void Execute()
         {
-            if (BotState.OrdersPlaced && BotState.positionsRemainOpen())
+            if (BotState.OrdersPlaced && BotState.PositionsRemainOpen())
             {
                 //Calculate spike retrace factor
-                SpikeManager.calculateRetraceFactor();
+                SpikeManager.CalculateRetraceFactor();
 
                 if (SpikeManager.IsRetraceBetweenLevel1AndLevel2())
                 {
@@ -29,7 +29,7 @@ namespace Niffler.Rules
             }
         }
 
-        override public void reportExecution()
+        override public void ReportExecution()
         {
             // report stats on rule execution 
             // e.g. execution rate, last position rule applied to, number of positions impacted by rule

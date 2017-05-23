@@ -15,22 +15,22 @@ namespace Niffler.Rules
         public ReduceRiskTimeSetHardSLToLastProfitPositionCloseWithBuffer(int priority) : base(priority) { }
 
         //If after reduce risk time then set hard stop losses to Last Profit Positions Entry Price with buffer
-        override protected void execute()
+        override protected void Execute()
         {
             if (BotState.IsAfterReducedRiskTime)
             {
-                if (BotState.OrdersPlaced && BotState.positionsRemainOpen())
+                if (BotState.OrdersPlaced && BotState.PositionsRemainOpen())
                 {
                     //If Hard SL has not been set yet
                     if (BotState.LastProfitPositionClosePrice > 0)
                     {
-                        StopLossManager.setSLWithBufferForAllPositions(BotState.LastProfitPositionClosePrice);
+                        StopLossManager.SetSLWithBufferForAllPositions(BotState.LastProfitPositionClosePrice);
                     }
                 }
             }
         }
 
-        override public void reportExecution()
+        override public void ReportExecution()
         {
             // report stats on rule execution 
             // e.g. execution rate, last position rule applied to, number of positions impacted by rule

@@ -15,12 +15,12 @@ namespace Niffler.Rules
         public OnTickTrailingActiveChase(int priority) : base(priority) {}
 
         //If the Trail is active then chase.
-        override protected void execute()
+        override protected void Execute()
         {
             FixedTrailingStop.chase();
         }
 
-        override public void reportExecution()
+        override public void ReportExecution()
         {
             // report stats on rule execution 
             // e.g. execution rate, last position rule applied to, number of positions impacted by rule

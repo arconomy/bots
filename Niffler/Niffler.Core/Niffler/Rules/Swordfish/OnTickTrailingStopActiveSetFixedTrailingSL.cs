@@ -15,15 +15,15 @@ namespace Niffler.Rules
         public OnTickTrailingStopActiveSetFixedTrailingSL(int priority) : base(priority) { }
 
         //If BreakEven SL is Active then set BreakEven Stop Losses for all orders if the current price is past the entry point of the Last position to close with profit
-        override protected void execute()
+        override protected void Execute()
         {
-            if (BotState.OrdersPlaced && BotState.positionsRemainOpen())
+            if (BotState.OrdersPlaced && BotState.PositionsRemainOpen())
             {
                 FixedTrailingStop.chase();
             }
         }
 
-        override public void reportExecution()
+        override public void ReportExecution()
         {
             // report stats on rule execution 
             // e.g. execution rate, last position rule applied to, number of positions impacted by rule

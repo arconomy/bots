@@ -23,7 +23,7 @@ namespace Niffler.Rules
             }
         }
 
-        override protected void execute() { /* IRule implementation not required */}
+        override protected void Execute() { /* IRule implementation not required */}
         abstract protected void execute(Position position);
     }
 }

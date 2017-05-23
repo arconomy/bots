@@ -17,16 +17,16 @@ namespace Niffler.Rules
         //If BreakEven SL is active set breakeven SL + Buffer
         override protected void execute(Position position)
         {
-            if (BotState.isThisBotId(position.Label))
+            if (BotState.IsThisBotId(position.Label))
             {
                 if (StopLossManager.IsBreakEvenStopLossActive)
                 {
-                    StopLossManager.setBreakEvenSLForAllPositions(BotState.LastProfitPositionEntryPrice, true);
+                    StopLossManager.SetBreakEvenSLForAllPositions(BotState.LastProfitPositionEntryPrice, true);
                 }
             }
         }
 
-        override public void reportExecution()
+        override public void ReportExecution()
         {
             // report stats on rule execution 
             // e.g. execution rate, last position rule applied to, number of positions impacted by rule

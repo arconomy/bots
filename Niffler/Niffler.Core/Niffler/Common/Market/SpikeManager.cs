@@ -48,16 +48,16 @@ namespace Niffler.Common.Market
             return Level1 > RetraceFactor;
         }
 
-        public void reduceLevelsBy50Percent()
+        public void ReduceLevelsBy50Percent()
         {
             Level1 /= 2;
             Level2 /= 2;
             Level3 /= 2;
         }
 
-        public double getSpikePeakPips()
+        public double GetSpikePeakPips()
         {
-            if(isSpikeCaptured())
+            if(IsSpikeCaptured())
             {
                 return Spike.PeakPips;
             }
@@ -68,9 +68,9 @@ namespace Niffler.Common.Market
             
         }
 
-        public double getSpikePeakPrice()
+        public double GetSpikePeakPrice()
         {
-            if (isSpikeCaptured())
+            if (IsSpikeCaptured())
             {
                 return Spike.PeakPrice;
             }
@@ -81,18 +81,18 @@ namespace Niffler.Common.Market
 
         }
 
-        public void reset()
+        public void Reset()
         {
             Spike = null;
         }
 
-        public bool isSpikeCaptured()
+        public bool IsSpikeCaptured()
         {
             return Spike.isCaptured();
         }
 
         //TO DO: Refactor where the a Spike Object is created and managed.
-        public void captureSpike()
+        public void CaptureSpike()
         {
             if(Spike == null)
             {
@@ -127,11 +127,11 @@ namespace Niffler.Common.Market
         }
 
         //Return the greater retrace of the percentage price or percent closed positions
-        public void calculateRetraceFactor()
+        public void CalculateRetraceFactor()
         {
             double retraceFactor = 0;
-            double percentClosed = BotState.calcPercentOfPositionsClosed();
-            double percentRetrace = calculatePercentageRetrace();
+            double percentClosed = BotState.CalcPercentOfPositionsClosed();
+            double percentRetrace = CalculatePercentageRetrace();
             if (percentClosed <= percentRetrace)
             {
                 retraceFactor = percentRetrace;
@@ -143,7 +143,7 @@ namespace Niffler.Common.Market
             RetraceFactor = (int) retraceFactor;
         }
 
-        protected double calculatePercentageRetrace()
+        protected double CalculatePercentageRetrace()
         {
             double percentRetrace = 0;
             if (BotState.LastPositionTradeType == TradeType.Sell)

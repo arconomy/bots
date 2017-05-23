@@ -101,7 +101,7 @@
     <Compile Include="Business\Positions.cs" />
     <Compile Include="Business\TradingHours.cs" />
     <Compile Include="Bots\Client\Bot.cs" />
-    <Compile Include="Common\BackTest\ProfitReporter.cs" />
+    <Compile Include="Common\BackTest\Reporter.cs" />
     <Compile Include="Common\IResetState.cs" />
     <Compile Include="Common\Utils.cs" />
     <Compile Include="Common\Market\MarketInfo.cs" />

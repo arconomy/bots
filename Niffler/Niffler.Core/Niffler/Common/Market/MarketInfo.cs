@@ -70,7 +70,7 @@ namespace Niffler.Common.Market
         public void SetCloseAfterMinutes(int closeAfterMinutes) { CloseAfterMinutes = closeAfterMinutes; UseCloseTime = false; }
         public void SetReduceRiskAfterMinutes(int reduceRiskAfterMinutes) { ReduceRiskAfterMinutes = reduceRiskAfterMinutes; UseReduceRiskTime = false; }
         public void SetTerminateAfterMinutes(int terminateAfterMinutes) { TerminateAfterMinutes = terminateAfterMinutes; UseTerminateTime = false; }
-        public void SetTradingDays(bool mon,bool tues,bool wed,bool thurs,bool fri,bool sat, bool, bool sun)
+        public void SetTradingDays(bool mon,bool tues,bool wed,bool thurs,bool fri,bool sat, bool sun)
         {
             IsTradeMonday = mon;
             IsTradeTuesday = tues;
@@ -147,7 +147,7 @@ namespace Niffler.Common.Market
             }
         }
 
-        private DateTime getTimeNow()
+        private DateTime GetTimeNow()
         {
             if (IsBackTesting)
             {
@@ -163,7 +163,7 @@ namespace Niffler.Common.Market
         public bool IsBotTradingOpen()
         {
 
-            DateTime dateTimeNow = getTimeNow();
+            DateTime dateTimeNow = GetTimeNow();
 
             if (UseCloseTime)
             {
@@ -180,11 +180,11 @@ namespace Niffler.Common.Market
         {
             if(UseReduceRiskTime)
             {
-                return IsTimeAfter(getTimeNow(), ReduceRiskTime);
+                return IsTimeAfter(GetTimeNow(), ReduceRiskTime);
             }
             else
             {
-                return IsMinsAfterOpenTime(getTimeNow(), ReduceRiskAfterMinutes);
+                return IsMinsAfterOpenTime(GetTimeNow(), ReduceRiskAfterMinutes);
             }
 
         }
@@ -194,11 +194,11 @@ namespace Niffler.Common.Market
         {
             if (UseCloseTime)
             {
-                return IsTimeAfter(getTimeNow(), CloseTime);
+                return IsTimeAfter(GetTimeNow(), CloseTime);
             }
             else
             {
-                return IsMinsAfterOpenTime(getTimeNow(), CloseAfterMinutes);
+                return IsMinsAfterOpenTime(GetTimeNow(), CloseAfterMinutes);
             }
                 
         }
@@ -208,11 +208,11 @@ namespace Niffler.Common.Market
         {
             if (UseTerminateTime)
             {
-                return IsTimeAfter(getTimeNow(), TerminateTime);
+                return IsTimeAfter(GetTimeNow(), TerminateTime);
             }
             else
             {
-                return IsMinsAfterOpenTime(getTimeNow(), TerminateAfterMinutes);
+                return IsMinsAfterOpenTime(GetTimeNow(), TerminateAfterMinutes);
             }
         }
 

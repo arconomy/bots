@@ -20,12 +20,11 @@ namespace Niffler.Rules
         protected PositionsManager PositionsManager;
         protected SellLimitOrdersTrader SellLimitOrdersTrader;
         protected BuyLimitOrdersTrader BuyLimitOrdersTrader;
-        protected OrdersManager OrdersManager;
         protected SpikeManager SpikeManager;
         protected StopLossManager StopLossManager;
         protected FixedTrailingStop FixedTrailingStop;
         protected MarketInfo MarketInfo;
-        protected ProfitReporter ProfitReporter;
+        protected Reporter Reporter;
         public int Priority { get; set; }
         protected int ExecutionCount;
         protected bool ExecuteOnce;
@@ -36,22 +35,23 @@ namespace Niffler.Rules
             Priority = priority;
         }
 
-        public void init(RulesManager rulesManager)
+        public void Init(RulesManager rulesManager)
         {
             RulesManager = rulesManager;
             BotState = rulesManager.BotState;
             Bot = BotState.Bot;
-            MarketInfo = BotState.getMarketInfo();
+            MarketInfo = BotState.GetMarketInfo();
             PositionsManager = rulesManager.PositionsManager;
             SellLimitOrdersTrader = rulesManager.SellLimitOrdersTrader;
             BuyLimitOrdersTrader = rulesManager.BuyLimitOrdersTrader;
             SpikeManager = rulesManager.SpikeManager;
             StopLossManager = rulesManager.StopLossManager;
             FixedTrailingStop = rulesManager.FixedTrailingStop;
+            Reporter = BotState.GetReporter();
             Initialised = true;
         }
 
-        public void run()
+        public void Run()
         {
             if (!Initialised)
                 return;
@@ -59,7 +59,7 @@ namespace Niffler.Rules
             if(!ExecuteOnce)
             {
                 ExecutionCount++;
-                execute();
+                Execute();
             }
         }
 
@@ -68,7 +68,7 @@ namespace Niffler.Rules
             ExecuteOnce = true;
         }
 
-        abstract public void reportExecution();
-        abstract protected void execute();
+        abstract public void ReportExecution();
+        abstract protected void Execute();
     }
 }

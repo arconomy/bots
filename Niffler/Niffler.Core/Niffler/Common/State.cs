@@ -44,31 +44,36 @@ namespace Niffler.Common
 
         public Robot Bot { get; set; }
         private MarketInfo MarketInfo;
-        private ProfitReporter ProfitReporter;
+        private Reporter Reporter;
         private SpikeManager SpikeManager;
 
         public State(Robot r)
         {
-            reset();
+            Reset();
             Type = BotType.SWORDFISH;
             Bot = r;
-            BotId = generateBotId();
+            BotId = GenerateBotId();
             MarketInfo = new MarketInfo(Bot);
             SpikeManager = new SpikeManager(this);
-            ProfitReporter = new ProfitReporter(this, SpikeManager);
+            Reporter = new Reporter(this, SpikeManager);
         }
 
-        public string getMarketName()
+        public string GetMarketName()
         {
             return MarketInfo.MarketName;
         }
 
-        public MarketInfo getMarketInfo()
+        public MarketInfo GetMarketInfo()
         {
             return MarketInfo;
         }
 
-        public void checkTimeState()
+        public Reporter GetReporter()
+        {
+            return Reporter;
+        }
+
+        public void CheckTimeState()
         {
             if (!IsAfterCloseTime && MarketInfo.IsAfterCloseTime())
                 IsAfterCloseTime = true;
@@ -80,9 +85,9 @@ namespace Niffler.Common
                 IsAfterTerminateTime = true;
         }
 
-        public void reset()
+        public void Reset()
         {
-            ProfitReporter.reportTotals(this);
+            Reporter.ReportTotals();
 
             //Set default Swordfish State Variables
             IsPendingOrdersClosed = false;
@@ -104,36 +109,34 @@ namespace Niffler.Common
             ClosedPositionsCount = 0;
 
             //Reset reporting
-            ProfitReporter.reset();
+            Reporter.Reset();
     }
 
-
-        private string generateBotId()
+        private string GenerateBotId()
         {
             Random randomIdGenerator = new Random();
             int id = randomIdGenerator.Next(0, 99999);
             return id.ToString("00000");
         }
 
-
-        public bool positionsRemainOpen()
+        public bool PositionsRemainOpen()
         {
             return OpenedPositionsCount > 0 && OpenedPositionsCount - ClosedPositionsCount > 0;
         }
 
-        public bool positionsAllClosed()
+        public bool PositionsAllClosed()
         {
             return OpenedPositionsCount > 0 && OpenedPositionsCount - ClosedPositionsCount == 0;
         }
 
-        public bool positionsNotOpened()
+        public bool PositionsNotOpened()
         {
             return OpenedPositionsCount == 0;
         }
 
 
         //Calculate the % of positions closed
-        public double calcPercentOfPositionsClosed()
+        public double CalcPercentOfPositionsClosed()
         {
             double percentClosed = 0;
             if (OpenedPositionsCount > 0)
@@ -143,7 +146,7 @@ namespace Niffler.Common
             return percentClosed;
         }
 
-        public void captureLastProfitPositionPrices(Position p)
+        public void CaptureLastProfitPositionPrices(Position p)
         {
             LastProfitPositionClosePrice = Bot.History.FindLast(p.Label, Bot.Symbol, p.TradeType).ClosingPrice;
             LastProfitPositionEntryPrice = p.EntryPrice;
@@ -151,7 +154,7 @@ namespace Niffler.Common
 
 
         //Check whether a position or order is managed by this bot instance.
-        public bool isThisBotId(string label)
+        public bool IsThisBotId(string label)
         {
             string id = label.Substring(0, 5);
             if (id.Equals(BotId))
@@ -160,7 +163,7 @@ namespace Niffler.Common
                 return false;
         }
 
-        protected string getReportSnapShot()
+        public string GetReportSnapShot()
         {
 
             string state = "";
@@ -170,27 +173,22 @@ namespace Niffler.Common
 
             // Last Position variables
             state += "," + LastPositionEntryPrice;
-            state += "," + LastClosedPositionEntryPrice;
-            state += "," + LastProfitPrice;
+            state += "," + LastProfitPositionEntryPrice;
+            state += "," + LastProfitPositionClosePrice;
             state += "," + LastPositionLabel;
-
-            // risk management variables
-            state += "," + IsBreakEvenStopLossActive;
-            state += "," + IsHardSLLastProfitPositionEntryPrice;
-            state += "," + IsHardSLLastPositionEntryPrice;
-            state += "," + IsHardSLLastProfitPositionClosePrice;
 
             // swordfish bot state variables
             state += "," + OpenPriceCaptured;
             state += "," + OrdersPlaced;
-            state += "," + IsReducedRiskTime;
+            state += "," + IsAfterCloseTime;
+            state += "," + IsAfterReducedRiskTime;
             state += "," + IsTerminated;
             state += "," + IsReset;
 
             return state;
         }
 
-        public string getReportSnapShotHeaders()
+        public string GetReportSnapShotHeaders()
         {
             return "OpenedPositionsCount" +
             ",ClosedPositionsCount" +
@@ -209,7 +207,7 @@ namespace Niffler.Common
             ",isReset";
         }
            
-         private List<String> getParameters()
+         private List<String> GetParameters()
         {
 
             List<string> parameters = new List<string>();

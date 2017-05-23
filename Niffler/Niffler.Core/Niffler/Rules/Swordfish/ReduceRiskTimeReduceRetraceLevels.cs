@@ -15,21 +15,21 @@ namespace Niffler.Rules
         public ReduceRiskTimeReduceRetraceLevels(int priority) : base(priority) { }
 
         // If it is after Reduce Risk Time then reduce retrace levels by 50%
-        override protected void execute()
+        override protected void Execute()
         {
 
             if (BotState.IsAfterReducedRiskTime)
             {
-                if(BotState.OrdersPlaced && BotState.positionsRemainOpen())
+                if(BotState.OrdersPlaced && BotState.PositionsRemainOpen())
                 {
                     //Reduce all retrace limits
-                    SpikeManager.reduceLevelsBy50Percent();
+                    SpikeManager.ReduceLevelsBy50Percent();
                     ExecuteOnceOnly();
                 }
             }
         }
 
-        override public void reportExecution()
+        override public void ReportExecution()
         {
             // report stats on rule execution 
             // e.g. execution rate, last position rule applied to, number of positions impacted by rule

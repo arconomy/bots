@@ -15,16 +15,16 @@ namespace Niffler.Rules
         public TerminateTimeCloseAllPositionsReset(int priority) : base(priority) { }
 
         //If trades still open at Terminate Time then take the hit and close remaining positions
-        override protected void execute()
+        override protected void Execute()
         {
             if(BotState.IsAfterTerminateTime)
             {
                 PositionsManager.closeAllPositions();
-                RulesManager.reset();
+                RulesManager.Reset();
             }
         }
 
-        override public void reportExecution()
+        override public void ReportExecution()
         {
             // report stats on rule execution 
             // e.g. execution rate, last position rule applied to, number of positions impacted by rule

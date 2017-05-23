@@ -28,7 +28,7 @@ namespace Niffler.Common.TrailingStop
             IsActive = false;
         }
 
-        public void reset()
+        public void Reset()
         {
             IsActive = false;
             TrailingStopPips = ResetTrailingStopPips;
@@ -48,7 +48,7 @@ namespace Niffler.Common.TrailingStop
                 {
                     try
                     {
-                        if (BotState.isThisBotId(p.Label))
+                        if (BotState.IsThisBotId(p.Label))
                         {
 
                             double newStopLossPrice = calcTrailingStopLoss(p);

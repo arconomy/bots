@@ -28,7 +28,7 @@ namespace Niffler.Common.Trade
             {
                 try
                 {
-                    if (BotState.isThisBotId(p.Label))
+                    if (BotState.IsThisBotId(p.Label))
                     {
                         Bot.ClosePositionAsync(p, onTradeOperationComplete);
                     }

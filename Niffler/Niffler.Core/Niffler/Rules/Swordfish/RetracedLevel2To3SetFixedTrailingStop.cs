@@ -16,9 +16,9 @@ namespace Niffler.Rules
         public RetracedLevel2To3SetFixedTrailingStop(int priority) : base(priority) { }
 
         //If Spike retrace is greater than Level 2 but less than Level 3 set Fixed Trailing Stop
-        override protected void execute()
+        override protected void Execute()
         {
-            if (BotState.OrdersPlaced && BotState.positionsRemainOpen())
+            if (BotState.OrdersPlaced && BotState.PositionsRemainOpen())
             {
                 if (SpikeManager.IsRetraceBetweenLevel2AndLevel3())
                 {
@@ -29,7 +29,7 @@ namespace Niffler.Rules
             }
         }
 
-        override public void reportExecution()
+        override public void ReportExecution()
         {
             // report stats on rule execution 
             // e.g. execution rate, last position rule applied to, number of positions impacted by rule

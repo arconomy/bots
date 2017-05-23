@@ -11,12 +11,7 @@ namespace Niffler.Tester
     {
         static void Main(string[] args)
         {
-
-
-        Niffler.Model.KeyLevel     YesterdayKeyLevels = Business.KeyLevels.GetYesterdaysKeyLevels("IC Markets", "UK100");
-
-            YesterdayKeyLevels = YesterdayKeyLevels;
-             
+            Niffler.Model.KeyLevel YesterdayKeyLevels = Business.KeyLevels.GetYesterdaysKeyLevels("IC Markets", "UK100");   
         }
     }
 }

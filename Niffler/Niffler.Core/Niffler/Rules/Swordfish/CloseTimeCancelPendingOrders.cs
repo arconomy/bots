@@ -15,16 +15,16 @@ namespace Niffler.Rules
         public CloseTimeCancelPendingOrders(int priority) : base(priority) {}
 
         // If it is after CloseTime and remaining pending orders have not been closed then close all pending orders
-        override protected void execute()
+        override protected void Execute()
         {
             if (!BotState.IsPendingOrdersClosed && BotState.IsAfterCloseTime)
             {
-                OrdersManager.closeAllPendingOrders();
+                SellLimitOrdersTrader.closeAllPendingOrders();
                 ExecuteOnceOnly();
             }
         }
 
-        override public void reportExecution()
+        override public void ReportExecution()
         {
             // report stats on rule execution 
             // e.g. execution rate, last position rule applied to, number of positions impacted by rule

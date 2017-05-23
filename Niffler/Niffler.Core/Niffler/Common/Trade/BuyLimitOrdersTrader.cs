@@ -27,7 +27,7 @@ namespace Niffler.Common.Trade
                         symbol = Bot.Symbol,
                         volume = setVolume(OrderCount),
                         entryPrice = calcBuyEntryPrice(OrderCount),
-                        label = BotState.BotId + "-" + Utils.getTimeStamp() + BotState.getMarketName() + "-SWF#" + OrderCount,
+                        label = BotState.BotId + "-" + Utils.GetTimeStamp() + BotState.GetMarketName() + "-SWF#" + OrderCount,
                         stopLossPips = setPendingOrderStopLossPips(OrderCount, NumberOfOrders),
                         takeProfitPips = DefaultTakeProfitPips * (1 / Bot.Symbol.TickSize)
                     };
@@ -75,20 +75,5 @@ namespace Niffler.Common.Trade
                 return BotState.OpenPrice - EntryOffSetPips - calcOrderSpacingDistance(orderCount);
             }
         }
-
-        protected void onTradeOperationComplete(TradeResult tr)
-        {
-            if (!tr.IsSuccessful)
-            {
-                string msg = "FAILED to place Limit Order : " + tr.Error;
-                if (tr.Position != null)
-                    Bot.Print(msg, " Position: ", tr.Position.Label, " ", tr.Position.TradeType, " ", System.DateTime.Now);
-                if (tr.PendingOrder != null)
-                    Bot.Print(msg, " Pending Order: ", tr.PendingOrder.Label, " ", tr.PendingOrder.TradeType, " ", System.DateTime.Now);
-            }
-        }
-
-
-
     }
 }

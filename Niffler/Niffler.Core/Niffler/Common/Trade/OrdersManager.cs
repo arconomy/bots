@@ -164,7 +164,7 @@ namespace Niffler.Common.Trade
             {
                 try
                 {
-                    if (BotState.isThisBotId(po.Label))
+                    if (BotState.IsThisBotId(po.Label))
                     {
                         Bot.CancelPendingOrderAsync(po, onTradeOperationComplete);
                     }

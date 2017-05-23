@@ -17,7 +17,7 @@ namespace Niffler.Rules
         //Last position's SL has been triggered for a loss - CLOSING ALL POSITIONS
         override protected void execute(Position position)
         {
-            if (BotState.isThisBotId(position.Label))
+            if (BotState.IsThisBotId(position.Label))
             {
                 if (BotState.LastPositionLabel == position.Label && position.GrossProfit < 0)
                 {
@@ -30,7 +30,7 @@ namespace Niffler.Rules
             }
         }
 
-        override public void reportExecution()
+        override public void ReportExecution()
         {
             // report stats on rule execution 
             // e.g. execution rate, last position rule applied to, number of positions impacted by rule

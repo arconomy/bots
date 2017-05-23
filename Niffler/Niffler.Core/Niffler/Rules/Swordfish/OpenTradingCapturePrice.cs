@@ -15,7 +15,7 @@ namespace Niffler.Rules
         public OpenTradingCapturePrice(int priority) : base(priority) { }
 
         //Get the Opening price for the trading period
-        override protected void execute()
+        override protected void Execute()
         {
             if (MarketInfo.IsBotTradingOpen())
             {
@@ -31,7 +31,7 @@ namespace Niffler.Rules
             
         }
 
-        override public void reportExecution()
+        override public void ReportExecution()
         {
             // report stats on rule execution 
             // e.g. execution rate, last position rule applied to, number of positions impacted by rule

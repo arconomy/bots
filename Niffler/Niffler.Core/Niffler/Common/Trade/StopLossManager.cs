@@ -12,7 +12,6 @@ namespace Niffler.Common.Trade
 {
     class StopLossManager : IResetState
     {
-
         public bool IsBreakEvenStopLossActive { get; set; }
         private double HardStopLossBufferPips { get; set; }
         private double ResetHardStopLossBufferPips { get; set; }
@@ -30,20 +29,30 @@ namespace Niffler.Common.Trade
             LastOrderStopLossPips = lastOrderStopLossPips;
         }
 
-        public void reset()
+        public String GetStopLossStatus()
+        {
+            return "," + IsBreakEvenStopLossActive;
+        }
+
+        public String GetStopLossStatusHeaders()
+        {
+            return ",IsBreakEvenStopLossActive";
+        }
+
+        public void Reset()
         {
             HardStopLossBufferPips = ResetHardStopLossBufferPips;
         }
 
-        public void setSLForAllPositions(double stopLossPrice)
+        public void SetSLForAllPositions(double stopLossPrice)
         {
             foreach (Position p in Bot.Positions)
             {
                 try
                 {
-                    if (BotState.isThisBotId(p.Label))
+                    if (BotState.IsThisBotId(p.Label))
                     {
-                        Bot.ModifyPositionAsync(p, stopLossPrice, p.TakeProfit, onTradeOperationComplete);
+                        Bot.ModifyPositionAsync(p, stopLossPrice, p.TakeProfit, OnTradeOperationComplete);
                     }
                 }
                 catch (Exception e)
@@ -53,25 +62,25 @@ namespace Niffler.Common.Trade
             }
         }
 
-        public void reduceHardSLBufferBy50Percent()
+        public void ReduceHardSLBufferBy50Percent()
         {
             HardStopLossBufferPips /= 2;
         }
 
-        public void setSLWithBufferForAllPositions(double SLPrice)
+        public void SetSLWithBufferForAllPositions(double SLPrice)
         {
             switch (BotState.LastPositionTradeType)
             {
                 case TradeType.Buy:
-                    setSLForAllPositions(SLPrice - HardStopLossBufferPips);
+                    SetSLForAllPositions(SLPrice - HardStopLossBufferPips);
                     break;
                 case TradeType.Sell:
-                    setSLForAllPositions(SLPrice + HardStopLossBufferPips);
+                    SetSLForAllPositions(SLPrice + HardStopLossBufferPips);
                     break;
             }
         }
 
-        public void setBreakEvenSLForAllPositions(double breakEvenTriggerPrice, bool withHardSLBuffer)
+        public void SetBreakEvenSLForAllPositions(double breakEvenTriggerPrice, bool withHardSLBuffer)
         {
             double SLBufferPips = 0;
             if(withHardSLBuffer)
@@ -84,13 +93,13 @@ namespace Niffler.Common.Trade
             {
                 try
                 {
-                    if (BotState.isThisBotId(p.Label))
+                    if (BotState.IsThisBotId(p.Label))
                     {
                         if (BotState.LastPositionTradeType == TradeType.Buy)
                         {
                             if (breakEvenTriggerPrice > p.EntryPrice)
                             {
-                                Bot.ModifyPositionAsync(p, p.EntryPrice + SLBufferPips, p.TakeProfit, onTradeOperationComplete);
+                                Bot.ModifyPositionAsync(p, p.EntryPrice + SLBufferPips, p.TakeProfit, OnTradeOperationComplete);
                             }
                         }
 
@@ -98,7 +107,7 @@ namespace Niffler.Common.Trade
                         {
                             if (breakEvenTriggerPrice < p.EntryPrice)
                             {
-                                Bot.ModifyPositionAsync(p, p.EntryPrice - SLBufferPips, p.TakeProfit, onTradeOperationComplete);
+                                Bot.ModifyPositionAsync(p, p.EntryPrice - SLBufferPips, p.TakeProfit, OnTradeOperationComplete);
                             }
                         }
                     }
@@ -112,7 +121,7 @@ namespace Niffler.Common.Trade
 
 
 
-        protected void onTradeOperationComplete(TradeResult tr)
+        protected void OnTradeOperationComplete(TradeResult tr)
         {
             if (!tr.IsSuccessful)
             {

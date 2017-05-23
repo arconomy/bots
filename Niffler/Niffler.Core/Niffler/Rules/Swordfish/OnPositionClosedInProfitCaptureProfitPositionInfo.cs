@@ -17,18 +17,18 @@ namespace Niffler.Rules
         //Report closing position trade
         override protected void execute(Position position)
         {
-            if (BotState.isThisBotId(position.Label))
+            if (BotState.IsThisBotId(position.Label))
             {
                 //Taking profit
                 if (position.GrossProfit > 0)
                 {
                     //capture last position take profit price
-                    BotState.captureLastProfitPositionPrices(position);
+                    BotState.CaptureLastProfitPositionPrices(position);
                 }
             }
         }
 
-        override public void reportExecution()
+        override public void ReportExecution()
         {
             // report stats on rule execution 
             // e.g. execution rate, last position rule applied to, number of positions impacted by rule

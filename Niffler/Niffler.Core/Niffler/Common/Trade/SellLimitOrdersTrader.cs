@@ -29,7 +29,7 @@ namespace Niffler.Common.Trade
                         symbol = Bot.Symbol,
                         volume = setVolume(OrderCount),
                         entryPrice = calcSellEntryPrice(OrderCount),
-                        label = BotState.BotId + "-" + Utils.getTimeStamp() + BotState.getMarketName() + "-SWF#" + OrderCount,
+                        label = BotState.BotId + "-" + Utils.GetTimeStamp() + BotState.GetMarketName() + "-SWF#" + OrderCount,
                         stopLossPips = setPendingOrderStopLossPips(OrderCount, NumberOfOrders),
                         takeProfitPips = DefaultTakeProfitPips * (1 / Bot.Symbol.TickSize)
                     };

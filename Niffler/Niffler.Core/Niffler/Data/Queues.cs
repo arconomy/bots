@@ -26,7 +26,7 @@ namespace Niffler.Data
             adgile_scheduledtasks
         }
 
-        public static iServiceBus Queue(QueueEnum QueueName)
+        public static IIServiceBus Queue(QueueEnum QueueName)
         {
 
             string Q = QueueName.ToString().Replace("_", "-");
@@ -36,7 +36,7 @@ namespace Niffler.Data
 
         }
 
-        public static iServiceBus Queue(string QueueName)
+        public static IIServiceBus Queue(string QueueName)
         {
 
             string ConnectionString_ServiceBus = Niffler.Constants.ServiceBusConnectionString;
@@ -45,7 +45,7 @@ namespace Niffler.Data
 
         }
 
-        public interface iServiceBus
+        public interface IIServiceBus
         {
 
             bool Create();
@@ -67,7 +67,7 @@ namespace Niffler.Data
             t Receive<t>(ref Dictionary<string, object> Properties);
 
         }
-        private class ServiceBus : iServiceBus
+        private class ServiceBus : IIServiceBus
         {
 
             private string _ConStr;
@@ -206,12 +206,13 @@ namespace Niffler.Data
                 QueueClient QueueClient = QueueClient.CreateFromConnectionString(_ConStr, _ReceivingQueue);
 
                 BrokeredMessage Msg = new BrokeredMessage(Obj);
+                object value;
 
                 if (Properties != null)
                 {
                     foreach (string Key in Properties.Keys)
                     {
-                        object value = "";
+                        value = "";
                         if (Properties.TryGetValue(Key, out value))
                         {
                             Msg.Properties.Add(Key, value.ToString());

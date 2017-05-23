@@ -17,7 +17,7 @@ namespace Niffler.Rules
         //Capture last Position Opened
         override protected void execute(Position position)
         {
-            if (BotState.isThisBotId(position.Label))
+            if (BotState.IsThisBotId(position.Label))
             {
                 BotState.OpenedPositionsCount++;
                 BotState.LastPositionTradeType = position.TradeType;
@@ -26,7 +26,7 @@ namespace Niffler.Rules
             }
         }
 
-        override public void reportExecution()
+        override public void ReportExecution()
         {
             // report stats on rule execution 
             // e.g. execution rate, last position rule applied to, number of positions impacted by rule
