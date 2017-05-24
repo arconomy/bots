@@ -49,7 +49,6 @@ namespace Niffler.Common
 
         public State(Robot r)
         {
-            Reset();
             Type = BotType.SWORDFISH;
             Bot = r;
             BotId = GenerateBotId();
@@ -87,8 +86,6 @@ namespace Niffler.Common
 
         public void Reset()
         {
-            Reporter.ReportTotals();
-
             //Set default Swordfish State Variables
             IsPendingOrdersClosed = false;
             OpenPriceCaptured = false;

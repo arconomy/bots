@@ -9,26 +9,35 @@ using Niffler;
 
 namespace cAlgo
 {
-    [Robot(TimeZone = TimeZones.UTC, AccessRights = AccessRights.FullAccess )]
-    public class NifflerSwordfish : Niffler.Bots.Swordfish.Bot
+    [Robot(TimeZone = TimeZones.UTC, AccessRights = AccessRights.FullAccess)]
+    public class NifflerSwordfish : Niffler.Bots.Swordfish.Teddy
     {
         [Parameter("Source")]
         public override DataSeries DataSeriesSource { get; set; }
 
         [Parameter("Use Bollinger Bollinger Band Entry", DefaultValue = false)]
-        public override bool useBollingerBandEntry { get; set; }
+        public override bool UseBollingerBandEntry { get; set; }
 
-        [Parameter("Pips inside Bollinger Band Entry", DefaultValue = 2)]
-        public override int targetBolliEntryPips { get; set; }
+        [Parameter("Pips inside Bollinger Band for Entry", DefaultValue = 2)]
+        public override int BolliEntryPips { get; set; }
 
         [Parameter("Initial Order placement trigger from open", DefaultValue = 5)]
-        public override int SwordFishTrigger { get; set; }
+        public override int TriggerOrderPlacementPips { get; set; }
 
         [Parameter("Offset from Market Open for First Order", DefaultValue = 9)]
         public override int OrderEntryOffset { get; set; }
 
-        [Parameter("Distance between Orders in Pips", DefaultValue = 1)]
+        [Parameter("Order spacing in Pips", DefaultValue = 1)]
         public override int OrderSpacing { get; set; }
+
+        [Parameter("# Order placed before order spacing multiplies", DefaultValue = 10)]
+        public override int OrderSpacingLevels { get; set; }
+
+        [Parameter("Order spacing multipler", DefaultValue = 2)]
+        public override double OrderSpacingMultipler { get; set; }
+
+        [Parameter("Order spacing max", DefaultValue = 3)]
+        public override int OrderSpacingMax { get; set; }
 
         [Parameter("# of Limit Orders", DefaultValue = 40)]
         public override int NumberOfOrders { get; set; }
@@ -39,29 +48,29 @@ namespace cAlgo
         [Parameter("Volume Max (Lots)", DefaultValue = 200)]
         public override int VolumeMax { get; set; }
 
-        [Parameter("# Order placed before Volume multiples", DefaultValue = 5)]
+        [Parameter("# Order placed before Volume multiplies", DefaultValue = 5)]
         public override int OrderVolumeLevels { get; set; }
 
         [Parameter("Volume multipler", DefaultValue = 2)]
-        public override int VolumeMultipler { get; set; }
+        public override double VolumeMultipler { get; set; }
 
         [Parameter("Take Profit", DefaultValue = 0.5)]
-        public override double TakeProfit { get; set; }
+        public override double DefaultTakeProfit { get; set; }
 
-        [Parameter("Mins after swordfish period to reduce position risk", DefaultValue = 45)]
-        public override int ReducePositionRiskTime { get; set; }
+        [Parameter("Mins after market open to reduce position risk", DefaultValue = 45)]
+        public override int ReduceRiskAfterMins { get; set; }
 
-        [Parameter("Enable Retrace risk management", DefaultValue = true)]
-        public override bool retraceEnabled { get; set; }
+        [Parameter("Mins after market open to stop swordfish trading", DefaultValue = 45)]
+        public override int CloseAfterMins { get; set; }
 
         [Parameter("Retrace level 1 Percentage", DefaultValue = 33)]
-        public override int retraceLevel1 { get; set; }
+        public override int RetraceLevel1 { get; set; }
 
         [Parameter("Retrace level 2 Percentage", DefaultValue = 50)]
-        public override int retraceLevel2 { get; set; }
+        public override int RetraceLevel2 { get; set; }
 
         [Parameter("Retrace level 3 Percentage", DefaultValue = 66)]
-        public override int retraceLevel3 { get; set; }
+        public override int RetraceLevel3 { get; set; }
 
         [Parameter("Initial Hard SL for last Order placed", DefaultValue = 5)]
         public override double FinalOrderStopLoss { get; set; }

@@ -15,74 +15,30 @@ namespace Niffler.Bots.Swordfish
 {
     public class Teddy : cAlgo.API.Robot
     { 
-        [Parameter("Source")]
-        public DataSeries DataSeriesSource { get; set; }
 
-        [Parameter("Use Bollinger Bollinger Band Entry", DefaultValue = false)]
-        public bool UseBollingerBandEntry { get; set; }
-
-        [Parameter("Pips inside Bollinger Band for Entry", DefaultValue = 2)]
-        public int BolliEntryPips { get; set; }
-
-        [Parameter("Initial Order placement trigger from open", DefaultValue = 5)]
-        public int TriggerOrderPlacementPips { get; set; }
-
-        [Parameter("Offset from Market Open for First Order", DefaultValue = 9)]
-        public int OrderEntryOffset { get; set; }
-
-        [Parameter("Order spacing in Pips", DefaultValue = 1)]
-        public int OrderSpacing { get; set; }
-
-        [Parameter("# Order placed before order spacing multiplies", DefaultValue = 10)]
-        public int OrderSpacingLevels { get; set; }
-
-        [Parameter("Order spacing multipler", DefaultValue = 2)]
-        public double OrderSpacingMultipler { get; set; }
-
-        [Parameter("Order spacing max", DefaultValue = 3)]
-        public int OrderSpacingMax { get; set; }
-
-        [Parameter("# of Limit Orders", DefaultValue = 40)]
-        public int NumberOfOrders { get; set; }
-
-        [Parameter("Volume (Lots)", DefaultValue = 1)]
-        public int Volume { get; set; }
-
-        [Parameter("Volume Max (Lots)", DefaultValue = 200)]
-        public int VolumeMax { get; set; }
-
-        [Parameter("# Order placed before Volume multiplies", DefaultValue = 5)]
-        public int OrderVolumeLevels { get; set; }
-
-        [Parameter("Volume multipler", DefaultValue = 2)]
-        public double VolumeMultipler { get; set; }
-
-        [Parameter("Take Profit", DefaultValue = 0.5)]
-        public double DefaultTakeProfit { get; set; }
-
-        [Parameter("Mins after swordfish period to reduce position risk", DefaultValue = 45)]
-        public int ReduceRiskAfterMins { get; set; }
-
-        [Parameter("Mins after swordfish period to reduce position risk", DefaultValue = 45)]
-        public int CloseAfterMins { get; set; }
-
-        [Parameter("Retrace level 1 Percentage", DefaultValue = 33)]
-        public int RetraceLevel1 { get; set; }
-
-        [Parameter("Retrace level 2 Percentage", DefaultValue = 50)]
-        public int RetraceLevel2 { get; set; }
-
-        [Parameter("Retrace level 3 Percentage", DefaultValue = 66)]
-        public int RetraceLevel3 { get; set; }
-
-        [Parameter("Initial Hard SL for last Order placed", DefaultValue = 5)]
-        public double FinalOrderStopLoss { get; set; }
-
-        [Parameter("Triggered Hard SL buffer", DefaultValue = 20)]
-        public double HardStopLossBuffer { get; set; }
-
-        [Parameter("Trailing SL fixed distance", DefaultValue = 5)]
-        public double TrailingStopPips { get; set; }
+        virtual public DataSeries DataSeriesSource { get; set; }
+        virtual public bool UseBollingerBandEntry { get; set; }
+        virtual public int BolliEntryPips { get; set; }
+        virtual public int TriggerOrderPlacementPips { get; set; }
+        virtual public int OrderEntryOffset { get; set; }
+        virtual public int OrderSpacing { get; set; }
+        virtual public int OrderSpacingLevels { get; set; }
+        virtual public double OrderSpacingMultipler { get; set; }
+        virtual public int OrderSpacingMax { get; set; }
+        virtual public int NumberOfOrders { get; set; }
+        virtual public int Volume { get; set; }
+        virtual public int VolumeMax { get; set; }
+        virtual public int OrderVolumeLevels { get; set; }
+        virtual public double VolumeMultipler { get; set; }
+        virtual public double DefaultTakeProfit { get; set; }
+        virtual public int ReduceRiskAfterMins { get; set; }
+        virtual public int CloseAfterMins { get; set; }
+        virtual public int RetraceLevel1 { get; set; }
+        virtual public int RetraceLevel2 { get; set; }
+        virtual public int RetraceLevel3 { get; set; }
+        virtual public double FinalOrderStopLoss { get; set; }
+        virtual public double HardStopLossBuffer { get; set; }
+        virtual public double TrailingStopPips { get; set; }
 
         private State BotState;
         private StopLossManager StopLossManager;
@@ -127,7 +83,7 @@ namespace Niffler.Bots.Swordfish
                     new OnTickBreakEvenSLActiveSetLastProfitPositionEntry(17),
                     new OnTickTrailingStopActiveSetFixedTrailingSL(18),
                     new OnTickTrailingActiveChase(19),
-                    new TerminateTimeCloseAllPositionsReset(20)
+                    new TerminateTimeCloseAllPositionsReset(20) 
             });
 
             RulesManager.SetOnPositionOpenedRules(new List<IRuleOnPositionEvent>

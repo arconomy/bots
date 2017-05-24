@@ -19,10 +19,10 @@ namespace Niffler.Common.TrailingStop
         private State BotState { get; set; }
         private Robot Bot { get; set; }
 
-        public FixedTrailingStop(State s, double trailingStopPips)
+        public FixedTrailingStop(State botstate, double trailingStopPips)
         {
+            BotState = botstate;
             Bot = BotState.Bot;
-            BotState = s;
             TrailingStopPips = trailingStopPips;
             ResetTrailingStopPips = trailingStopPips;
             IsActive = false;

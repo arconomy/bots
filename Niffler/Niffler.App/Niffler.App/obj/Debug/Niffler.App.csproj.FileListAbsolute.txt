@@ -15,4 +15,3 @@ C:\Users\alist\Documents\cAlgo\Sources\Niffler\Niffler.App\Niffler.App\obj\Debug
 C:\Users\alist\Documents\cAlgo\Sources\Niffler\Niffler.App\Niffler.App\obj\Debug\Niffler.App.csproj.GenerateResource.Cache
 C:\Users\alist\Documents\cAlgo\Sources\Niffler\Niffler.App\Niffler.App\obj\Debug\Niffler.App.exe
 C:\Users\alist\Documents\cAlgo\Sources\Niffler\Niffler.App\Niffler.App\obj\Debug\Niffler.App.pdb
-C:\Users\alist\Documents\cAlgo\Sources\Niffler\Niffler.App\Niffler.App\obj\Debug\Niffler.App.csprojResolveAssemblyReference.cache

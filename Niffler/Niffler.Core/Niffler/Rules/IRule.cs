@@ -28,6 +28,7 @@ namespace Niffler.Rules
         public int Priority { get; set; }
         protected int ExecutionCount;
         protected bool ExecuteOnce;
+        protected bool LogEveryExecution;
         protected bool Initialised;
 
         public IRule(int priority)
@@ -60,14 +61,38 @@ namespace Niffler.Rules
             {
                 ExecutionCount++;
                 Execute();
+                if(LogEveryExecution)
+                    LogExecution();
             }
         }
 
+        public void Reset()
+        {
+            ExecuteOnce = false;
+            ExecutionCount = 0;
+        }
+
+        //Flag that can be set by implemented Rule to ensure rule is only executed once
         protected void ExecuteOnceOnly()
         {
             ExecuteOnce = true;
         }
+        
+        public void ReportExecutionResults()
+        {
+            Reporter.ReportRuleExecutionResults(this,ExecutionCount);
+        }
+        
+        //Use to log Rules everytime they execute in order to see which rules executed prior to a trade closing
+        protected void LogExecutions()
+        {
+            LogEveryExecution = true;
+        }
 
+        private void LogExecution()
+        {
+            Reporter.LogRuleExecution(this);
+        }
         abstract public void ReportExecution();
         abstract protected void Execute();
     }
