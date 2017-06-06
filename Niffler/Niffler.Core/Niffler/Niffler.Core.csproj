@@ -130,37 +130,35 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Bots\Shadow\Entry.cs" />
     <Compile Include="Rules\IRuleOnPositionEvent.cs" />
-    <Compile Include="Rules\Swordfish\OnPositionClosedInProfitSetBreakEvenWithBufferIfActive.cs" />
-    <Compile Include="Rules\Swordfish\OnPositionClosedInProfitCaptureProfitPositionInfo.cs" />
-    <Compile Include="Rules\Swordfish\OnPositionClosedLastEntryPositionStopLossTriggeredCloseAll.cs" />
-    <Compile Include="Rules\Swordfish\OnPositionClosedReportTrade.cs" />
-    <Compile Include="Rules\Swordfish\OnPositionOpenedCaptureLastPositionInfo.cs" />
-    <Compile Include="Rules\Swordfish\OnTickTrailingActiveChase.cs" />
-    <Compile Include="Rules\Swordfish\OpenTradingCaptureSpike.cs" />
-    <Compile Include="Rules\Swordfish\CloseTimeNoPositionsOpenedReset.cs" />
-    <Compile Include="Rules\Swordfish\OpenTradingPlaceLimitOrders.cs" />
-    <Compile Include="Rules\Swordfish\CloseTimeNoPositionsRemainOpenReset.cs" />
-    <Compile Include="Rules\Swordfish\ReduceRiskTimeSetTrailingStop.cs" />
-    <Compile Include="Rules\Swordfish\RetracedLevel2To3SetFixedTrailingStop.cs" />
-    <Compile Include="Rules\Swordfish\RetracedLevel3PlusReduceHardSLBuffer.cs" />
-    <Compile Include="Rules\Swordfish\OpenTradingCapturePrice.cs" />
-    <Compile Include="Rules\Swordfish\TerminateTimeCloseAllPositionsReset.cs" />
-    <Compile Include="Rules\Swordfish\OnTickTrailingStopActiveSetFixedTrailingSL.cs" />
-    <Compile Include="Rules\Swordfish\OnTickBreakEvenSLActiveSetLastProfitPositionEntry.cs" />
-    <Compile Include="Rules\Swordfish\RetracedLevel1To2SetBreakEvenSLActive.cs" />
-    <Compile Include="Rules\Swordfish\CloseTimeSetHardSLToLastPositionEntryWithBuffer.cs" />
-    <Compile Include="Rules\Swordfish\ReduceRiskTimeSetHardSLToLastProfitPositionCloseWithBuffer.cs" />
-    <Compile Include="Rules\Swordfish\ReduceRiskTimeReduceRetraceLevels.cs" />
-    <Compile Include="Rules\Swordfish\RetracedLevel3PlusSetHardSLToLastProfitPositionCloseWithBuffer.cs" />
-    <Compile Include="Rules\Swordfish\RetracedLevel2To3SetHardSLToLastProfitPositionEntry.cs" />
-    <Compile Include="Rules\Swordfish\RetracedLevel1To2SetHardSLToLastProfitPositionEntryWithBuffer.cs" />
+    <Compile Include="Rules\OnPositionClosed\OnPositionClosedInProfitSetBreakEvenWithBufferIfActive.cs" />
+    <Compile Include="Rules\OnPositionClosed\OnPositionClosedInProfitCaptureProfitPositionInfo.cs" />
+    <Compile Include="Rules\OnPositionClosed\OnPositionClosedLastEntryPositionStopLossTriggeredCloseAll.cs" />
+    <Compile Include="Rules\OnPositionClosed\OnPositionClosedReportTrade.cs" />
+    <Compile Include="Rules\OnPositionOpened\OnPositionOpenedCaptureLastPositionInfo.cs" />
+    <Compile Include="Rules\OnTick\OnTickTrailingActiveChase.cs" />
+    <Compile Include="Rules\OpenTime\OpenTradingCaptureSpike.cs" />
+    <Compile Include="Rules\CloseTime\CloseTimeNoPositionsOpenedReset.cs" />
+    <Compile Include="Rules\OpenTime\OpenTradingPlaceLimitOrders.cs" />
+    <Compile Include="Rules\CloseTime\CloseTimeNoPositionsRemainOpenReset.cs" />
+    <Compile Include="Rules\ReduceRiskTime\ReduceRiskTimeSetTrailingStop.cs" />
+    <Compile Include="Rules\RetraceLevel2\RetracedLevel2To3SetFixedTrailingStop.cs" />
+    <Compile Include="Rules\RetraceLevel3\RetracedLevel3PlusReduceHardSLBuffer.cs" />
+    <Compile Include="Rules\OpenTime\OpenTradingCapturePrice.cs" />
+    <Compile Include="Rules\TerminateTime\TerminateTimeCloseAllPositionsReset.cs" />
+    <Compile Include="Rules\OnTick\OnTickTrailingStopActiveSetFixedTrailingSL.cs" />
+    <Compile Include="Rules\OnTick\OnTickBreakEvenSLActiveSetLastProfitPositionEntry.cs" />
+    <Compile Include="Rules\RetraceLevel1\RetracedLevel1To2SetBreakEvenSLActive.cs" />
+    <Compile Include="Rules\CloseTime\CloseTimeSetHardSLToLastPositionEntryWithBuffer.cs" />
+    <Compile Include="Rules\ReduceRiskTime\ReduceRiskTimeSetHardSLToLastProfitPositionCloseWithBuffer.cs" />
+    <Compile Include="Rules\ReduceRiskTime\ReduceRiskTimeReduceRetraceLevels.cs" />
+    <Compile Include="Rules\RetraceLevel3\RetracedLevel3PlusSetHardSLToLastProfitPositionCloseWithBuffer.cs" />
+    <Compile Include="Rules\RetraceLevel2\RetracedLevel2To3SetHardSLToLastProfitPositionEntry.cs" />
+    <Compile Include="Rules\RetraceLevel1\RetracedLevel1To2SetHardSLToLastProfitPositionEntryWithBuffer.cs" />
     <Compile Include="Rules\IRule.cs" />
     <Compile Include="Rules\RulesManager.cs" />
-    <Compile Include="Rules\Swordfish\CloseTimeCancelPendingOrders.cs" />
+    <Compile Include="Rules\CloseTime\CloseTimeCancelPendingOrders.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Rules\Dividend\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
