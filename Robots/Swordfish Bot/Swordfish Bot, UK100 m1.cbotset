@@ -23,6 +23,6 @@ retraceEnabled = True
 retraceLevel1 = 33
 retraceLevel2 = 50
 retraceLevel3 = 66
-FinalOrderStopLoss = 5
+FinalOrderStopLoss = 10
 HardStopLossBuffer = 10
 TrailingStopPips = 5
