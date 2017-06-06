@@ -1,0 +1,28 @@
+﻿[ChartParameters]
+Symbol = UK100
+Timeframe = m1
+
+[cBotParameters]
+DataSeriesSource = Close
+useBollingerBandEntry = False
+targetBolliEntryPips = 2
+SwordFishTrigger = 6
+OrderEntryOffset = 10
+OrderSpacing = 1
+OrderSpacingLevels = 6
+OrderSpacingMultipler = 1
+OrderSpacingMax = 1
+NumberOfOrders = 25
+Volume = 40
+VolumeMax = 100
+OrderVolumeLevels = 4
+VolumeMultipler = 1.5
+TakeProfit = 0.5
+ReducePositionRiskTime = 45
+retraceEnabled = True
+retraceLevel1 = 33
+retraceLevel2 = 50
+retraceLevel3 = 66
+FinalOrderStopLoss = 5
+HardStopLossBuffer = 10
+TrailingStopPips = 5

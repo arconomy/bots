@@ -72,13 +72,13 @@ namespace cAlgo
         [Parameter("Retrace level 3 Percentage", DefaultValue = 66)]
         public int retraceLevel3 { get; set; }
 
-        [Parameter("Initial Hard SL for last Order placed", DefaultValue = 5)]
+        [Parameter("Final order placed Hard SL", DefaultValue = 10)]
         public double FinalOrderStopLoss { get; set; }
 
         [Parameter("Triggered Hard SL buffer", DefaultValue = 20)]
         public double HardStopLossBuffer { get; set; }
 
-        [Parameter("Trailing SL fixed distance", DefaultValue = 5)]
+        [Parameter("Trailing fixed SL", DefaultValue = 5)]
         public double TrailingStopPips { get; set; }
 
         protected MarketTimeInfo _swordFishTimeInfo;
