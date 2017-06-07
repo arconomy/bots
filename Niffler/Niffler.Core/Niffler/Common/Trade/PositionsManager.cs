@@ -7,6 +7,7 @@ using cAlgo;
 using cAlgo.API;
 using cAlgo.API.Internals;
 using cAlgo.API.Indicators;
+using Niffler.Common.BackTest;
 
 namespace Niffler.Common.Trade
 {
@@ -14,14 +15,16 @@ namespace Niffler.Common.Trade
     { 
         private State BotState { get; set; }
         private Robot Bot { get; set; }
+        private Reporter Reporter { get;  set; } 
 
         public PositionsManager(State s)
         {
             BotState = s;
             Bot = BotState.Bot;
+            Reporter = BotState.GetReporter();
         }
 
-        public void closeAllPositions()
+        public void CloseAllPositions()
         {
             //Close any outstanding pending orders
             foreach (Position p in Bot.Positions)
@@ -30,7 +33,7 @@ namespace Niffler.Common.Trade
                 {
                     if (BotState.IsThisBotId(p.Label))
                     {
-                        Bot.ClosePositionAsync(p, onTradeOperationComplete);
+                        Bot.ClosePositionAsync(p, OnPositionCloseOperationComplete);
                     }
                 }
                 catch (Exception e)
@@ -41,12 +44,14 @@ namespace Niffler.Common.Trade
             BotState.IsTerminated = true;
         }
 
-        protected void onTradeOperationComplete(TradeResult tr)
+        protected void OnPositionCloseOperationComplete(TradeResult tr)
         {
             if (!tr.IsSuccessful)
             {
-                string msg = "FAILED Trade Operation for Position: " + tr.Error;
-                Bot.Print(msg, " Pending Order: ", tr.Position.Label, " ", tr.Position.TradeType, " ", System.DateTime.Now);
+                if(tr.Position != null)
+                {
+                    Reporter.ReportTradeResultError("FAILED to CLOSE position," + tr.Position.Label + "," + tr.Position.TradeType + "," + System.DateTime.Now + "," + tr.Error);
+                }
             }
         }
 

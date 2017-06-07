@@ -16,7 +16,7 @@ namespace Niffler.Common.Trade
             : base(botState,  numberOfOrders, entryTriggerOrderPlacementPips, entryOffSetPips,  defaultTakeProfitPips, finalOrderStopLossPips) { }
 
         // Place Sell Limit Orders
-        public void placeSellLimitOrders()
+        public void PlaceSellLimitOrders()
         {
             //Place Sell Limit Orders
             for (int OrderCount = 0; OrderCount < NumberOfOrders; OrderCount++)
@@ -27,10 +27,10 @@ namespace Niffler.Common.Trade
                     {
                         tradeType = TradeType.Sell,
                         symbol = Bot.Symbol,
-                        volume = setVolume(OrderCount),
-                        entryPrice = calcSellEntryPrice(OrderCount),
+                        volume = SetVolume(OrderCount),
+                        entryPrice = CalcSellEntryPrice(OrderCount),
                         label = BotState.BotId + "-" + Utils.GetTimeStamp() + BotState.GetMarketName() + "-SWF#" + OrderCount,
-                        stopLossPips = setPendingOrderStopLossPips(OrderCount, NumberOfOrders),
+                        stopLossPips = SetPendingOrderStopLossPips(OrderCount, NumberOfOrders),
                         takeProfitPips = DefaultTakeProfitPips * (1 / Bot.Symbol.TickSize)
                     };
                     if (data == null)
@@ -39,13 +39,13 @@ namespace Niffler.Common.Trade
                     //Check that entry price is valid
                     if (data.entryPrice > Bot.Symbol.Ask)
                     {
-                        Bot.PlaceLimitOrderAsync(data.tradeType, data.symbol, data.volume, data.entryPrice, data.label, data.stopLossPips, data.takeProfitPips, onTradeOperationComplete);
+                        Bot.PlaceLimitOrderAsync(data.tradeType, data.symbol, data.volume, data.entryPrice, data.label, data.stopLossPips, data.takeProfitPips, OnPlaceSellLimitOrderOperationComplete);
                     }
                     else
                     {
                         //Tick price has 'jumped' - therefore avoid placing all PendingOrders by re-calculating the OrderCount to the equivelant entry point.
-                        OrderCount = calculateNewOrderCount(OrderCount, Bot.Symbol.Ask);
-                        Bot.ExecuteMarketOrderAsync(data.tradeType, data.symbol, data.volume, data.label + "X", data.stopLossPips, data.takeProfitPips, onTradeOperationComplete);
+                        OrderCount = CalcNewOrderCount(OrderCount, Bot.Symbol.Ask);
+                        Bot.ExecuteMarketOrderAsync(data.tradeType, data.symbol, data.volume, data.label + "X", data.stopLossPips, data.takeProfitPips, OnPlaceSellOperationComplete);
                     }
                 }
                 catch (Exception e)
@@ -56,10 +56,10 @@ namespace Niffler.Common.Trade
 
             //All Sell Limit Orders have been placed
             BotState.OrdersPlaced = true;
-            resetBollingerBand();
+            ResetBollingerBand();
         }
 
-        protected double calcSellEntryPrice(int orderCount)
+        protected double CalcSellEntryPrice(int orderCount)
         {
 
             //OPTIONAL - Bollinger band indicates whether market is oversold or over bought.
@@ -70,13 +70,25 @@ namespace Niffler.Common.Trade
                     EntryBollingerBandPrice = BollingerBand.Top.Last(0);
                 }
                 //Use Bolinger Band limit as first order entry point.
-                return EntryBollingerBandPrice + calcOrderSpacingDistance(orderCount);
+                return EntryBollingerBandPrice + CalcOrderSpacingDistance(orderCount);
             }
             else
             {
-                return BotState.OpenPrice + EntryOffSetPips + calcOrderSpacingDistance(orderCount);
+                return BotState.OpenPrice + EntryOffSetPips + CalcOrderSpacingDistance(orderCount);
             }
         }
+
+        protected void OnPlaceSellLimitOrderOperationComplete(TradeResult tr)
+        {
+            OnPendingOrderOperationComplete(tr, "FAILED to place Limit Order");
+        }
+
+        protected void OnPlaceSellOperationComplete(TradeResult tr)
+        {
+            OnPositionOperationComplete(tr, "FAILED to place position");
+        }
         
+
+
     }
 }

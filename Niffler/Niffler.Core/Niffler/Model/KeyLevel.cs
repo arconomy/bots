@@ -15,9 +15,9 @@ namespace Niffler.Model
         double DailyS3 = 0;
         double DailyCBOL = 0;
         double DailyCBOS = 0;
-         
-        double WeeklyPivot = 0;
-        double MonthlyPivot = 0;
+
+        // double WeeklyPivot = 0;
+        // double MonthlyPivot = 0;
 
         public void CalculateDaily()
         {

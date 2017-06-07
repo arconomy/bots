@@ -19,7 +19,7 @@ namespace Niffler.Rules
         {
             if(BotState.IsAfterTerminateTime)
             {
-                PositionsManager.closeAllPositions();
+                PositionsManager.CloseAllPositions();
                 RulesManager.Reset();
             }
         }

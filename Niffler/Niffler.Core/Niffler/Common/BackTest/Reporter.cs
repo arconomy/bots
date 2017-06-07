@@ -136,6 +136,12 @@ namespace Niffler.Common.BackTest
             WriteCSVFile(RulesExecuted);
         }
 
+        public void ReportTradeResultError(string msg)
+        {
+            TradeResults.Add(msg);
+        }
+
+
         private void WriteCSVFile(List<String> data)
         {
             if (!System.IO.Directory.Exists(ReportDirectory))

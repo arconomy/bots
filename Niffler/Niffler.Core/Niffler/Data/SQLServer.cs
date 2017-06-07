@@ -297,6 +297,7 @@ namespace Niffler.Data
                             }
                             catch (Exception ex) 
                             {
+                                Debugger.Log(1,"Niffler.Data.SQLServer",ex.ToString());
                                 UserAdapter.Dispose();
                                 Conn.Dispose();
                             }
@@ -359,16 +360,10 @@ namespace Niffler.Data
                                     }
                                     else if (Property.PropertyType.Name == "TimeSpan")
                                     {
-
-                                        TimeSpan ts = default(TimeSpan);
-
-                                        if (TimeSpan.TryParse(Dr[Property.Name].ToString(), out ts))
+                                        if (TimeSpan.TryParse(Dr[Property.Name].ToString(), out TimeSpan ts))
                                         {
                                             Property.SetValue(X, ts, null);
                                         }
-
-
-
                                     }
                                     else if (Property.PropertyType.IsEnum)
                                     {
@@ -383,6 +378,7 @@ namespace Niffler.Data
                                 }
                                 catch (Exception ex)
                                 {
+                                    Debugger.Log(1, "Niffler.Data.SQLServer", ex.ToString());
                                 }
                             }
                         }

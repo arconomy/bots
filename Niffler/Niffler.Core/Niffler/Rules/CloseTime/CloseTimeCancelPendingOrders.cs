@@ -19,7 +19,7 @@ namespace Niffler.Rules
         {
             if (!BotState.IsPendingOrdersClosed && BotState.IsAfterCloseTime)
             {
-                SellLimitOrdersTrader.closeAllPendingOrders();
+                SellLimitOrdersTrader.CancelAllPendingOrders();
                 ExecuteOnceOnly();
             }
         }

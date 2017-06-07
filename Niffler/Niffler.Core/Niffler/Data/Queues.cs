@@ -146,6 +146,7 @@ namespace Niffler.Data
                 }
                 catch (Exception ex)
                 {
+                    Debugger.Log(1, "Niffler.Data.SQLServer", ex.ToString());
                     return -1;
                 }
 
@@ -163,6 +164,7 @@ namespace Niffler.Data
                 }
                 catch (Exception ex)
                 {
+                    Debugger.Log(1, "Niffler.Data.SQLServer", ex.ToString());
                     return false;
                 }
 
@@ -228,6 +230,7 @@ namespace Niffler.Data
                 }
                 catch (Exception ex)
                 {
+                    Debugger.Log(1, "Niffler.Data.SQLServer", ex.ToString());
                     return false;
                 }
 

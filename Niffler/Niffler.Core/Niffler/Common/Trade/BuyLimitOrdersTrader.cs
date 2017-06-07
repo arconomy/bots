@@ -14,7 +14,7 @@ namespace Niffler.Common.Trade
             : base(botState,  numberOfOrders, entryTriggerOrderPlacementPips, entryOffSetPips,  defaultTakeProfitPips, finalOrderStopLossPips) { }
 
         //Place Buy Limit Orders
-        public void placeBuyLimitOrders()
+        public void PlaceBuyLimitOrders()
         {
             //Place Buy Limit Orders
             for (int OrderCount = 0; OrderCount < NumberOfOrders; OrderCount++)
@@ -25,10 +25,10 @@ namespace Niffler.Common.Trade
                     {
                         tradeType = TradeType.Buy,
                         symbol = Bot.Symbol,
-                        volume = setVolume(OrderCount),
-                        entryPrice = calcBuyEntryPrice(OrderCount),
+                        volume = SetVolume(OrderCount),
+                        entryPrice = CalcBuyEntryPrice(OrderCount),
                         label = BotState.BotId + "-" + Utils.GetTimeStamp() + BotState.GetMarketName() + "-SWF#" + OrderCount,
-                        stopLossPips = setPendingOrderStopLossPips(OrderCount, NumberOfOrders),
+                        stopLossPips = SetPendingOrderStopLossPips(OrderCount, NumberOfOrders),
                         takeProfitPips = DefaultTakeProfitPips * (1 / Bot.Symbol.TickSize)
                     };
 
@@ -38,13 +38,13 @@ namespace Niffler.Common.Trade
                     //Check that entry price is valid
                     if (data.entryPrice < Bot.Symbol.Bid)
                     {
-                        Bot.PlaceLimitOrderAsync(data.tradeType, data.symbol, data.volume, data.entryPrice, data.label, data.stopLossPips, data.takeProfitPips, onTradeOperationComplete);
+                        Bot.PlaceLimitOrderAsync(data.tradeType, data.symbol, data.volume, data.entryPrice, data.label, data.stopLossPips, data.takeProfitPips, OnPlaceBuyLimitOrderOperationComplete);
                     }
                     else
                     {
                         //Tick price has 'jumped' - therefore avoid placing all PendingOrders by re-calculating the OrderCount to the equivelant entry point.
-                        OrderCount = calculateNewOrderCount(OrderCount, Bot.Symbol.Bid);
-                        Bot.ExecuteMarketOrderAsync(data.tradeType, data.symbol, data.volume, data.label + "X", data.stopLossPips, data.takeProfitPips, onTradeOperationComplete);
+                        OrderCount = CalcNewOrderCount(OrderCount, Bot.Symbol.Bid);
+                        Bot.ExecuteMarketOrderAsync(data.tradeType, data.symbol, data.volume, data.label + "X", data.stopLossPips, data.takeProfitPips, OnBuyTradeOperationComplete);
                     }
                 }
                 catch (Exception e)
@@ -55,10 +55,10 @@ namespace Niffler.Common.Trade
 
             //All Buy Limit Orders have been placed
             BotState.OrdersPlaced = true;
-            resetBollingerBand();
+            ResetBollingerBand();
         }
 
-        protected double calcBuyEntryPrice(int orderCount)
+        protected double CalcBuyEntryPrice(int orderCount)
         {
             //OPTIONAL - Bollinger band indicates whether market is oversold or over bought.
             if (useBollingerBandEntry)
@@ -68,12 +68,25 @@ namespace Niffler.Common.Trade
                     EntryBollingerBandPrice = BollingerBand.Bottom.Last(0);
                 }
                 //Use Bolinger Band limit as first order entry point.
-                return EntryBollingerBandPrice - calcOrderSpacingDistance(orderCount);
+                return EntryBollingerBandPrice - CalcOrderSpacingDistance(orderCount);
             }
             else
             {
-                return BotState.OpenPrice - EntryOffSetPips - calcOrderSpacingDistance(orderCount);
+                return BotState.OpenPrice - EntryOffSetPips - CalcOrderSpacingDistance(orderCount);
             }
         }
+
+        protected void OnPlaceBuyLimitOrderOperationComplete(TradeResult tr)
+        {
+            OnPendingOrderOperationComplete(tr, "FAILED to place BUY Limit Order");
+        }
+
+        protected void OnBuyTradeOperationComplete(TradeResult tr)
+        {
+            OnPositionOperationComplete(tr, "FAILED to place BUY position");
+        }
+
+
+
     }
 }

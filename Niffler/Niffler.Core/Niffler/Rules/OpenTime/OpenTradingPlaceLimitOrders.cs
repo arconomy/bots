@@ -22,13 +22,13 @@ namespace Niffler.Rules
                 //Price moves TriggerOrderPlacementPips UP from open then look to set SELL LimitOrders
                 if (BotState.OpenPrice + SellLimitOrdersTrader.EntryTriggerOrderPlacementPips < Bot.Symbol.Bid)
                 {
-                    SellLimitOrdersTrader.placeSellLimitOrders();
+                    SellLimitOrdersTrader.PlaceSellLimitOrders();
                     ExecuteOnceOnly();
                 }
                 //Price moves 5pts DOWN from open then look to set BUY LimitOrders
                 else if (BotState.OpenPrice - BuyLimitOrdersTrader.EntryTriggerOrderPlacementPips > Bot.Symbol.Ask)
                 {
-                    BuyLimitOrdersTrader.placeBuyLimitOrders();
+                    BuyLimitOrdersTrader.PlaceBuyLimitOrders();
                     ExecuteOnceOnly();
                 }
             }

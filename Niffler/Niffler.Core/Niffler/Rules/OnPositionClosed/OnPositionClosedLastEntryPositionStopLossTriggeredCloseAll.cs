@@ -21,8 +21,8 @@ namespace Niffler.Rules
             {
                 if (BotState.LastPositionLabel == position.Label && position.GrossProfit < 0)
                 {
-                    BuyLimitOrdersTrader.closeAllPendingOrders();
-                    PositionsManager.closeAllPositions();
+                    BuyLimitOrdersTrader.CancelAllPendingOrders();
+                    PositionsManager.CloseAllPositions();
                     BotState.IsTerminated = true;
                     ExecuteOnceOnly();
                 }

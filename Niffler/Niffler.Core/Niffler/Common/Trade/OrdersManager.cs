@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using cAlgo;
 using cAlgo.API;
 using cAlgo.API.Indicators;
+using Niffler.Common.BackTest;
 
 namespace Niffler.Common.Trade
 {
@@ -13,6 +14,7 @@ namespace Niffler.Common.Trade
     {
         protected State BotState { get; set; }
         protected Robot Bot { get; set; }
+        protected Reporter Reporter { get; set; }
         protected bool useBollingerBandEntry;
 
         protected double EntryBollingerBandPrice;
@@ -48,7 +50,7 @@ namespace Niffler.Common.Trade
             EntryTriggerOrderPlacementPips = entryTriggerOrderPlacementPips;
         }
 
-        public void setVolumeMultipler(int multiplyVolumeEveryNthOrder, double volumeMultipler, int maxVolumeLots, int baseVolumeLots)
+        public void SetVolumeMultipler(int multiplyVolumeEveryNthOrder, double volumeMultipler, int maxVolumeLots, int baseVolumeLots)
         {
             MultiplyVolumeEveryNthOrder = multiplyVolumeEveryNthOrder;
             VolumeMultipler = volumeMultipler;
@@ -57,7 +59,7 @@ namespace Niffler.Common.Trade
             UseVariableVolume = true;
         }
 
-        public void setOrderSpacing(int multiplyOrderSpacingEveryNthOrder, double orderSpacingMultipler, int orderSpacingMaxPips, int orderSpacingPips)
+        public void SetOrderSpacing(int multiplyOrderSpacingEveryNthOrder, double orderSpacingMultipler, int orderSpacingMaxPips, int orderSpacingPips)
         {
             MultiplyOrderSpacingEveryNthOrder = multiplyOrderSpacingEveryNthOrder;
             OrderSpacingMultipler = orderSpacingMultipler;
@@ -66,28 +68,28 @@ namespace Niffler.Common.Trade
             UseVariableOrderSpacing = true;
         }
 
-        protected void resetBollingerBand()
+        protected void ResetBollingerBand()
         {
             EntryBollingerBandPrice = 0;
         }
 
-        public void setBollingerBandDefault(DataSeries source)
+        public void SetBollingerBandDefault(DataSeries source)
         {
             BollingerBand = Bot.Indicators.BollingerBands(source, 2, 20, MovingAverageType.Exponential);
             useBollingerBandEntry = true;
         }
 
-        public void setBollingerBand(int insideBollingerEntryPips, DataSeries source, int periods, double standDeviations, MovingAverageType maType)
+        public void SetBollingerBand(int insideBollingerEntryPips, DataSeries source, int periods, double standDeviations, MovingAverageType maType)
         {
             BollingerBand = Bot.Indicators.BollingerBands(source, periods, standDeviations, maType);
             useBollingerBandEntry = true;
         }
 
         //Calculate a new orderCount number for when tick jumps
-        protected int calculateNewOrderCount(int orderCount, double currentTickPrice)
+        protected int CalcNewOrderCount(int orderCount, double currentTickPrice)
         {
             double tickJumpIntoRange = Math.Abs(BotState.OpenPrice - currentTickPrice) - EntryOffSetPips;
-            double pendingOrderRange = calcOrderSpacingDistance(NumberOfOrders);
+            double pendingOrderRange = CalcOrderSpacingDistance(NumberOfOrders);
             double pendingOrdersPercentageJumped = tickJumpIntoRange / pendingOrderRange;
             double newOrderCount = NumberOfOrders * pendingOrdersPercentageJumped;
 
@@ -98,7 +100,7 @@ namespace Niffler.Common.Trade
         }
 
         //Returns the entry distance from the first entry point to an order based on MultiplyOrderSpacingEveryNthOrder, OrderSpacingMultipler and OrderSpacingPips until OrderSpacingMax reached
-        protected int calcOrderSpacingDistance(int orderCount)
+        protected int CalcOrderSpacingDistance(int orderCount)
         {
             if(!UseVariableOrderSpacing)
             {
@@ -126,7 +128,7 @@ namespace Niffler.Common.Trade
         }
 
         //Set a stop loss on the last Pending Order set to catch the break away train that never comes back!
-        protected double setPendingOrderStopLossPips(int orderCount, int numberOfOrders)
+        protected double SetPendingOrderStopLossPips(int orderCount, int numberOfOrders)
         {
             if (orderCount == numberOfOrders - 1)
             {
@@ -139,7 +141,7 @@ namespace Niffler.Common.Trade
         }
 
         //Increase the volume based on Orders places and volume levels and multiplier until max volume reached
-        protected int setVolume(int orderCount)
+        protected int SetVolume(int orderCount)
         {
             if(!UseVariableVolume)
             {
@@ -157,7 +159,7 @@ namespace Niffler.Common.Trade
             return (int)volume;
         }
 
-        public void closeAllPendingOrders()
+        public void CancelAllPendingOrders()
         {
             //Close any outstanding pending orders
             foreach (PendingOrder po in Bot.PendingOrders)
@@ -166,7 +168,7 @@ namespace Niffler.Common.Trade
                 {
                     if (BotState.IsThisBotId(po.Label))
                     {
-                        Bot.CancelPendingOrderAsync(po, onTradeOperationComplete);
+                        Bot.CancelPendingOrderAsync(po, OnCancelPendingOrderOperationComplete);
                     }
                 }
                 catch (Exception e)
@@ -177,13 +179,36 @@ namespace Niffler.Common.Trade
             BotState.IsPendingOrdersClosed = true;
         }
 
-        protected void onTradeOperationComplete(TradeResult tr)
+        protected void OnCancelPendingOrderOperationComplete(TradeResult tr)
+        {
+            OnPendingOrderOperationComplete(tr, "FAILED to CANCEL pending Order,");
+        }
+
+        protected void OnPendingOrderOperationComplete(TradeResult tr, string errorMsg)
         {
             if (!tr.IsSuccessful)
             {
-                string msg = "FAILED Trade Operation for Order: " + tr.Error;
-                Bot.Print(msg, " Pending Order: ", tr.PendingOrder.Label, " ", tr.PendingOrder.TradeType, " ", System.DateTime.Now);
+                if (tr.PendingOrder != null)
+                {
+                    Reporter.ReportTradeResultError(errorMsg + "," + tr.PendingOrder.Label + "," + tr.PendingOrder.TradeType + "," + System.DateTime.Now + "," + tr.Error);
+                }
             }
         }
+
+        protected void OnPositionOperationComplete(TradeResult tr, string errorMsg)
+        {
+            if (!tr.IsSuccessful)
+            {
+                if (tr.Position != null)
+                {
+                    Reporter.ReportTradeResultError(errorMsg + "," + tr.Position.Label + "," + tr.Position.TradeType + "," + System.DateTime.Now + "," + tr.Error);
+                }
+            }
+        }
+
+
+
+
+
     }
 }

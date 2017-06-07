@@ -15,8 +15,11 @@ namespace cAlgo
         [Parameter("Source")]
         public DataSeries DataSeriesSource { get; set; }
 
-        [Parameter("# of Orders", DefaultValue = 8)]
-        public int NumberOfOrders { get; set; }
+        [Parameter("# of Limit Orders", DefaultValue = 15)]
+        public int NumberOfSellLimitOrders { get; set; }
+
+        [Parameter("# of Sell Trades placed", DefaultValue = 10)]
+        public int NumberOfPositions { get; set; }
 
         [Parameter("Volume (Lots)", DefaultValue = 20)]
         public int Volume { get; set; }
@@ -42,10 +45,10 @@ namespace cAlgo
         [Parameter("Take profit spacing max", DefaultValue = 3)]
         public int TPSpacingMax { get; set; }
 
-        [Parameter("Maximum Take Profit", DefaultValue = 0.6)]
+        [Parameter("Maximum Take Profit", DefaultValue = 0.5)]
         public double MaxTakeProfit { get; set; }
 
-        [Parameter("Minimum Take Profit", DefaultValue = 0.2)]
+        [Parameter("Minimum Take Profit", DefaultValue = 0.3)]
         public double MinTakeProfit { get; set; }
 
         [Parameter("Mins after trading start reduce position risk", DefaultValue = 10)]
@@ -54,14 +57,17 @@ namespace cAlgo
         [Parameter("Enable chase risk management", DefaultValue = true)]
         public bool chaseEnabled { get; set; }
 
-        [Parameter("Chase level Percentage", DefaultValue = 60)]
-        public int chaseLevel { get; set; }
+        [Parameter("Chase level Percentage", DefaultValue = 20)]
+        public int chaseLevel1 { get; set; }
+
+        [Parameter("Chase level Percentage", DefaultValue = 70)]
+        public int chaseLevel2 { get; set; }
 
         [Parameter("Initial Hard SL for last Order placed", DefaultValue = 5)]
         public double FinalOrderStopLoss { get; set; }
 
-        [Parameter("Triggered Hard SL buffer", DefaultValue = 20)]
-        public double HardStopLossBuffer { get; set; }
+        [Parameter("Triggered Chase Level 2 Hard SL", DefaultValue = 20)]
+        public double HardStopLoss { get; set; }
 
         [Parameter("Trailing SL fixed distance", DefaultValue = 5)]
         public double TrailingStopPips { get; set; }
@@ -70,6 +76,7 @@ namespace cAlgo
 
         //Price and Position Variables
         protected double _startPrice;
+        protected double _earlyEntryPrice;
         protected string _lastPositionLabel;
         protected TradeType _lastPositionTradeType;
         protected double _lastPositionEntryPrice;
@@ -85,12 +92,13 @@ namespace cAlgo
         protected bool _isTrailingStopsActive = false;
         protected bool _isHardSLLastProfitPrice = false;
         protected bool _isHardSLLastPositionEntryPrice = false;
-        protected bool _isHardSLLastClosedPositionEntryPrice = false;
+        protected bool _isHardSLActive = false;
         protected bool _isBreakEvenStopLossActive = false;
 
         //Swordfish State Variables
         protected bool _isPendingOrdersClosed = false;
         protected bool _startPriceCaptured = false;
+        protected bool _earlyEntryPriceCaptured = false;
         protected bool _ordersPlaced = false;
         protected bool _positionsPlaced = false;
         protected bool _isTerminated = false;
@@ -116,7 +124,7 @@ namespace cAlgo
             Positions.Opened += PositionsOnOpened;
             Positions.Closed += PositionsOnClosed;
             debugCSV.Add("PARAMETERS");
-            debugCSV.Add("NumberOfOrders," + NumberOfOrders.ToString());
+            debugCSV.Add("NumberOfOrders," + NumberOfPositions.ToString());
             debugCSV.Add("Volume," + Volume.ToString());
             debugCSV.Add("VolumeMax," + VolumeMax.ToString());
             debugCSV.Add("OrderVolumeLevels," + OrderVolumeLevels.ToString());
@@ -125,9 +133,9 @@ namespace cAlgo
             debugCSV.Add("MinTakeProfit," + MinTakeProfit.ToString());
             debugCSV.Add("ReducePositionRiskTime," + ReducePositionRiskTime.ToString());
             debugCSV.Add("ChaseEnabled," + chaseEnabled.ToString());
-            debugCSV.Add("ChaseLevel," + chaseLevel.ToString());
+            debugCSV.Add("ChaseLevel," + chaseLevel1.ToString());
             debugCSV.Add("FinalOrderStopLoss," + FinalOrderStopLoss.ToString());
-            debugCSV.Add("HardStopLossBuffer," + HardStopLossBuffer.ToString());
+            debugCSV.Add("HardStopLossBuffer," + HardStopLoss.ToString());
             debugCSV.Add("TrailingStopPips," + TrailingStopPips.ToString());
             debugCSV.Add("--------------------------");
 
@@ -143,6 +151,16 @@ namespace cAlgo
 
         protected override void OnTick()
         {
+            if (IsTradingTimeIn(4))
+            {
+                if (!_earlyEntryPriceCaptured)
+                {
+                    //Get the Price 5mins before open
+                    _earlyEntryPrice = Symbol.Ask;
+                    _earlyEntryPriceCaptured = true;
+                }
+            }
+
             // If backtesting use the Server.Time.        
             if (IsTradingTime())
             {
@@ -157,7 +175,7 @@ namespace cAlgo
                     _startPriceCaptured = true;
                 }
 
-                if (!_positionsPlaced)
+                if (!_positionsPlaced && _earlyEntryPrice - 3 < Symbol.Ask)
                 {
                     placeSellOrders();
                 }
@@ -195,7 +213,7 @@ namespace cAlgo
                         //Manage the open positions
                         ManagePositionRisk();
                     }
-                    
+
 
                     //Out of Trading time and all positions that were opened are now closed
                     if (_openedPositionsCount > 0 && _openedPositionsCount - _closedPositionsCount == 0)
@@ -206,32 +224,28 @@ namespace cAlgo
 
         protected void ManagePositionRisk()
         {
-            //Set hard stop losses as soon as Trading time is over
-            if (!_isHardSLLastPositionEntryPrice && !IsTradingTime())
-            {
-                setAllStopLossesWithBuffer(_lastPositionEntryPrice);
-                _isHardSLLastPositionEntryPrice = true;
-            }
 
             if (chaseEnabled)
             {
                 //Calculate spike retrace factor
                 double chaseFactor = calculateChaseFactor();
 
-                if (_isReducedRiskTime)
-                {
-                    //reset HARD SL Limits with reduced SL's
-                    _isHardSLLastPositionEntryPrice = true;
-
-                    //Reduce all retrace limits
-                    chaseLevel = chaseLevel / 2;
-                }
-
-                //Set hard stop losses and activate Trail if Spike has retraced between than chaseLevel1 and chaseLevel2
-                if (chaseLevel < chaseFactor)
+                //Activate BreakEven SL if chaseLevel1 has been passed
+                if (chaseLevel1 < chaseFactor)
                 {
                     //Activate Trailing Stop Losses
                     _isBreakEvenStopLossActive = true;
+                }
+
+                //Activate HardSL if chaseLevel2 has been passed
+                if (chaseLevel2 < chaseFactor)
+                {
+                    //Activate Hard SL
+                    _isHardSLActive = true;
+                    if (_isHardSLActive)
+                    {
+                        setStopLossForAllPositions(HardStopLoss);
+                    }
                 }
 
                 //Try and set a BreakEvenSL as soon as trades start taking profit
@@ -245,7 +259,6 @@ namespace cAlgo
                 {
                     setTrailingSL();
                 }
-
             }
         }
 
@@ -260,8 +273,7 @@ namespace cAlgo
                     {
                         CancelPendingOrderAsync(po, OnPendingOrderCancelledComplete);
                     }
-                }
-                catch (Exception e)
+                } catch (Exception e)
                 {
                     Print("Failed to Cancel Pending Order :" + e.Message);
                 }
@@ -299,8 +311,7 @@ namespace cAlgo
                                 ModifyPositionAsync(p, newStopLossPrice, p.TakeProfit, OnModifyTrailingStop);
                             }
                         }
-                    }
-                    catch (Exception e)
+                    } catch (Exception e)
                     {
                         Print("Failed to Modify Position:" + e.Message);
                     }
@@ -315,13 +326,14 @@ namespace cAlgo
                 //check if SL is already better than break even
                 if (isCurrentSLCloser(p, p.EntryPrice))
                     continue;
+
                 try
                 {
                     if (isThisBotId(p.Label))
                     {
                         if (_lastPositionTradeType == TradeType.Buy)
                         {
-                            if (Symbol.Ask - HardStopLossBuffer > p.EntryPrice)
+                            if (Symbol.Ask - MinTakeProfit * (1/Symbol.TickSize) > p.EntryPrice)
                             {
                                 ModifyPositionAsync(p, p.EntryPrice, p.TakeProfit, OnModifyBreakEvenStopComplete);
                             }
@@ -329,7 +341,7 @@ namespace cAlgo
 
                         if (_lastPositionTradeType == TradeType.Sell)
                         {
-                            if (Symbol.Bid + HardStopLossBuffer < p.EntryPrice)
+                            if (Symbol.Bid + MinTakeProfit * (1 / Symbol.TickSize) < p.EntryPrice)
                             {
                                 ModifyPositionAsync(p, p.EntryPrice, p.TakeProfit, OnModifyBreakEvenStopComplete);
                             }
@@ -356,8 +368,7 @@ namespace cAlgo
                     {
                         ModifyPositionAsync(p, stopLossPrice, p.TakeProfit, OnModifyHardSLComplete);
                     }
-                }
-                catch (Exception e)
+                } catch (Exception e)
                 {
                     Print("Failed to Modify Position: " + e.Message);
                 }
@@ -456,7 +467,7 @@ namespace cAlgo
         protected void placeSellOrders()
         {
             //Place Sell Limit Orders
-            for (int OrderCount = 0; OrderCount < NumberOfOrders; OrderCount++)
+            for (int OrderCount = 0; OrderCount < NumberOfPositions; OrderCount++)
             {
                 try
                 {
@@ -487,7 +498,7 @@ namespace cAlgo
         protected void placeSellLimitOrders()
         {
             //Place Sell Limit Orders
-            for (int OrderCount = 0; OrderCount < NumberOfOrders; OrderCount++)
+            for (int OrderCount = 0; OrderCount < NumberOfSellLimitOrders; OrderCount++)
             {
                 try
                 {
@@ -498,7 +509,7 @@ namespace cAlgo
                         volume = setVolume(OrderCount),
                         entryPrice = calcSellEntryPrice(OrderCount),
                         label = _botId + "-" + getTimeStamp() + _marketTimeInfo.market + "-SWF#" + OrderCount,
-                        stopLossPips = setPendingOrderStopLossPips(OrderCount, NumberOfOrders),
+                        stopLossPips = setPendingOrderStopLossPips(OrderCount, NumberOfSellLimitOrders),
                         takeProfitPips = calcTakeProfit(OrderCount)
                     };
                     if (data == null)
@@ -512,7 +523,7 @@ namespace cAlgo
                     else
                     {
                         //Tick price has 'jumped' - therefore avoid placing all PendingOrders by re-calculating the OrderCount to the equivelant entry point.
-                        OrderCount = calculateNewOrderCount(OrderCount, Symbol.Ask);
+                        OrderCount = calculateNewOrderCount(NumberOfSellLimitOrders, OrderCount, Symbol.Ask);
                         ExecuteMarketOrderAsync(data.tradeType, data.symbol, data.volume, data.label + "X", data.stopLossPips, data.takeProfitPips, OnPlaceOrderOperationComplete);
                     }
                 } catch (Exception e)
@@ -541,12 +552,13 @@ namespace cAlgo
         }
 
         //Calculate a new orderCount number for when tick jumps
-        protected int calculateNewOrderCount(int orderCount, double currentTickPrice)
+        protected int calculateNewOrderCount(int numberOfOrders, int orderCount, double currentTickPrice)
         {
             double tickJumpIntoRange = Math.Abs(_startPrice - currentTickPrice);
-            double pendingOrderRange = NumberOfOrders; //assume orders are placed at 1pip intervals
+            double pendingOrderRange = numberOfOrders;
+            //assume orders are placed at 1pip intervals
             double pendingOrdersPercentageJumped = tickJumpIntoRange / pendingOrderRange;
-            double newOrderCount = NumberOfOrders * pendingOrdersPercentageJumped;
+            double newOrderCount = numberOfOrders * pendingOrdersPercentageJumped;
 
             if (newOrderCount > orderCount)
                 return (int)newOrderCount;
@@ -636,8 +648,7 @@ namespace cAlgo
                     {
                         ModifyPositionAsync(p, p.StopLoss, p.EntryPrice - calcTakeProfit(positionCount), OnModifyTakeProfitComplete);
                     }
-                }
-                catch (Exception e)
+                } catch (Exception e)
                 {
                     Print("Failed to Modify Position: " + e.Message);
                 }
@@ -657,7 +668,7 @@ namespace cAlgo
                 _lastPositionLabel = args.Position.Label;
 
                 //Set TP for all positions based on their entry point if Pending Orders are triggered
-                if (Positions.Count > NumberOfOrders)
+                if (Positions.Count > NumberOfPositions)
                     setCascadingTakeProfit();
             }
 
@@ -713,15 +724,20 @@ namespace cAlgo
             return _marketTimeInfo.IsPlacePendingOrdersTime(IsBacktesting, Server.Time);
         }
 
+        protected bool IsTradingTimeIn(int mins)
+        {
+            return _marketTimeInfo.IsTimeBeforeOpen(IsBacktesting, Server.Time, mins);
+        }
+
         protected void setAllStopLossesWithBuffer(double SLPrice)
         {
             switch (_lastPositionTradeType)
             {
                 case TradeType.Buy:
-                    setStopLossForAllPositions(SLPrice - HardStopLossBuffer);
+                    setStopLossForAllPositions(SLPrice - HardStopLoss);
                     break;
                 case TradeType.Sell:
-                    setStopLossForAllPositions(SLPrice + HardStopLossBuffer);
+                    setStopLossForAllPositions(SLPrice + HardStopLoss);
                     break;
             }
         }
@@ -791,7 +807,7 @@ namespace cAlgo
             _divideTrailingStopPips = 1;
             _isTrailingStopsActive = false;
             _isBreakEvenStopLossActive = false;
-            _isHardSLLastClosedPositionEntryPrice = false;
+            _isHardSLActive = false;
             _isHardSLLastPositionEntryPrice = false;
             _isHardSLLastProfitPrice = false;
 
@@ -842,7 +858,7 @@ namespace cAlgo
             state += "," + _divideTrailingStopPips;
             state += "," + _isTrailingStopsActive;
             state += "," + _isBreakEvenStopLossActive;
-            state += "," + _isHardSLLastClosedPositionEntryPrice;
+            state += "," + _isHardSLActive;
             state += "," + _isHardSLLastPositionEntryPrice;
             state += "," + _isHardSLLastProfitPrice;
 
@@ -879,11 +895,11 @@ namespace cAlgo
                     _marketTimeInfo.market = "FTSE";
                     _marketTimeInfo.tz = TimeZoneInfo.FindSystemTimeZoneById("GMT Standard Time");
                     // Market for swordfish trades opens at 8:00am.
-                    _marketTimeInfo.open = new TimeSpan(16, 26, 0);
+                    _marketTimeInfo.open = new TimeSpan(16, 29, 0);
                     // Market for swordfish trades closes at 8:05am.
-                    _marketTimeInfo.close = new TimeSpan(16, 32, 0);
+                    _marketTimeInfo.close = new TimeSpan(16, 31, 0);
                     // Close all open Swordfish position at 11:29am before US opens.
-                    _marketTimeInfo.closeAll = new TimeSpan(16, 45, 0);
+                    _marketTimeInfo.closeAll = new TimeSpan(18, 45, 0);
 
                     break;
                 case "GER30":
@@ -942,11 +958,24 @@ public struct MarketTimeInfo
     {
         if (isBackTesting)
         {
-            return IsReduceRiskAt(serverTime, reduceRiskTimeFromOpen);
+            return IsTimeAfterOpen(serverTime, reduceRiskTimeFromOpen);
         }
         else
         {
-            return IsReduceRiskAt(DateTime.UtcNow, reduceRiskTimeFromOpen);
+            return IsTimeAfterOpen(DateTime.UtcNow, reduceRiskTimeFromOpen);
+        }
+    }
+
+    //Time from open
+    public bool IsTimeBeforeOpen(bool isBackTesting, DateTime serverTime, int timeFromOpen)
+    {
+        if (isBackTesting)
+        {
+            return IsTimeBeforeOpen(serverTime, timeFromOpen);
+        }
+        else
+        {
+            return IsTimeBeforeOpen(DateTime.UtcNow, timeFromOpen);
         }
     }
 
@@ -965,21 +994,28 @@ public struct MarketTimeInfo
     }
 
     //Is the current time within the period Swordfish Pending Orders can be placed.
-    public bool IsOpenAt(DateTime dateTimeUtc)
+    private bool IsOpenAt(DateTime dateTimeUtc)
     {
         DateTime tzTime = TimeZoneInfo.ConvertTimeFromUtc(dateTimeUtc, tz);
         return (tzTime.TimeOfDay >= open & tzTime.TimeOfDay <= close);
     }
 
     //Is the current time after the time period when risk should be reduced.
-    public bool IsReduceRiskAt(DateTime dateTimeUtc, int reduceRiskTimeFromOpen)
+    private bool IsTimeAfterOpen(DateTime dateTimeUtc, int timeFromOpen)
     {
         DateTime tzTime = TimeZoneInfo.ConvertTimeFromUtc(dateTimeUtc, tz);
-        return (tzTime.TimeOfDay >= open.Add(TimeSpan.FromMinutes(reduceRiskTimeFromOpen)));
+        return (tzTime.TimeOfDay >= open.Add(TimeSpan.FromMinutes(timeFromOpen)));
+    }
+
+    //Is the current time after the time period when risk should be reduced.
+    private bool IsTimeBeforeOpen(DateTime dateTimeUtc, int timeToOpen)
+    {
+        DateTime tzTime = TimeZoneInfo.ConvertTimeFromUtc(dateTimeUtc, tz);
+        return (tzTime.TimeOfDay >= open.Subtract(TimeSpan.FromMinutes(timeToOpen)));
     }
 
     //Is the current time within the period Swordfish positions can remain open.
-    public bool IsCloseAllAt(DateTime dateTimeUtc)
+    private bool IsCloseAllAt(DateTime dateTimeUtc)
     {
         DateTime tzTime = TimeZoneInfo.ConvertTimeFromUtc(dateTimeUtc, tz);
         return tzTime.TimeOfDay >= closeAll;
