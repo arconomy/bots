@@ -23,6 +23,14 @@ namespace Niffler.Bots.Client
         protected override void OnStart()
         {
 
+            var x = Business.TradingHours.GetStatus("UK100");
+
+            var a = Business.TradingHours.GetStatus("UK100", "SwordfishOpen");
+
+            var b = Business.TradingHours.GetStatus("UK100", "SwordfishRetrace");
+
+            
+
             Print("Starting Niffler Client Bot");
 
             Positions.Opened += PositionsOpened;
