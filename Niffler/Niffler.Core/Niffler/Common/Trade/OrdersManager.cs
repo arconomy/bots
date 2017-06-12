@@ -43,6 +43,7 @@ namespace Niffler.Common.Trade
         { 
             BotState = s;
             Bot = BotState.Bot;
+            Reporter = BotState.GetReporter();
             NumberOfOrders = numberOfOrders;
             EntryOffSetPips = entryOffSetPips;
             DefaultTakeProfitPips = defaultTakeProfitPips;
@@ -68,7 +69,7 @@ namespace Niffler.Common.Trade
             UseVariableOrderSpacing = true;
         }
 
-        protected void ResetBollingerBand()
+        public void ResetBollingerBand()
         {
             EntryBollingerBandPrice = 0;
         }
@@ -84,6 +85,14 @@ namespace Niffler.Common.Trade
             BollingerBand = Bot.Indicators.BollingerBands(source, periods, standDeviations, maType);
             useBollingerBandEntry = true;
         }
+
+        public bool IsOutSideBollingerBand()
+        {
+            //TO DO: Implement bollinger band in new class with own Rules
+            return true;
+        }
+
+
 
         //Calculate a new orderCount number for when tick jumps
         protected int CalcNewOrderCount(int orderCount, double currentTickPrice)
@@ -176,7 +185,6 @@ namespace Niffler.Common.Trade
                     Bot.Print("Failed to Cancel Pending Order :" + e.Message);
                 }
             }
-            BotState.IsPendingOrdersClosed = true;
         }
 
         protected void OnCancelPendingOrderOperationComplete(TradeResult tr)
@@ -192,6 +200,10 @@ namespace Niffler.Common.Trade
                 {
                     Reporter.ReportTradeResultError(errorMsg + "," + tr.PendingOrder.Label + "," + tr.PendingOrder.TradeType + "," + System.DateTime.Now + "," + tr.Error);
                 }
+                else
+                {
+                    Reporter.ReportTradeResultError(tr.Error.ToString());
+                }
             }
         }
 
@@ -202,6 +214,10 @@ namespace Niffler.Common.Trade
                 if (tr.Position != null)
                 {
                     Reporter.ReportTradeResultError(errorMsg + "," + tr.Position.Label + "," + tr.Position.TradeType + "," + System.DateTime.Now + "," + tr.Error);
+                }
+                else
+                {
+                    Reporter.ReportTradeResultError(tr.Error.ToString());
                 }
             }
         }

@@ -11,7 +11,7 @@ namespace Niffler.Rules
     {
         public IRuleOnPositionEvent(int priority) : base(priority) { }
 
-        public void run(Position position)
+        public void Run(Position position)
         {
             if (!Initialised)
                 return;
@@ -19,11 +19,12 @@ namespace Niffler.Rules
             if (!ExecuteOnce)
             {
                 ExecutionCount++;
-                execute(position);
+                Execute(position);
+                RunExecutionLogging();
             }
         }
 
         override protected void Execute() { /* IRule implementation not required */}
-        abstract protected void execute(Position position);
+        abstract protected void Execute(Position position);
     }
 }

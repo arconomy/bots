@@ -9,7 +9,7 @@ using Niffler.Common.BackTest;
 
 namespace Niffler.Common
 {
-    class State : IResetState
+    class State
     {
         // Define the Type of Bot this State manages
         public enum BotType
@@ -21,12 +21,16 @@ namespace Niffler.Common
         public BotType Type { get; }
         public string BotId { get; set; }
 
+
+        //Only State variable that is not Reset - it is set in a rule to start trading and a rule to stop trading
+        public bool IsTrading { get; set; }
+
         //State Variables
         public bool IsPendingOrdersClosed { get; set; }
         public bool OpenPriceCaptured { get; set; }
         public bool OrdersPlaced { get; set; }
-        public bool IsTerminated { get; set; }
         public bool IsReset { get; set; }
+        public bool IsOpenTime { get; set; }
         public bool IsAfterCloseTime { get; set; }
         public bool IsAfterReducedRiskTime { get; set; }
         public bool IsAfterTerminateTime { get; set; }
@@ -72,43 +76,6 @@ namespace Niffler.Common
             return Reporter;
         }
 
-        public void CheckTimeState()
-        {
-            if (!IsAfterCloseTime && MarketInfo.IsAfterCloseTime())
-                IsAfterCloseTime = true;
-
-            if (!IsAfterReducedRiskTime && MarketInfo.IsAfterReduceRiskTime())
-                IsAfterReducedRiskTime = true;
-
-            if (!IsTerminated && !IsAfterTerminateTime && MarketInfo.IsAfterTerminateTime())
-                IsAfterTerminateTime = true;
-        }
-
-        public void Reset()
-        {
-            //Set default Swordfish State Variables
-            IsPendingOrdersClosed = false;
-            OpenPriceCaptured = false;
-            OrdersPlaced = false;
-            IsTerminated = false;
-            IsReset = true;
-            IsAfterCloseTime = false;
-            IsAfterReducedRiskTime = false;
-            IsAfterTerminateTime = false;
-            
-            //Price and Position Variables
-            OpenPrice = 0;
-            LastPositionLabel = "NO LAST POSITION SET";
-            LastPositionEntryPrice = 0;
-            LastProfitPositionEntryPrice = 0;
-            LastProfitPositionClosePrice = 0;
-            OpenedPositionsCount = 0;
-            ClosedPositionsCount = 0;
-
-            //Reset reporting
-            Reporter.Reset();
-    }
-
         private string GenerateBotId()
         {
             Random randomIdGenerator = new Random();
@@ -143,13 +110,6 @@ namespace Niffler.Common
             return percentClosed;
         }
 
-        public void CaptureLastProfitPositionPrices(Position p)
-        {
-            LastProfitPositionClosePrice = Bot.History.FindLast(p.Label, Bot.Symbol, p.TradeType).ClosingPrice;
-            LastProfitPositionEntryPrice = p.EntryPrice;
-        }
-
-
         //Check whether a position or order is managed by this bot instance.
         public bool IsThisBotId(string label)
         {
@@ -179,8 +139,7 @@ namespace Niffler.Common
             state += "," + OrdersPlaced;
             state += "," + IsAfterCloseTime;
             state += "," + IsAfterReducedRiskTime;
-            state += "," + IsTerminated;
-            state += "," + IsReset;
+            state += "," + IsOpenTime;
 
             return state;
         }

@@ -41,7 +41,7 @@ namespace Niffler.Common.Trade
                     Bot.Print("Failed to Close Position: " + e.Message);
                 }
             }
-            BotState.IsTerminated = true;
+            BotState.IsOpenTime = true;
         }
 
         protected void OnPositionCloseOperationComplete(TradeResult tr)

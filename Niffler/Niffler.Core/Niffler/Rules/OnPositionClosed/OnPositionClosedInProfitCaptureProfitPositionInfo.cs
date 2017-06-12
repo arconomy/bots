@@ -14,8 +14,14 @@ namespace Niffler.Rules
     {
         public OnPositionClosedInProfitCaptureProfitPositionInfo(int priority) : base(priority) {}
 
+        //If rule should only execute when bot is trading return TRUE, default is FALSE
+        protected override bool IsTradingRule()
+        {
+            return true;
+        }
+
         //Report closing position trade
-        override protected void execute(Position position)
+        override protected void Execute(Position position)
         {
             if (BotState.IsThisBotId(position.Label))
             {
@@ -23,16 +29,24 @@ namespace Niffler.Rules
                 if (position.GrossProfit > 0)
                 {
                     //capture last position take profit price
-                    BotState.CaptureLastProfitPositionPrices(position);
+                    BotState.LastProfitPositionClosePrice = Bot.History.FindLast(position.Label, Bot.Symbol, position.TradeType).ClosingPrice;
+                    BotState.LastProfitPositionEntryPrice = position.EntryPrice;
                 }
             }
         }
 
-        override public void ReportExecution()
+        // reset any botstate variables to the state prior to executing rule
+        override protected void Reset()
         {
-            // report stats on rule execution 
-            // e.g. execution rate, last position rule applied to, number of positions impacted by rule
-            // Gonna need some thought here.
+            BotState.LastProfitPositionEntryPrice = 0;
+            BotState.LastProfitPositionClosePrice = 0;
+        }
+
+        // report stats on rule execution 
+        // e.g. execution rate, last position rule applied to, number of positions impacted by rule
+        override public void Report()
+        {
+
         }
     }
 }

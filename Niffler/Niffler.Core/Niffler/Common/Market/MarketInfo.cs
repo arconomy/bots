@@ -171,7 +171,7 @@ namespace Niffler.Common.Market
             }
             else
             {
-                return IsTradingDay(dateTimeNow.DayOfWeek) && IsMinsAfterOpenTime(dateTimeNow, CloseAfterMinutes);
+                return IsTradingDay(dateTimeNow.DayOfWeek) && IsMinsAfterOpenTime(dateTimeNow, 0) && !IsMinsAfterOpenTime(dateTimeNow, CloseAfterMinutes);
             }
         }
 

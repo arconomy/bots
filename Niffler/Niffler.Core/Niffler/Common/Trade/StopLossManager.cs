@@ -7,6 +7,7 @@ using cAlgo;
 using cAlgo.API;
 using cAlgo.API.Internals;
 using cAlgo.API.Indicators;
+using Niffler.Common.BackTest;
 
 namespace Niffler.Common.Trade
 {
@@ -18,11 +19,13 @@ namespace Niffler.Common.Trade
         private double LastOrderStopLossPips { get; set; }
         private State BotState { get;  set; }
         private Robot Bot { get; set; }
+        private Reporter Reporter { get; set; }
 
         public StopLossManager(State s, double hardStopLossBufferPips, double lastOrderStopLossPips)
         {
             BotState = s;
             Bot = BotState.Bot;
+            Reporter = BotState.GetReporter();
             IsBreakEvenStopLossActive = false;
             HardStopLossBufferPips = hardStopLossBufferPips;
             ResetHardStopLossBufferPips = hardStopLossBufferPips;
@@ -52,7 +55,7 @@ namespace Niffler.Common.Trade
                 {
                     if (BotState.IsThisBotId(p.Label))
                     {
-                        Bot.ModifyPositionAsync(p, stopLossPrice, p.TakeProfit, OnTradeOperationComplete);
+                        Bot.ModifyPositionAsync(p, stopLossPrice, p.TakeProfit, OnPositionSLOperationComplete);
                     }
                 }
                 catch (Exception e)
@@ -99,7 +102,7 @@ namespace Niffler.Common.Trade
                         {
                             if (breakEvenTriggerPrice > p.EntryPrice)
                             {
-                                Bot.ModifyPositionAsync(p, p.EntryPrice + SLBufferPips, p.TakeProfit, OnTradeOperationComplete);
+                                Bot.ModifyPositionAsync(p, p.EntryPrice + SLBufferPips, p.TakeProfit, OnBreakEvenSLOperationComplete);
                             }
                         }
 
@@ -107,7 +110,7 @@ namespace Niffler.Common.Trade
                         {
                             if (breakEvenTriggerPrice < p.EntryPrice)
                             {
-                                Bot.ModifyPositionAsync(p, p.EntryPrice - SLBufferPips, p.TakeProfit, OnTradeOperationComplete);
+                                Bot.ModifyPositionAsync(p, p.EntryPrice - SLBufferPips, p.TakeProfit, OnBreakEvenSLOperationComplete);
                             }
                         }
                     }
@@ -119,19 +122,25 @@ namespace Niffler.Common.Trade
             }
         }
 
+        protected void OnBreakEvenSLOperationComplete(TradeResult tr)
+        {
+            OnPositionOperationComplete(tr, "FAILED to set BreakEven StopLoss for position");
+        }
 
+        protected void OnPositionSLOperationComplete(TradeResult tr)
+        {
+            OnPositionOperationComplete(tr,"FAILED to UPDATE StopLoss for position");
+        }
 
-        protected void OnTradeOperationComplete(TradeResult tr)
+        protected void OnPositionOperationComplete(TradeResult tr, string errorMsg)
         {
             if (!tr.IsSuccessful)
             {
-                string msg = "FAILED to update BreakEvenStop : " + tr.Error;
                 if (tr.Position != null)
-                    Bot.Print(msg, " Position: ", tr.Position.Label, " ", tr.Position.TradeType, " ", System.DateTime.Now);
-                if (tr.PendingOrder != null)
-                    Bot.Print(msg, " Pending Order: ", tr.PendingOrder.Label, " ", tr.PendingOrder.TradeType, " ", System.DateTime.Now);
+                {
+                    Reporter.ReportTradeResultError(errorMsg + "," + tr.Position.Label + "," + tr.Position.TradeType + "," + System.DateTime.Now + "," + tr.Error);
+                }
             }
         }
-
     }
 }

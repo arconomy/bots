@@ -8,6 +8,7 @@ using Niffler.Common.Trade;
 using Niffler.Common.Market;
 using Niffler.Common.TrailingStop;
 using cAlgo.API;
+using Niffler.Common.BackTest;
 
 namespace Niffler.Rules
 {
@@ -20,6 +21,7 @@ namespace Niffler.Rules
         public StopLossManager StopLossManager { get; }
         public FixedTrailingStop FixedTrailingStop { get;}
         public State BotState { get; }
+        private Reporter Reporter { get; set; }
         private List<IRule> OnTickRules = new List<IRule>();
         private List<IRuleOnPositionEvent> OnPositionOpenedRules = new List<IRuleOnPositionEvent>();
         private List<IRuleOnPositionEvent> OnPositionClosedRules = new List<IRuleOnPositionEvent>();
@@ -29,6 +31,7 @@ namespace Niffler.Rules
         public RulesManager(State botState, SellLimitOrdersTrader sellLimitOrdersTrader, BuyLimitOrdersTrader buyLimitOrdersTrader, StopLossManager stopLossManager, FixedTrailingStop fixedTrailingStop)
         {
             BotState = botState;
+            Reporter = botState.GetReporter();
             SellLimitOrdersTrader = sellLimitOrdersTrader;
             BuyLimitOrdersTrader = buyLimitOrdersTrader;
             PositionsManager = new PositionsManager(BotState);
@@ -109,9 +112,6 @@ namespace Niffler.Rules
 
         public void OnTick()
         {
-            //Check the state based on the time from open
-            BotState.CheckTimeState();
-
             //Run the onTick Rules
             RunAllRules(OnTickRules);
         }
@@ -144,7 +144,7 @@ namespace Niffler.Rules
 
         public void RunAllPositionRules(List<IRuleOnPositionEvent> rules,Position position)
         {
-            rules.ForEach(IRuleOnPositionEvent => IRuleOnPositionEvent.run(position));
+            rules.ForEach(IRuleOnPositionEvent => IRuleOnPositionEvent.Run(position));
         }
 
         public void RunAllRules(List<IRule> rules)
@@ -154,30 +154,30 @@ namespace Niffler.Rules
 
         public void ResetRules()
         {
-            OnTickRules.ForEach(IRule => IRule.Reset());
-            OnBarRules.ForEach(IRule => IRule.Reset());
-            OnTimerRules.ForEach(IRule => IRule.Reset());
-            OnPositionClosedRules.ForEach(IRule => IRule.Reset());
-            OnPositionOpenedRules.ForEach(IRule => IRule.Reset());
+            OnTickRules.ForEach(IRule => IRule.ResetRule());
+            OnBarRules.ForEach(IRule => IRule.ResetRule());
+            OnTimerRules.ForEach(IRule => IRule.ResetRule());
+            OnPositionClosedRules.ForEach(IRule => IRule.ResetRule());
+            OnPositionOpenedRules.ForEach(IRule => IRule.ResetRule());
         }
 
         public void Reset()
         {
-            ReportResults();
-            ResetRules();
-            SpikeManager.Reset();
-            FixedTrailingStop.Reset();
-            BotState.Reset();
+                ReportResults();
+                ResetRules();
+                SpikeManager.Reset();
+                FixedTrailingStop.Reset();
+                Reporter.Reset();
         }
 
         //Report Summary Rules Execution Results
         private void ReportResults()
         {
-            OnTickRules.ForEach(IRule => IRule.ReportExecutionResults());
-            OnBarRules.ForEach(IRule => IRule.ReportExecutionResults());
-            OnTimerRules.ForEach(IRule => IRule.ReportExecutionResults());
-            OnPositionOpenedRules.ForEach(IRule => IRule.ReportExecutionResults());
-            OnPositionClosedRules.ForEach(IRule => IRule.ReportExecutionResults());
+            OnTickRules.ForEach(IRule => IRule.ReportExecutionCount());
+            OnBarRules.ForEach(IRule => IRule.ReportExecutionCount());
+            OnTimerRules.ForEach(IRule => IRule.ReportExecutionCount());
+            OnPositionOpenedRules.ForEach(IRule => IRule.ReportExecutionCount());
+            OnPositionClosedRules.ForEach(IRule => IRule.ReportExecutionCount());
             BotState.GetReporter().Report();
         }
 

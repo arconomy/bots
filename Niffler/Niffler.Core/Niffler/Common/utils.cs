@@ -3,16 +3,22 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using cAlgo.API;
 
 namespace Niffler.Common
 {
     class Utils
     {
-        public static string GetTimeStamp(bool unformatted = false)
+        public static string GetTimeStamp(Robot bot, bool unformatted = false)
         {
+
+            DateTime datetime = System.DateTime.Now;
+            if (bot.IsBacktesting)
+                datetime = bot.Server.Time;
+
             if (unformatted)
-                return System.DateTime.Now.Year.ToString() + System.DateTime.Now.Month + System.DateTime.Now.Day + System.DateTime.Now.Minute + System.DateTime.Now.Second;
-            return System.DateTime.Now.Year + "-" + System.DateTime.Now.Month + "-" + System.DateTime.Now.Day;
+                return datetime.Year.ToString() + datetime.Month + datetime.Day + datetime.Minute + datetime.Second;
+            return datetime.Year + "-" + datetime.Month + "-" + datetime.Day;
         }
     }
 }

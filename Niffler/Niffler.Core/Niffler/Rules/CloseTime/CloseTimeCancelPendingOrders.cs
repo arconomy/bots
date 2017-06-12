@@ -12,23 +12,35 @@ namespace Niffler.Rules
 {
     class CloseTimeCancelPendingOrders : IRule
     {
-        public CloseTimeCancelPendingOrders(int priority) : base(priority) {}
+        public CloseTimeCancelPendingOrders(int priority) : base(priority) { }
 
-        // If it is after CloseTime and remaining pending orders have not been closed then close all pending orders
+        //If rule should only execute when bot is trading return TRUE, default is FALSE
+        protected override bool IsTradingRule()
+        {
+            return true;
+        }
+
+        //If it is after CloseTime and remaining pending orders have not been closed then close all pending orders
         override protected void Execute()
         {
             if (!BotState.IsPendingOrdersClosed && BotState.IsAfterCloseTime)
             {
                 SellLimitOrdersTrader.CancelAllPendingOrders();
+                BotState.IsPendingOrdersClosed = true;
                 ExecuteOnceOnly();
             }
         }
 
-        override public void ReportExecution()
+        override protected void Reset()
         {
-            // report stats on rule execution 
-            // e.g. execution rate, last position rule applied to, number of positions impacted by rule
-            // Gonna need some thought here.
+            BotState.IsPendingOrdersClosed = false;
+        }
+
+        // report stats on rule execution 
+        // e.g. execution rate, last position rule applied to, number of positions impacted by rule
+        override public void Report()
+        {
+            
         }
     }
 }

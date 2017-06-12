@@ -14,8 +14,14 @@ namespace Niffler.Rules
     {
         public OnPositionClosedLastEntryPositionStopLossTriggeredCloseAll(int priority) : base(priority) {}
 
+        //If rule should only execute when bot is trading return TRUE, default is FALSE
+        protected override bool IsTradingRule()
+        {
+            return true;
+        }
+
         //Last position's SL has been triggered for a loss - CLOSING ALL POSITIONS
-        override protected void execute(Position position)
+        override protected void Execute(Position position)
         {
             if (BotState.IsThisBotId(position.Label))
             {
@@ -23,18 +29,24 @@ namespace Niffler.Rules
                 {
                     BuyLimitOrdersTrader.CancelAllPendingOrders();
                     PositionsManager.CloseAllPositions();
-                    BotState.IsTerminated = true;
+                    BotState.IsReset = true;
                     ExecuteOnceOnly();
                 }
 
             }
         }
 
-        override public void ReportExecution()
+        // reset any botstate variables to the state prior to executing rule
+        override protected void Reset()
         {
-            // report stats on rule execution 
-            // e.g. execution rate, last position rule applied to, number of positions impacted by rule
-            // Gonna need some thought here.
+            BotState.IsReset = false;
+        }
+
+        // report stats on rule execution 
+        // e.g. execution rate, last position rule applied to, number of positions impacted by rule
+        override public void Report()
+        {
+
         }
     }
 }

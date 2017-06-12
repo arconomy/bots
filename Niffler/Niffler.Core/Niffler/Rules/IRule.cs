@@ -57,19 +57,31 @@ namespace Niffler.Rules
             if (!Initialised)
                 return;
 
+            if(IsTradingRule())
+            {
+                if (!BotState.IsTrading)
+                    return;
+            }
+
             if(!ExecuteOnce)
             {
                 ExecutionCount++;
                 Execute();
-                if(LogEveryExecution)
-                    LogExecution();
+                RunExecutionLogging();
             }
         }
 
-        public void Reset()
+        protected void RunExecutionLogging()
+        {
+            if (LogEveryExecution)
+                LogExecution();
+        }
+
+        public void ResetRule()
         {
             ExecuteOnce = false;
             ExecutionCount = 0;
+            Reset();
         }
 
         //Flag that can be set by implemented Rule to ensure rule is only executed once
@@ -78,12 +90,12 @@ namespace Niffler.Rules
             ExecuteOnce = true;
         }
         
-        public void ReportExecutionResults()
+        public void ReportExecutionCount()
         {
-            Reporter.ReportRuleExecutionResults(this,ExecutionCount);
+            Reporter.ReportRuleExecutionCount(this,ExecutionCount);
         }
         
-        //Use to log Rules everytime they execute in order to see which rules executed prior to a trade closing
+        //Use to log Rules everytime Rule executes in order to see which rules executed prior to a trade closing
         protected void LogExecutions()
         {
             LogEveryExecution = true;
@@ -93,7 +105,10 @@ namespace Niffler.Rules
         {
             Reporter.LogRuleExecution(this);
         }
-        abstract public void ReportExecution();
+
+        abstract protected bool IsTradingRule();
         abstract protected void Execute();
+        abstract protected void Reset();
+        abstract public void Report();
     }
 }

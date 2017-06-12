@@ -43,13 +43,13 @@ namespace cAlgo
         public override int NumberOfOrders { get; set; }
 
         [Parameter("Volume (Lots)", DefaultValue = 1)]
-        public override int Volume { get; set; }
+        public override int VolumeBase { get; set; }
 
         [Parameter("Volume Max (Lots)", DefaultValue = 200)]
         public override int VolumeMax { get; set; }
 
         [Parameter("# Order placed before Volume multiplies", DefaultValue = 5)]
-        public override int OrderVolumeLevels { get; set; }
+        public override int VolumeMultiplierOrderLevels { get; set; }
 
         [Parameter("Volume multipler", DefaultValue = 2)]
         public override double VolumeMultipler { get; set; }

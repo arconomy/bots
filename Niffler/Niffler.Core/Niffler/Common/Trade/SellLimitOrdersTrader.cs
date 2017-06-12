@@ -29,7 +29,7 @@ namespace Niffler.Common.Trade
                         symbol = Bot.Symbol,
                         volume = SetVolume(OrderCount),
                         entryPrice = CalcSellEntryPrice(OrderCount),
-                        label = BotState.BotId + "-" + Utils.GetTimeStamp() + BotState.GetMarketName() + "-SWF#" + OrderCount,
+                        label = BotState.BotId + "-" + Utils.GetTimeStamp(Bot) + BotState.GetMarketName() + "-SWF#" + OrderCount,
                         stopLossPips = SetPendingOrderStopLossPips(OrderCount, NumberOfOrders),
                         takeProfitPips = DefaultTakeProfitPips * (1 / Bot.Symbol.TickSize)
                     };
@@ -53,10 +53,6 @@ namespace Niffler.Common.Trade
                     Bot.Print("Failed to place Sell Limit Order: " + e.Message);
                 }
             }
-
-            //All Sell Limit Orders have been placed
-            BotState.OrdersPlaced = true;
-            ResetBollingerBand();
         }
 
         protected double CalcSellEntryPrice(int orderCount)

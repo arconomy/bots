@@ -34,7 +34,7 @@ namespace Niffler.Common.BackTest
             SpikeManager = spikeManager;
             BotName = Bot.GetType().Name;
             ReportDirectory = "C:\\Users\\alist\\Desktop\\" + BotName;
-            ReportFile = "C:\\Users\\alist\\Desktop\\" + BotName + "\\" + BotName + "-" + BotState.GetMarketName() + "-" + BotState.BotId + "-" + Utils.GetTimeStamp(true) + ".csv";
+            ReportFile = "C:\\Users\\alist\\Desktop\\" + BotName + "\\" + BotName + "-" + BotState.GetMarketName() + "-" + BotState.BotId + "-" + Utils.GetTimeStamp(Bot,true) + ".csv";
             Reset();
         }
 
@@ -84,10 +84,8 @@ namespace Niffler.Common.BackTest
 
         public void LogRuleExecution(IRule rule)
         {
-            RulesExecuted.Add(System.DateTime.Now + "," + rule.GetType().Name);
-
             //Add rule logging to TradeResults rather than RulesExecuted to see the Rules that were executed just prior to a position closing
-            WriteCSVFile(TradeResults);
+            TradeResults.Add(Utils.GetTimeStamp(Bot) + "," + rule.GetType().Name);
         }
 
         private string GetReportRulesHeaders()
@@ -95,9 +93,9 @@ namespace Niffler.Common.BackTest
             return "Date/Time" + "," + "Rule" + "," + "Execution Count";
         }
 
-        public void ReportRuleExecutionResults(IRule rule, int executionCount)
+        public void ReportRuleExecutionCount(IRule rule, int executionCount)
         {
-            RulesExecuted.Add(System.DateTime.Now + "," + rule.GetType().Name + "," + executionCount);
+            RulesExecuted.Add(Utils.GetTimeStamp(Bot) + "," + rule.GetType().Name + "," + executionCount);
         }
 
         private void AddTradeToTotals(Position p)
@@ -141,7 +139,6 @@ namespace Niffler.Common.BackTest
             TradeResults.Add(msg);
         }
 
-
         private void WriteCSVFile(List<String> data)
         {
             if (!System.IO.Directory.Exists(ReportDirectory))
@@ -156,8 +153,5 @@ namespace Niffler.Common.BackTest
                 System.IO.File.WriteAllLines(ReportFile, data.ToArray());
             }
         }
-
-
-
     }
 }

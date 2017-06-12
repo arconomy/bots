@@ -14,21 +14,33 @@ namespace Niffler.Rules
     {
         public TerminateTimeCloseAllPositionsReset(int priority) : base(priority) { }
 
+        //If rule should only execute when bot is trading return TRUE, default is FALSE
+        protected override bool IsTradingRule()
+        {
+            return true;
+        }
+
         //If trades still open at Terminate Time then take the hit and close remaining positions
         override protected void Execute()
         {
             if(BotState.IsAfterTerminateTime)
             {
                 PositionsManager.CloseAllPositions();
-                RulesManager.Reset();
+                BotState.IsReset = true;
             }
         }
 
-        override public void ReportExecution()
+        // reset any botstate variables to the state prior to executing rule
+        override protected void Reset()
         {
-            // report stats on rule execution 
-            // e.g. execution rate, last position rule applied to, number of positions impacted by rule
-            // Gonna need some thought here.
+            BotState.IsReset = false;
+        }
+
+        // report stats on rule execution 
+        // e.g. execution rate, last position rule applied to, number of positions impacted by rule
+        override public void Report()
+        {
+
         }
     }
 }

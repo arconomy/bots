@@ -14,8 +14,14 @@ namespace Niffler.Rules
     {
         public OnPositionClosedReportTrade(int priority) : base(priority) {}
 
+        //If rule should only execute when bot is trading return TRUE, default is FALSE
+        protected override bool IsTradingRule()
+        {
+            return true;
+        }
+
         //Report closing position trade
-        override protected void execute(Position position)
+        override protected void Execute(Position position)
         {
             if (BotState.IsThisBotId(position.Label))
             {
@@ -24,11 +30,17 @@ namespace Niffler.Rules
             }
         }
 
-        override public void ReportExecution()
+        // reset any botstate variables to the state prior to executing rule
+        override protected void Reset()
         {
-            // report stats on rule execution 
-            // e.g. execution rate, last position rule applied to, number of positions impacted by rule
-            // Gonna need some thought here.
+            BotState.ClosedPositionsCount = 0;
+        }
+
+        // report stats on rule execution 
+        // e.g. execution rate, last position rule applied to, number of positions impacted by rule
+        override public void Report()
+        {
+
         }
     }
 }

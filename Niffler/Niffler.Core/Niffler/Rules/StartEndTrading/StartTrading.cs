@@ -10,30 +10,24 @@ using Niffler.Common;
 
 namespace Niffler.Rules
 {
-    class ReduceRiskTimeSetHardSLToLastProfitPositionCloseWithBuffer : IRule
+    class StartTrading : IRule
     {
-        public ReduceRiskTimeSetHardSLToLastProfitPositionCloseWithBuffer(int priority) : base(priority) { }
+        public StartTrading(int priority) : base(priority) { }
 
         //If rule should only execute when bot is trading return TRUE, default is FALSE
         protected override bool IsTradingRule()
         {
-            return true;
+            return false;
         }
 
-        //If after reduce risk time then set hard stop losses to Last Profit Positions Entry Price with buffer
+        //The IsTrading flag is the only state variable that is not reset by the rule that sets it
         override protected void Execute()
         {
-            if (BotState.IsAfterReducedRiskTime)
+            if (BotState.IsOpenTime)
             {
-                if (BotState.OrdersPlaced && BotState.PositionsRemainOpen())
-                {
-                    //If Hard SL has not been set yet
-                    if (BotState.LastProfitPositionClosePrice > 0)
-                    {
-                        StopLossManager.SetSLWithBufferForAllPositions(BotState.LastProfitPositionClosePrice);
-                    }
-                }
-            }
+                BotState.IsTrading = true;
+                ExecuteOnceOnly();
+            } 
         }
 
         // reset any botstate variables to the state prior to executing rule

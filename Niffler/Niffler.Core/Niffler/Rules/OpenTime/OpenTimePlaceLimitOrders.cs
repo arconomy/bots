@@ -10,35 +10,49 @@ using Niffler.Common;
 
 namespace Niffler.Rules
 {
-    class OpenTradingPlaceLimitOrders : IRule
+    class OpenTimePlaceLimitOrders : IRule
     {
-        public OpenTradingPlaceLimitOrders(int priority) : base(priority) { }
+        public OpenTimePlaceLimitOrders(int priority) : base(priority) { }
+
+        //If rule should only execute when bot is trading return TRUE, default is FALSE
+        protected override bool IsTradingRule()
+        {
+            return true;
+        }
 
         //Get the Opening price for the trading period
         override protected void Execute()
         {
-            if (MarketInfo.IsBotTradingOpen())
+            if (BotState.IsOpenTime)
             {
                 //Price moves TriggerOrderPlacementPips UP from open then look to set SELL LimitOrders
                 if (BotState.OpenPrice + SellLimitOrdersTrader.EntryTriggerOrderPlacementPips < Bot.Symbol.Bid)
                 {
                     SellLimitOrdersTrader.PlaceSellLimitOrders();
+                    BotState.OrdersPlaced = true;
                     ExecuteOnceOnly();
                 }
                 //Price moves 5pts DOWN from open then look to set BUY LimitOrders
                 else if (BotState.OpenPrice - BuyLimitOrdersTrader.EntryTriggerOrderPlacementPips > Bot.Symbol.Ask)
                 {
                     BuyLimitOrdersTrader.PlaceBuyLimitOrders();
+                    BotState.OrdersPlaced = true;
                     ExecuteOnceOnly();
                 }
             }
         }
 
-        override public void ReportExecution()
+        // reset any botstate variables to the state prior to executing rule
+        override protected void Reset()
         {
-            // report stats on rule execution 
-            // e.g. execution rate, last position rule applied to, number of positions impacted by rule
-            // Gonna need some thought here.
+            BotState.OrdersPlaced = false;
+        }
+
+        // report stats on rule execution 
+        // e.g. execution rate, last position rule applied to, number of positions impacted by rule
+        override public void Report()
+        {
+
         }
     }
 }
