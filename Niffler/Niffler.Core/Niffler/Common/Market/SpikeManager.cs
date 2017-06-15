@@ -88,7 +88,14 @@ namespace Niffler.Common.Market
 
         public bool IsSpikeCaptured()
         {
-            return Spike.isCaptured();
+            if(Spike != null)
+            {
+                return Spike.isCaptured();
+            }
+            else
+            {
+                return false;
+            }
         }
 
         //TO DO: Refactor where the a Spike Object is created and managed.

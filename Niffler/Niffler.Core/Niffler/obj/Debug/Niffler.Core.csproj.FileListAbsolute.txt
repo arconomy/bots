@@ -44,3 +44,4 @@ C:\Users\alist\Documents\cAlgo\Sources\Niffler\Niffler.Core\Niffler\bin\Debug\cA
 C:\Users\alist\Documents\cAlgo\Sources\Niffler\Niffler.Core\Niffler\bin\Debug\Microsoft.ServiceBus.xml
 C:\Users\alist\Documents\cAlgo\Sources\Niffler\Niffler.Core\Niffler\obj\Debug\Niffler.dll
 C:\Users\alist\Documents\cAlgo\Sources\Niffler\Niffler.Core\Niffler\obj\Debug\Niffler.pdb
+C:\Users\alist\Documents\cAlgo\Sources\Niffler\Niffler.Core\Niffler\obj\Debug\Niffler.Core.csprojResolveAssemblyReference.cache

@@ -4,181 +4,1175 @@ using cAlgo.API;
 using cAlgo.API.Indicators;
 using cAlgo.API.Internals;
 using cAlgo.Indicators;
+using System.Collections.Generic;
 
 namespace cAlgo
 {
-    [Robot(TimeZone = TimeZones.GMTStandardTime, AccessRights = AccessRights.None)]
-    public class OptionsExpiry : Robot
+    [Robot(TimeZone = TimeZones.UTC, AccessRights = AccessRights.FileSystem)]
+    public class Divibot : Robot
     {
 
+        [Parameter("Source")]
+        public DataSeries DataSeriesSource { get; set; }
 
-        // OPTIONS EXPIRY TRADE
+        [Parameter("# of Limit Orders", DefaultValue = 15)]
+        public int NumberOfBuyLimitOrders { get; set; }
 
-        // Written by: Andrew
-        // Backtested by: N/A
+        [Parameter("Offset from 10.09am Price for 1st Limit Order", DefaultValue = 3)]
+        public int OrderEntryOffset { get; set; }
 
-        // INSTRUCTIONS
-        // Turn on before the Trade Takes Place (anytime that day or that week before).
-        // Turn off anytime before the next friday.
-        // It will ONLY trade on a Friday at 10:10am (GMT). 
-        // So if the Options is not on a Friday you need to modify the bot.
+        [Parameter("# of Buy Trades placed", DefaultValue = 10)]
+        public int NumberOfPositions { get; set; }
 
+        [Parameter("Volume (Lots)", DefaultValue = 20)]
+        public int Volume { get; set; }
 
+        [Parameter("Volume Max (Lots)", DefaultValue = 100)]
+        public int VolumeMax { get; set; }
 
-        [Parameter("Contract Size", DefaultValue = 1)]
-        public int ContractSize { get; set; }
+        [Parameter("# Order placed before Volume multiplies", DefaultValue = 2)]
+        public int OrderVolumeLevels { get; set; }
 
-        [Parameter("Pending Order Validity (mins)", DefaultValue = 7)]
-        public int PendingOrderMins { get; set; }
+        [Parameter("Volume multipler", DefaultValue = 2)]
+        public double VolumeMultipler { get; set; }
 
-        [Parameter("Minimum Movement for Validation", DefaultValue = 8)]
-        public int MinMovementForValidity { get; set; }
+        [Parameter("Take profity interval spacing in Pips", DefaultValue = 0.5)]
+        public double TPSpacing { get; set; }
 
-        [Parameter("Gaps between Limit Orders", DefaultValue = 1)]
-        public int GapsBetweenOrders { get; set; }
+        [Parameter("# positions open before TP spacing increases by multiplier", DefaultValue = 20)]
+        public int TPSpacingLevels { get; set; }
 
-        [Parameter("Number of Orders", DefaultValue = 10)]
-        public int NumberOfOrders { get; set; }
+        [Parameter("Take profit spacing multipler", DefaultValue = 2)]
+        public double TPSpacingMultipler { get; set; }
 
-        [Parameter("Take Proft (Pts.)", DefaultValue = 6)]
-        public int TakeProfit { get; set; }
+        [Parameter("Take profit spacing max", DefaultValue = 3)]
+        public int TPSpacingMax { get; set; }
 
+        [Parameter("Maximum Take Profit", DefaultValue = 0.5)]
+        public double MaxTakeProfit { get; set; }
 
+        [Parameter("Minimum Take Profit", DefaultValue = 0.3)]
+        public double MinTakeProfit { get; set; }
+
+        [Parameter("Mins after trading start reduce position risk", DefaultValue = 10)]
+        public int ReducePositionRiskTime { get; set; }
+
+        [Parameter("Enable chase risk management", DefaultValue = true)]
+        public bool chaseEnabled { get; set; }
+
+        [Parameter("Chase level Percentage", DefaultValue = 20)]
+        public int chaseLevel1 { get; set; }
+
+        [Parameter("Chase level Percentage", DefaultValue = 70)]
+        public int chaseLevel2 { get; set; }
+
+        [Parameter("Initial Hard SL for last Order placed", DefaultValue = 5)]
+        public double FinalOrderStopLoss { get; set; }
+
+        [Parameter("Triggered Chase Level 2 Hard SL", DefaultValue = 20)]
+        public double HardStopLoss { get; set; }
+
+        [Parameter("Trailing SL fixed distance", DefaultValue = 5)]
+        public double TrailingStopPips { get; set; }
+
+        protected MarketTimeInfo _marketTimeInfo;
+
+        //Price and Position Variables
+        protected double _spikeStartPrice;
+        protected double _orderEntryStartPrice;
+        protected string _lastPositionLabel;
+        protected TradeType _lastPositionTradeType;
+        protected double _lastPositionEntryPrice;
+        protected double _lastClosedPositionEntryPrice;
+        protected double _lastProfitPrice;
+
+        protected double _openedPositionsCount = 0;
+        protected double _closedPositionsCount = 0;
+        protected double _orderCountLabel = 0;
+
+        //Stop Loss Variables
+        protected double _divideTrailingStopPips = 1;
+        protected bool _isTrailingStopsActive = false;
+        protected bool _isHardSLLastProfitPrice = false;
+        protected bool _isHardSLLastPositionEntryPrice = false;
+        protected bool _isHardSLActive = false;
+        protected bool _isBreakEvenStopLossActive = false;
+
+        //Swordfish State Variables
+        protected bool _isPendingOrdersClosed = false;
+        protected bool _startPriceCaptured = false;
+        protected bool _earlyEntryPriceCaptured = false;
+        protected bool _ordersPlaced = false;
+        protected bool _positionsPlaced = false;
+        protected bool _isTerminated = false;
+        protected bool _isReset = true;
+        protected bool _isReducedRiskTime = false;
+
+        protected string _botId = null;
+
+        List<string> debugCSV = new List<string>();
+
+        //Performance Reporting
+        protected double _dayProfitTotal = 0;
+        protected double _dayPipsTotal = 0;
+        protected double _spikePeakPips = 0;
+        protected double _spikePeakPrice = 0;
 
         protected override void OnStart()
         {
-            // Put your initialization logic here
+            _botId = generateBotId();
+            _marketTimeInfo = new MarketTimeInfo();
+            setTimeZone();
 
+            Positions.Opened += OnPositionsOpened;
+            Positions.Closed += OnPositionsClosed;
+            debugCSV.Add("PARAMETERS");
+            debugCSV.Add("NumberOfOrders," + NumberOfPositions.ToString());
+            debugCSV.Add("Volume," + Volume.ToString());
+            debugCSV.Add("VolumeMax," + VolumeMax.ToString());
+            debugCSV.Add("OrderVolumeLevels," + OrderVolumeLevels.ToString());
+            debugCSV.Add("VolumeMultipler," + VolumeMultipler.ToString());
+            debugCSV.Add("MaxTakeProfit," + MaxTakeProfit.ToString());
+            debugCSV.Add("MinTakeProfit," + MinTakeProfit.ToString());
+            debugCSV.Add("ReducePositionRiskTime," + ReducePositionRiskTime.ToString());
+            debugCSV.Add("ChaseEnabled," + chaseEnabled.ToString());
+            debugCSV.Add("ChaseLevel," + chaseLevel1.ToString());
+            debugCSV.Add("FinalOrderStopLoss," + FinalOrderStopLoss.ToString());
+            debugCSV.Add("HardStopLossBuffer," + HardStopLoss.ToString());
+            debugCSV.Add("TrailingStopPips," + TrailingStopPips.ToString());
+            debugCSV.Add("--------------------------");
 
+            debugCSV.Add("Label," + "Profit," + "Pips," + "EntryPrice," + "ClosePrice," + "SL," + "TP," + "Day," + "Date/Time," + "OpenedPositionsCount," + "ClosedPositionsCount,," + "LastPositionEntryPrice,LastClosedPositionEntryPrice,LastProfitPrice," + "LastPositionLabel,DivideTrailingStopPips,isTrailingStopsActive,isBreakEvenStopLossActive," + "isHardSLLastClosedPositionEntryPrice,isHardSLLastPositionEntryPrice,isHardSLLastProfitPrice,StartPriceCaptured," + "OrdersPlaced,isReset,isTerminated,isReducedRiskTime");
         }
 
-
-        protected override void OnPositionOpened(Position openedPosition)
+        protected string generateBotId()
         {
-
-            // when the first position is opened (either up or down) close off the other pending Orders on the other side.
-            foreach (PendingOrder P in PendingOrders)
-            {
-                if (P.TradeType != openedPosition.TradeType)
-                {
-                    CancelPendingOrder(P);
-                    Print("Cancelling Orders that are for the other direction.");
-                }
-            }
-
-
-
+            Random randomIdGenerator = new Random();
+            int id = randomIdGenerator.Next(0, 99999);
+            return id.ToString("00000");
         }
-
-        protected override void OnBar()
-        {
-
-
-            if (MarketSeries.OpenTime.LastValue.TimeOfDay == new TimeSpan(10, 10, 0) && MarketSeries.OpenTime.LastValue.DayOfWeek == DayOfWeek.Friday)
-            {
-
-
-                double OpeningPrice = MarketSeries.Open.LastValue;
-
-                Print("On Options Expiry Opening Bar which is: " + OpeningPrice.ToString());
-
-                TakeProfit = (int)(TakeProfit * (1 / Symbol.TickSize));
-
-                // If the Options Move down we're looking for Buys...
-                double SellStart = OpeningPrice - MinMovementForValidity;
-                for (int i = 0; i <= (NumberOfOrders - 1); i += GapsBetweenOrders)
-                {
-
-                    Print("Starting buy loop");
-                    double Entry = SellStart - i;
-                    //  double StopLoss; null as we dont know where it will be....  Semi Manual Bot... 
-                    //  var result = PlaceLimitOrder(TradeType.Buy, Symbol, ContractSize, Entry, "BUY", null, TakeProfit, MarketSeries.OpenTime.LastValue.AddMinutes(PendingOrderMins));
-
-                    PlaceLimitOrderAsync(TradeType.Buy, Symbol, ContractSize, Entry, "BUY", null, TakeProfit, MarketSeries.OpenTime.LastValue.AddMinutes(PendingOrderMins), "BarBreak");
-
-                    //if (!result.IsSuccessful)
-                    //    Print(result.Error);
-
-                    Print("BUY at " + Entry.ToString() + ", TP: " + TakeProfit.ToString());
-
-                }
-
-
-                //If the Options move up we're looking for sells....
-                double BuyStart = OpeningPrice + MinMovementForValidity;
-                for (int i = 0; i <= (NumberOfOrders - 1); i += GapsBetweenOrders)
-                {
-
-                    Print("Starting sell loop");
-                    double Entry = BuyStart + i;
-                    //  double StopLoss; null as we dont know where it will be....  Semi Manual Bot... 
-                    //  var result = PlaceLimitOrder(TradeType.Sell, Symbol, ContractSize, Entry, "SELL", null, TakeProfit, MarketSeries.OpenTime.LastValue.AddMinutes(PendingOrderMins));
-
-                    PlaceLimitOrderAsync(TradeType.Sell, Symbol, ContractSize, Entry, "SELL", null, TakeProfit, MarketSeries.OpenTime.LastValue.AddMinutes(PendingOrderMins), "BarBreak");
-
-                    //  if (!result.IsSuccessful)
-                    //    Print(result.Error);
-
-                    Print("SELL at " + Entry.ToString() + ", TP: " + TakeProfit.ToString());
-
-                }
-
-
-            }
-
-        }
-
 
         protected override void OnTick()
         {
+            if (IsTradingTimeIn(1))
+            {
+                if (!_earlyEntryPriceCaptured)
+                {
+                    //Get the Price 5mins before open
+                    _orderEntryStartPrice = Symbol.Bid;
+                    _earlyEntryPriceCaptured = true;
+                }
 
-            // Manage any open Positions.
+                if (!_ordersPlaced)
+                {
+                    placeBuyLimitOrders();
+                }
+            }
+
+            // If backtesting use the Server.Time.        
+            if (IsOpenTradingTime())
+            {
+                //Start Trading
+                if (_isReset)
+                    _isReset = false;
+
+                if (!_startPriceCaptured)
+                {
+                    //Get the Market Open Price
+                    _spikeStartPrice = Symbol.Bid;
+                    _startPriceCaptured = true;
+                }
+
+                if (!_positionsPlaced)
+                {
+                    placeBuyOrders();
+                }
+
+                captureSpikePeak();
+            }
+            //It is outside Placing Trading Time
+
+            if (IsCloseTradingTime())
+            {
+                //Cancel all open pending Orders
+                CancelAllPendingOrders();
+
+                if (_ordersPlaced || _positionsPlaced)
+                {
+                    if (_openedPositionsCount - _closedPositionsCount > 0)
+                    {
+                        //Positions still open after ReducePositionRiskTime
+                        if (!_isReducedRiskTime && _marketTimeInfo.IsReduceRiskTime(IsBacktesting, Server.Time, ReducePositionRiskTime))
+                        {
+                            _isReducedRiskTime = true;
+                        }
+
+                        //If trades still open at ClosingAllTime then take the hit and close remaining positions
+                        if (!_isTerminated && _marketTimeInfo.IsTerminateTime(IsBacktesting, Server.Time))
+                        {
+                            CloseAllPositions();
+                            _isTerminated = true;
+                        }
+
+                        //Manage the open positions
+                        ManagePositionRisk();
+                    }
+
+
+                    //Out of Trading time and all positions that were opened are now closed
+                    if (_openedPositionsCount > 0 && _openedPositionsCount - _closedPositionsCount == 0)
+                        ResetSwordFish();
+                }
+            }
+        }
+
+        protected void ManagePositionRisk()
+        {
+
+            if (chaseEnabled)
+            {
+                //Calculate spike retrace factor
+                double chaseFactor = calculateChaseFactor();
+
+                //Activate BreakEven SL if chaseLevel1 has been passed
+                if (chaseLevel1 < chaseFactor)
+                {
+                    //Activate Trailing Stop Losses
+                    _isBreakEvenStopLossActive = true;
+                }
+
+                //Activate HardSL if chaseLevel2 has been passed
+                if (chaseLevel2 < chaseFactor)
+                {
+                    //Activate Hard SL
+                    _isHardSLActive = true;
+                    if (_isHardSLActive)
+                    {
+                        setStopLossForAllPositions(HardStopLoss);
+                    }
+                }
+
+                //Try and set a BreakEvenSL as soon as trades start taking profit
+                if (_isBreakEvenStopLossActive)
+                {
+                    setBreakEvenSL();
+                }
+
+                // If Trailing stop is active update position SL's - Remove TP as trailing position.
+                if (_isTrailingStopsActive)
+                {
+                    setTrailingSL();
+                }
+            }
+        }
+
+        public void CancelAllPendingOrders()
+        {
+            //Close any outstanding pending orders
+            foreach (PendingOrder po in PendingOrders)
+            {
+                try
+                {
+                    if (isThisBotId(po.Label))
+                    {
+                        CancelPendingOrderAsync(po, OnPendingOrderCancelledComplete);
+                    }
+                } catch (Exception e)
+                {
+                    Print("Failed to Cancel Pending Order :" + e.Message);
+                }
+            }
+            _isPendingOrdersClosed = true;
+        }
+
+
+        protected void captureSpikePeak()
+        {
+            //Capture the highest point of the Spike within trading Time
+            if (_openedPositionsCount > 0)
+            {
+                //We are Buying - look for the Highest point
+                if (Symbol.Ask < _spikePeakPrice || _spikePeakPrice == 0)
+                {
+                    _spikePeakPrice = Symbol.Ask;
+                    _spikePeakPips = _spikeStartPrice - Symbol.Ask;
+                }
+            }
+        }
+
+        protected void setTrailingSL()
+        {
+            foreach (Position p in Positions)
+            {
+                {
+                    try
+                    {
+                        if (isThisBotId(p.Label))
+                        {
+                            double newStopLossPrice = calcTrailingStopLoss(p);
+                            if (newStopLossPrice > 0)
+                            {
+                                ModifyPositionAsync(p, newStopLossPrice, p.TakeProfit, OnModifyTrailingStop);
+                            }
+                        }
+                    } catch (Exception e)
+                    {
+                        Print("Failed to Modify Position:" + e.Message);
+                    }
+                }
+            }
+        }
+
+
+        protected void setBreakEvenTPForBuySpikePositions()
+        {
+            foreach (Position p in Positions)
+            {
+                //check if SL is already better than break even
+                if (isCurrentTPBreakEven(p, p.EntryPrice))
+                    continue;
+
+                //If this position was a Buy Order catching the Spike down then continue
+                if (isSpikeDownBuyOrder(p))
+                    continue;
+
+                try
+                {
+                    if (isThisBotId(p.Label))
+                    {
+                        if (_lastPositionTradeType == TradeType.Buy)
+                        {
+                                ModifyPositionAsync(p, 0, p.EntryPrice, OnModifyBreakEvenStopComplete);
+                        }
+
+                        if (_lastPositionTradeType == TradeType.Sell)
+                        {
+                                ModifyPositionAsync(p, 0, p.EntryPrice, OnModifyBreakEvenStopComplete);
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    Print("Failed to Modify Position:" + e.Message);
+                }
+            }
+        }
+
+
+        protected bool isSpikeDownBuyOrder(Position p)
+        {
+
+            char positionLabelLastChar = p.Label[p.Label.Length - 1];
+            if (positionLabelLastChar == 'O')
+                return true;
+
+            return false;
+        }
+        
 
 
 
+        protected void setBreakEvenSL()
+        {
+            foreach (Position p in Positions)
+            {
+                //check if SL is already better than break even
+                if (isCurrentSLCloser(p, p.EntryPrice))
+                    continue;
+
+                try
+                {
+                    if (isThisBotId(p.Label))
+                    {
+                        if (_lastPositionTradeType == TradeType.Buy)
+                        {
+                            if (Symbol.Ask - MinTakeProfit * (1 / Symbol.TickSize) > p.EntryPrice)
+                            {
+                                ModifyPositionAsync(p, p.EntryPrice, p.TakeProfit, OnModifyBreakEvenStopComplete);
+                            }
+                        }
+
+                        if (_lastPositionTradeType == TradeType.Sell)
+                        {
+                            if (Symbol.Bid + MinTakeProfit * (1 / Symbol.TickSize) < p.EntryPrice)
+                            {
+                                ModifyPositionAsync(p, p.EntryPrice, p.TakeProfit, OnModifyBreakEvenStopComplete);
+                            }
+                        }
+                    }
+                } catch (Exception e)
+                {
+                    Print("Failed to Modify Position:" + e.Message);
+                }
+            }
+        }
+
+        protected void setStopLossForAllPositions(double stopLossPrice)
+        {
+            foreach (Position p in Positions)
+            {
+                //check if SL is already better than break even
+                if (isCurrentSLCloser(p, stopLossPrice))
+                    continue;
+
+                try
+                {
+                    if (isThisBotId(p.Label))
+                    {
+                        ModifyPositionAsync(p, stopLossPrice, p.TakeProfit, OnModifyHardSLComplete);
+                    }
+                } catch (Exception e)
+                {
+                    Print("Failed to Modify Position: " + e.Message);
+                }
+            }
+        }
+
+
+        protected bool isCurrentTPBreakEven(Position p, double newTPValue)
+        {
+            if (p.TakeProfit.HasValue)
+            {
+                switch (p.TradeType)
+                {
+                    case TradeType.Sell:
+                        {
+                            return p.TakeProfit.Value == p.EntryPrice;
+                        }
+                    case TradeType.Buy:
+                        {
+                            return p.TakeProfit.Value == p.EntryPrice;
+                        }
+                    default:
+                        return false;
+                }
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+
+
+        protected bool isCurrentSLCloser(Position p, double newSLValue)
+        {
+            if (p.StopLoss.HasValue)
+            {
+                switch (p.TradeType)
+                {
+                    case TradeType.Sell:
+                        {
+                            return p.StopLoss.Value < newSLValue;
+                        }
+                    case TradeType.Buy:
+                        {
+                            return p.StopLoss.Value > newSLValue;
+                        }
+                    default:
+                        return false;
+                }
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+
+        //calculate Trailing Stop Loss
+        protected double calcTrailingStopLoss(Position position)
+        {
+            double newStopLossPips = 0;
+            double newStopLossPrice = 0;
+            double currentStopLossPips = 0;
+            double currentStopLossPrice = 0;
+
+            bool isProtected = position.StopLoss.HasValue;
+            if (isProtected)
+            {
+                currentStopLossPrice = (double)position.StopLoss;
+            }
+            else
+            {
+                //Should never happen
+                Print("WARNING: Trailing Stop Loss Activated but No intial STOP LESS set");
+                currentStopLossPrice = _lastPositionEntryPrice;
+            }
+
+            if (position.TradeType == TradeType.Buy)
+            {
+                newStopLossPrice = Symbol.Ask - TrailingStopPips / _divideTrailingStopPips;
+                newStopLossPips = position.EntryPrice - newStopLossPrice;
+                currentStopLossPips = position.EntryPrice - currentStopLossPrice;
+
+                //Is newStopLoss more risk than current SL
+                if (newStopLossPips < currentStopLossPips)
+                    return 0;
+
+                //Is newStopLoss more than the current Ask and therefore not valid
+                if (newStopLossPrice > Symbol.Ask)
+                    return 0;
+
+                //Is the difference between the newStopLoss and the current SL less than the tick size and therefore not valid
+                if (currentStopLossPips - newStopLossPips < Symbol.TickSize)
+                    return 0;
+            }
+
+            if (position.TradeType == TradeType.Sell)
+            {
+                newStopLossPrice = Symbol.Bid + TrailingStopPips / _divideTrailingStopPips;
+                newStopLossPips = newStopLossPrice - position.EntryPrice;
+                currentStopLossPips = currentStopLossPrice - position.EntryPrice;
+
+                //Is newStopLoss more risk than current SL
+                if (newStopLossPips > currentStopLossPips)
+                    return 0;
+
+                //Is newStopLoss more than the current Ask and therefore not valid
+                if (newStopLossPrice < Symbol.Bid)
+                    return 0;
+
+                //Is the difference between the newStopLoss and the current SL less than the tick size and therefore not valid
+                if (currentStopLossPips - newStopLossPips < Symbol.TickSize)
+                    return 0;
+            }
+
+            return newStopLossPrice;
+        }
+
+        // Place Buy Orders
+        protected void placeBuyOrders()
+        {
+            //Place Buy Limit Orders
+            for (int OrderCount = 0; OrderCount < NumberOfPositions; OrderCount++)
+            {
+                try
+                {
+                    tradeData data = new tradeData 
+                    {
+                        tradeType = TradeType.Buy,
+                        symbol = Symbol,
+                        volume = setBuyVolume(OrderCount),
+                        entryPrice = 0,
+                        label = _botId + "-" + getTimeStamp() + _marketTimeInfo.market + "-SWF#" + _orderCountLabel + "-X",
+                        stopLossPips = 0,
+                        takeProfitPips = calcTakeProfit(OrderCount)
+                    };
+                    if (data == null)
+                        continue;
+
+                    //Place Market Orders immediately
+                    ExecuteMarketOrderAsync(data.tradeType, data.symbol, data.volume, data.label, data.stopLossPips, data.takeProfitPips, OnPlaceTradeOperationComplete);
+                    _orderCountLabel++;
+                } catch (Exception e)
+                {
+                    Print("Failed to place Buy Limit Order: " + e.Message);
+                }
+            }
+        }
+
+        // Place Buy Limit Orders
+        protected void placeBuyLimitOrders()
+        {
+            //Place Buy Limit Orders
+            for (int OrderCount = 0; OrderCount < NumberOfBuyLimitOrders; OrderCount++)
+            {
+                try
+                {
+                    tradeData data = new tradeData 
+                    {
+                        tradeType = TradeType.Buy,
+                        symbol = Symbol,
+                        volume = setBuyOrderLimitVolume(OrderCount),
+                        entryPrice = calcBuyOrderEntryPrice(OrderCount),
+                        label = _botId + "-" + getTimeStamp() + _marketTimeInfo.market + "-SWF#" + OrderCount,
+                        stopLossPips = 0,
+                        takeProfitPips = calcTakeProfit(OrderCount)
+                    };
+                    if (data == null)
+                        continue;
+
+                    //Check that entry price is valid
+                    if (data.entryPrice < Symbol.Bid)
+                    {
+                        PlaceLimitOrderAsync(data.tradeType, data.symbol, data.volume, data.entryPrice, data.label + "-O", data.stopLossPips, data.takeProfitPips, OnPlaceOrderOperationComplete);
+                    }
+                    else
+                    {
+                        //Tick price has 'jumped' - therefore avoid placing all PendingOrders by re-calculating the OrderCount to the equivelant entry point.
+                        OrderCount = calculateNewOrderCount(NumberOfBuyLimitOrders, OrderCount, Symbol.Ask);
+                        ExecuteMarketOrderAsync(data.tradeType, data.symbol, data.volume, data.label + "-XO", data.stopLossPips, data.takeProfitPips, OnPlaceOrderOperationComplete);
+                    }
+                } catch (Exception e)
+                {
+                    Print("Failed to place Buy Limit Order: " + e.Message);
+                }
+            }
+        }
+
+        protected double calcBuyOrderEntryPrice(int orderCount)
+        {
+            return _orderEntryStartPrice - OrderEntryOffset - orderCount;
+        }
+
+        //Set a stop loss on the last Pending Order set to catch the break away train that never comes back!
+        protected double setPendingOrderStopLossPips(int orderCount, int numberOfOrders)
+        {
+            if (orderCount == numberOfOrders - 1)
+            {
+                return FinalOrderStopLoss * (1 / Symbol.TickSize);
+            }
+            else
+            {
+                return 0;
+            }
+        }
+
+        //Calculate a new orderCount number for when tick jumps
+        protected int calculateNewOrderCount(int numberOfOrders, int orderCount, double currentTickPrice)
+        {
+            double tickJumpIntoRange = Math.Abs(_spikeStartPrice - currentTickPrice);
+            double pendingOrderRange = numberOfOrders;
+            //assume orders are placed at 1pip intervals
+            double pendingOrdersPercentageJumped = tickJumpIntoRange / pendingOrderRange;
+            double newOrderCount = numberOfOrders * pendingOrdersPercentageJumped;
+
+            if (newOrderCount > orderCount)
+                return (int)newOrderCount;
+            else
+                return (int)orderCount;
+        }
+
+        protected void OnPendingOrderCancelledComplete(TradeResult tr)
+        {
+            OnTradeOperationComplete(tr, "FAILED to CANCEL pending order : ");
+        }
+
+        protected void OnModifyHardSLComplete(TradeResult tr)
+        {
+            OnTradeOperationComplete(tr, "FAILED to modify HARD stop loss: ");
+        }
+
+        protected void OnModifyBreakEvenStopComplete(TradeResult tr)
+        {
+            OnTradeOperationComplete(tr, "FAILED to modify BREAKEVEN stop loss: ");
+        }
+
+        protected void OnModifyTakeProfitComplete(TradeResult tr)
+        {
+            OnTradeOperationComplete(tr, "FAILED to modify TAKE PROFIT: ");
+        }
+
+        protected void OnClosePositionComplete(TradeResult tr)
+        {
+            OnTradeOperationComplete(tr, "FAILED to close position: ");
+        }
+
+        protected void OnModifyTrailingStop(TradeResult tr)
+        {
+            OnTradeOperationComplete(tr, "FAILED to modify TRAILING stop loss: ");
+        }
+
+        protected void OnPlaceOrderOperationComplete(TradeResult tr)
+        {
+            if (tr.IsSuccessful)
+                _ordersPlaced = true;
+            else
+                OnTradeOperationComplete(tr, "FAILED to place ORDER: ");
+        }
+
+        protected void OnPlaceTradeOperationComplete(TradeResult tr)
+        {
+            if (tr.IsSuccessful)
+                _positionsPlaced = true;
+            else
+                OnTradeOperationComplete(tr, "FAILED to enter TRADE position: ");
+        }
+
+        protected void OnTradeOperationComplete(TradeResult tr, string errorMsg)
+        {
+            if (!tr.IsSuccessful)
+            {
+                if (tr.Position != null)
+                    Print(errorMsg + tr.Error, " Position: ", tr.Position.Label, " ", tr.Position.TradeType, " ", Time);
+                if (tr.PendingOrder != null)
+                    Print(errorMsg + tr.Error, " PendingOrder: ", tr.PendingOrder.Label, " ", tr.PendingOrder.TradeType, " ", Time);
+            }
+        }
+
+        protected double calcTakeProfit(int orderCount)
+        {
+            double tp = 0;
+
+            tp = MinTakeProfit * (1 / Symbol.TickSize) + orderCount * TPSpacing;
+
+            if (tp > MaxTakeProfit * (1 / Symbol.TickSize))
+                tp = MaxTakeProfit * (1 / Symbol.TickSize);
+
+            return tp;
+        }
+
+        protected double calcAscendingTakeProfit(int orderCount)
+        {
+            double tp = 0;
+
+            tp = MaxTakeProfit * (1 / Symbol.TickSize) - orderCount * TPSpacing;
+
+            if (tp < MinTakeProfit * (1 / Symbol.TickSize))
+                tp = MinTakeProfit * (1 / Symbol.TickSize);
+
+            return tp;
+        }
+
+        protected void setCascadingTakeProfit()
+        {
+            IEnumerable<Position> orderedPositions = Positions.OrderBy(position => position.EntryPrice);
+
+            int positionCount = 0;
+            foreach (Position p in orderedPositions)
+            {
+                try
+                {
+                    if (isThisBotId(p.Label))
+                    {
+                        ModifyPositionAsync(p, p.StopLoss, p.EntryPrice + calcAscendingTakeProfit(positionCount), OnModifyTakeProfitComplete);
+                    }
+                } catch (Exception e)
+                {
+                    Print("Failed to Modify Position: " + e.Message);
+                }
+                positionCount++;
+            }
+        }
+
+        protected void OnPositionsOpened(PositionOpenedEventArgs args)
+        {
+            if (isThisBotId(args.Position.Label))
+            {
+                _openedPositionsCount++;
+
+                //Capture last Position Opened i.e. the furthest away
+                _lastPositionTradeType = args.Position.TradeType;
+                _lastPositionEntryPrice = args.Position.EntryPrice;
+                _lastPositionLabel = args.Position.Label;
+
+                //Set TP for all positions based on their entry point if Pending Orders are triggered
+                if (Positions.Count > NumberOfPositions)
+                    setCascadingTakeProfit();
+            }
+
+            //If the number of positions opened is greater than the expected number of positions plus 2 then spike is down
+            if (_openedPositionsCount > NumberOfPositions + 2)
+                setBreakEvenTPForBuySpikePositions();
+
+        }
+
+        protected void OnPositionsClosed(PositionClosedEventArgs args)
+        {
+            if (isThisBotId(args.Position.Label))
+            {
+                _closedPositionsCount++;
+
+                _dayProfitTotal += args.Position.GrossProfit;
+                _dayPipsTotal += args.Position.Pips;
+
+                debugCSV.Add(args.Position.Label + "," + args.Position.GrossProfit + "," + args.Position.Pips + "," + args.Position.EntryPrice + "," + History.FindLast(args.Position.Label, Symbol, args.Position.TradeType).ClosingPrice + "," + args.Position.StopLoss + "," + args.Position.TakeProfit + "," + Time.DayOfWeek + "," + Time + debugState());
+
+                //Taking profit
+                if (args.Position.GrossProfit > 0)
+                {
+                    //capture last position take profit price
+                    setLastProfitPrice(args.Position.TradeType);
+
+                    //capture last closed position entry price
+                    _lastClosedPositionEntryPrice = args.Position.EntryPrice;
+
+                    //Set trailing SL
+                    _isTrailingStopsActive = true;
+                }
+            }
+        }
+
+        protected double calculateChaseFactor()
+        {
+            double percentClosed = 0;
+            if (_openedPositionsCount > 0)
+            {
+                percentClosed = (_closedPositionsCount / _openedPositionsCount) * 100;
+            }
+            return percentClosed;
+        }
+
+
+        protected void setLastProfitPrice(TradeType lastProfitTradeType)
+        {
+            if (lastProfitTradeType == TradeType.Buy)
+                _lastProfitPrice = Symbol.Ask;
+            if (lastProfitTradeType == TradeType.Sell)
+                _lastProfitPrice = Symbol.Bid;
+        }
+
+        protected bool IsOpenTradingTime()
+        {
+            return _marketTimeInfo.IsPlacePendingOrdersTime(IsBacktesting, Server.Time);
+        }
+
+        protected bool IsCloseTradingTime()
+        {
+            return _marketTimeInfo.IsCloseTime(IsBacktesting, Server.Time);
+        }
+
+        protected bool IsTradingTimeIn(int mins)
+        {
+            return _marketTimeInfo.IsTimeBeforeOpen(IsBacktesting, Server.Time, mins);
+        }
+
+        protected void setAllStopLossesWithBuffer(double SLPrice)
+        {
+            switch (_lastPositionTradeType)
+            {
+                case TradeType.Buy:
+                    setStopLossForAllPositions(SLPrice - HardStopLoss);
+                    break;
+                case TradeType.Sell:
+                    setStopLossForAllPositions(SLPrice + HardStopLoss);
+                    break;
+            }
+        }
+
+        //Increase the volume based on Orders places and volume levels and multiplier until max volume reached
+        protected int setBuyVolume(int orderCount)
+        {
+
+            double orderVolumeLevel = orderCount / OrderVolumeLevels;
+            double volume = VolumeMax / Math.Pow(VolumeMultipler, orderVolumeLevel);
+
+            if (volume < Volume)
+            {
+                volume = Volume;
+            }
+
+            return (int)volume;
+        }
+
+        //Increase the volume based on Orders places and volume levels and multiplier until max volume reached
+        protected int setBuyOrderLimitVolume(int orderCount)
+        {
+
+            double orderVolumeLevel = orderCount / OrderVolumeLevels;
+            double volume = Math.Pow(VolumeMultipler, orderVolumeLevel) * Volume;
+
+            if (volume > VolumeMax)
+            {
+                volume = VolumeMax;
+            }
+
+            return (int)volume;
+        }
+
+        protected void CloseAllPositions()
+        {
+            //Close any outstanding pending orders
+            foreach (Position p in Positions)
+            {
+                try
+                {
+                    if (isThisBotId(p.Label))
+                    {
+                        ClosePositionAsync(p, OnClosePositionComplete);
+                    }
+                } catch (Exception e)
+                {
+                    Print("Failed to Close Position: " + e.Message);
+                }
+            }
+        }
+
+        //Check whether a position or order is managed by this bot instance.
+        protected bool isThisBotId(string label)
+        {
+            string id = label.Substring(0, 5);
+            if (id.Equals(_botId))
+                return true;
+            else
+                return false;
+        }
+
+        protected void ResetSwordFish()
+        {
+            if (_isReset)
+                return;
+
+            reportDay();
+
+            //reset position counters
+            _openedPositionsCount = 0;
+            _closedPositionsCount = 0;
+            _orderCountLabel = 0;
+
+            //reset Last Position variables
+            _lastPositionLabel = "NO LAST POSITION SET";
+            _lastPositionEntryPrice = 0;
+            _lastClosedPositionEntryPrice = 0;
+            _lastProfitPrice = 0;
+
+            //reset risk management variables
+            _divideTrailingStopPips = 1;
+            _isTrailingStopsActive = false;
+            _isBreakEvenStopLossActive = false;
+            _isHardSLActive = false;
+            _isHardSLLastPositionEntryPrice = false;
+            _isHardSLLastProfitPrice = false;
+
+            // swordfish bot state variables
+            _startPriceCaptured = false;
+            _ordersPlaced = false;
+            _isPendingOrdersClosed = false;
+            _isTerminated = false;
+            _isReset = true;
+            _isReducedRiskTime = false;
+
+            // reset reporting variables
+            _dayProfitTotal = 0;
+            _dayPipsTotal = 0;
+            _spikePeakPips = 0;
+            _spikePeakPrice = 0;
+        }
+
+        protected void reportDay()
+        {
+            string profit = "";
+            if (_dayProfitTotal != 0 && _dayPipsTotal != 0)
+            {
+                profit = ("TOTALS," + _dayProfitTotal + "," + _dayPipsTotal + "," + _openedPositionsCount + "," + _spikePeakPips + "," + Time.DayOfWeek + "," + Time);
+                debugCSV.Add("--------------------------------");
+                debugCSV.Add(",Profit,Pips,Opened Positions,Spike Peak,Day,Date/Time,");
+                debugCSV.Add(profit);
+            }
+        }
+
+
+
+        protected string debugState()
+        {
+
+            string state = "";
+            // Position counters
+            state += "," + _openedPositionsCount;
+            state += "," + _closedPositionsCount;
+
+            // Last Position variables
+            state += "," + _lastPositionEntryPrice;
+            state += "," + _lastClosedPositionEntryPrice;
+            state += "," + _lastProfitPrice;
+            state += "," + _lastPositionLabel;
+
+            // risk management variables
+            state += "," + _divideTrailingStopPips;
+            state += "," + _isTrailingStopsActive;
+            state += "," + _isBreakEvenStopLossActive;
+            state += "," + _isHardSLActive;
+            state += "," + _isHardSLLastPositionEntryPrice;
+            state += "," + _isHardSLLastProfitPrice;
+
+            // swordfish bot state variables
+            state += "," + _startPriceCaptured;
+            state += "," + _ordersPlaced;
+            state += "," + _isReset;
+            state += "," + _isTerminated;
+            state += "," + _isReducedRiskTime;
+
+            return state;
         }
 
         protected override void OnStop()
         {
             // Put your deinitialization logic here
-
+            System.IO.File.WriteAllLines("C:\\Users\\alist\\Desktop\\Divi\\" + _marketTimeInfo.market + "-" + _botId + "-" + "Divi-" + getTimeStamp(true) + ".csv", debugCSV.ToArray());
         }
 
+        protected string getTimeStamp(bool unformatted = false)
+        {
+            if (unformatted)
+                return Time.Year.ToString() + Time.Month + Time.Day + Time.Minute + Time.Second;
+            return Time.Year + "-" + Time.Month + "-" + Time.Day;
+        }
 
-
-        // -------------------------------------------------------------------------------------------
-
-
-        protected bool LevelAvailable(double Level)
+        protected void setTimeZone()
         {
 
-            Level = Math.Floor(Level);
-
-            foreach (Position Position in Positions)
+            switch (Symbol.Code)
             {
+                case "UK100":
+                    // Instantiate a MarketTimeInfo object.
+                    _marketTimeInfo.market = "FTSE";
+                    _marketTimeInfo.tz = TimeZoneInfo.FindSystemTimeZoneById("GMT Standard Time");
+                    // Market for swordfish trades opens at 10:08am.
+                    _marketTimeInfo.open = new TimeSpan(10, 9, 0);
+                    // Market for swordfish trades closes at 10:13am.
+                    _marketTimeInfo.close = new TimeSpan(10, 15, 0);
+                    // Close all open Swordfish position at 11:29am before US opens.
+                    _marketTimeInfo.closeAll = new TimeSpan(11, 29, 0);
 
-                // if Mod or floored entry price = Level  
-                if ((Math.Floor(Position.EntryPrice) % 3) == 0)
-                {
-                    if (Math.Floor(Position.EntryPrice) == Level)
-                        return false;
-
-                }
-
+                    break;
+                case "GER30":
+                    _marketTimeInfo.market = "DAX";
+                    _marketTimeInfo.tz = TimeZoneInfo.FindSystemTimeZoneById("W. Europe Standard Time");
+                    // Market for swordfish opens at 9:00.
+                    _marketTimeInfo.open = new TimeSpan(9, 0, 0);
+                    // Market for swordfish closes at 9:05.
+                    _marketTimeInfo.close = new TimeSpan(9, 5, 0);
+                    // Close all open Swordfish position at 11:29am before US opens.
+                    _marketTimeInfo.closeAll = new TimeSpan(11, 29, 0);
+                    break;
+                case "HK50":
+                    _marketTimeInfo.market = "HSI";
+                    _marketTimeInfo.tz = TimeZoneInfo.FindSystemTimeZoneById("China Standard Time");
+                    // Market for swordfish opens at 9:00.
+                    _marketTimeInfo.open = new TimeSpan(9, 30, 0);
+                    // Market for swordfish closes at 9:05.
+                    _marketTimeInfo.close = new TimeSpan(9, 35, 0);
+                    // Close all open Swordfish positions
+                    _marketTimeInfo.closeAll = new TimeSpan(11, 30, 0);
+                    break;
             }
-
-            return true;
-
-
-
         }
-
-
-
-
-
-
 
 
     }
+
 }
+
+
+//Manage Market Opening Times
+public struct MarketTimeInfo
+{
+    public String market;
+    public TimeZoneInfo tz;
+    public TimeSpan open;
+    public TimeSpan close;
+    public TimeSpan closeAll;
+
+    //Is the current time within the trading period orders/positions can be placed
+    public bool IsPlacePendingOrdersTime(bool isBackTesting, DateTime serverTime)
+    {
+        if (isBackTesting)
+        {
+            return IsBetweenOpenAndCloseTime(serverTime);
+        }
+        else
+        {
+            return IsBetweenOpenAndCloseTime(DateTime.UtcNow);
+        }
+    }
+
+    //Is after Close time
+    public bool IsCloseTime(bool isBackTesting, DateTime serverTime)
+    {
+
+        if (isBackTesting)
+        {
+            return IsAfterCloseTime(serverTime);
+        }
+        else
+        {
+            return IsAfterCloseTime(DateTime.UtcNow);
+        }
+    }
+
+    //Is after Reduce Risk time
+    public bool IsReduceRiskTime(bool isBackTesting, DateTime serverTime, int reduceRiskTimeFromOpen)
+    {
+        if (isBackTesting)
+        {
+            return IsTimeAfterOpen(serverTime, reduceRiskTimeFromOpen);
+        }
+        else
+        {
+            return IsTimeAfterOpen(DateTime.UtcNow, reduceRiskTimeFromOpen);
+        }
+    }
+
+    //Time X minutes from open
+    public bool IsTimeBeforeOpen(bool isBackTesting, DateTime serverTime, int timeFromOpen)
+    {
+        if (isBackTesting)
+        {
+            return IsTimeBeforeOpen(serverTime, timeFromOpen);
+        }
+        else
+        {
+            return IsTimeBeforeOpen(DateTime.UtcNow, timeFromOpen);
+        }
+    }
+
+    //Is after Terminate time
+    public bool IsTerminateTime(bool isBackTesting, DateTime serverTime)
+    {
+
+        if (isBackTesting)
+        {
+            return IsAfterTerminateTime(serverTime);
+        }
+        else
+        {
+            return IsAfterTerminateTime(DateTime.UtcNow);
+        }
+    }
+
+    //Is the current time within the period Swordfish Pending Orders can be placed.
+    private bool IsBetweenOpenAndCloseTime(DateTime dateTimeUtc)
+    {
+        DateTime tzTime = TimeZoneInfo.ConvertTimeFromUtc(dateTimeUtc, tz);
+        return (tzTime.TimeOfDay >= open & tzTime.TimeOfDay <= close);
+    }
+
+    //Is the current time after the time period when risk should be reduced.
+    private bool IsTimeAfterOpen(DateTime dateTimeUtc, int timeFromOpen)
+    {
+        DateTime tzTime = TimeZoneInfo.ConvertTimeFromUtc(dateTimeUtc, tz);
+        return (tzTime.TimeOfDay >= open.Add(TimeSpan.FromMinutes(timeFromOpen)));
+    }
+
+    //Is the current time after the time period when risk should be reduced.
+    private bool IsTimeBeforeOpen(DateTime dateTimeUtc, int timeToOpen)
+    {
+        DateTime tzTime = TimeZoneInfo.ConvertTimeFromUtc(dateTimeUtc, tz);
+        return (tzTime.TimeOfDay >= open.Subtract(TimeSpan.FromMinutes(timeToOpen)));
+    }
+
+    //Is the current time within the period Swordfish positions can remain open.
+    private bool IsAfterTerminateTime(DateTime dateTimeUtc)
+    {
+        DateTime tzTime = TimeZoneInfo.ConvertTimeFromUtc(dateTimeUtc, tz);
+        return tzTime.TimeOfDay >= closeAll;
+    }
+
+    //Is the current time within the period Swordfish positions can remain open.
+    private bool IsAfterCloseTime(DateTime dateTimeUtc)
+    {
+        DateTime tzTime = TimeZoneInfo.ConvertTimeFromUtc(dateTimeUtc, tz);
+        return tzTime.TimeOfDay >= close;
+    }
+}
+
+class tradeData
+{
+    public TradeType tradeType;
+    public Symbol symbol;
+    public int volume;
+    public double entryPrice;
+    public string label;
+    public double stopLossPips;
+    public double takeProfitPips;
+}
+
+
+
+
+
+
+
+
+

@@ -333,7 +333,7 @@ namespace cAlgo
                     {
                         if (_lastPositionTradeType == TradeType.Buy)
                         {
-                            if (Symbol.Ask - MinTakeProfit * (1/Symbol.TickSize) > p.EntryPrice)
+                            if (Symbol.Ask - MinTakeProfit * (1 / Symbol.TickSize) > p.EntryPrice)
                             {
                                 ModifyPositionAsync(p, p.EntryPrice, p.TakeProfit, OnModifyBreakEvenStopComplete);
                             }

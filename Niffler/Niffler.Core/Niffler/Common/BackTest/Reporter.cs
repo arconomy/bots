@@ -44,7 +44,7 @@ namespace Niffler.Common.BackTest
             ProfitTotal = 0;
             PipsTotal = 0;
             TradeResults.Clear();
-            TotalsResults.Add(GetReportTradesHeaders());
+            TradeResults.Add(GetReportTradesHeaders());
             TotalsResults.Clear();
             TotalsResults.Add(GetReportTotalsHeaders());
             RulesExecuted.Clear();
@@ -75,8 +75,8 @@ namespace Niffler.Common.BackTest
                 Bot.History.FindLast(p.Label, Bot.Symbol, p.TradeType).ClosingPrice + "," +
                 p.StopLoss + "," +
                 p.TakeProfit + "," +
-                System.DateTime.Now.DayOfWeek +
-                System.DateTime.Now +
+                Utils.GetDayOfWeek(Bot) + "," +
+                Utils.GetTimeStamp(Bot, true) + "," +
                 BotState.GetReportSnapShot()
                 );
             AddTradeToTotals(p);
@@ -95,7 +95,7 @@ namespace Niffler.Common.BackTest
 
         public void ReportRuleExecutionCount(IRule rule, int executionCount)
         {
-            RulesExecuted.Add(Utils.GetTimeStamp(Bot) + "," + rule.GetType().Name + "," + executionCount);
+            RulesExecuted.Add(Utils.GetTimeStamp(Bot,true) + "," + rule.GetType().Name + "," + executionCount);
         }
 
         private void AddTradeToTotals(Position p)
@@ -108,7 +108,6 @@ namespace Niffler.Common.BackTest
         {
             return "Profit," +
             "Pips" +
-            ",Day" +
             ",Opened Positions" +
             ",Spike Peak" +
             ",Day" +
@@ -124,8 +123,8 @@ namespace Niffler.Common.BackTest
                     PipsTotal + "," +
                     BotState.OpenedPositionsCount + "," +
                     SpikeManager.GetSpikePeakPips() + "," +
-                    System.DateTime.Now.DayOfWeek + "," +
-                    System.DateTime.Now
+                    Utils.GetDayOfWeek(Bot) + "," +
+                    Utils.GetTimeStamp(Bot,true)
                     );
             }
 
