@@ -117,6 +117,8 @@ namespace cAlgo
         protected bool _isBreakEvenStopLossActive = false;
         protected bool _IsNewTPChaseActive = false;
         protected bool _isNewTPChaseSet = false;
+        protected bool _IsSpikeStartBreakEvenSet = false;
+        
 
         //Swordfish State Variables
         protected bool _isPendingOrdersClosed = false;
@@ -207,11 +209,10 @@ namespace cAlgo
                 {
                     placeBuyOrders();
                 }
-
                 captureSpikePeak();
             }
-            //It is outside Placing Trading Time
 
+            //It is outside Placing Trading Time
             if (IsCloseTradingTime())
             {
                 //Cancel all open pending Orders
@@ -234,6 +235,10 @@ namespace cAlgo
                             _isTerminated = true;
                         }
                     }
+
+                    //Set Hard Stop Loss
+                    _isHardSLActive = true;
+                    _isBreakEvenStopLossActive = true;
 
                     //Activate manage position risk if it is not already active
                     if (!_isManagePositionRiskActive)
@@ -349,7 +354,11 @@ namespace cAlgo
 
 
             if(p.StopLoss.HasValue)
-                currentSLPrice = (double) p.StopLoss;
+            {
+                currentSLPrice = (double)p.StopLoss;
+                SLPrices.Add(currentSLPrice);
+            }
+               
 
             if (!_isHardSLSet && _isHardSLActive)
             {
@@ -601,62 +610,20 @@ namespace cAlgo
         //calculate Trailing Stop Loss
         protected double calcTrailingSLPrice(Position position)
         {
-            double newStopLossPips = 0;
-            double newStopLossPrice = 0;
-            double currentStopLossPips = 0;
-            double currentStopLossPrice = 0;
-
-            bool isProtected = position.StopLoss.HasValue;
-            if (isProtected)
-            {
-                currentStopLossPrice = (double)position.StopLoss;
-            }
-            else
-            {
-                //Should never happen
-                Print("WARNING: Trailing Stop Loss Activated but No intial STOP LESS set");
-                currentStopLossPrice = _lastPositionEntryPrice;
-            }
+            double newTrailingSLPrice = 0;
 
             if (position.TradeType == TradeType.Buy)
             {
-                newStopLossPrice = Symbol.Ask - TrailingStopPips / _divideTrailingStopPips;
-                newStopLossPips = position.EntryPrice - newStopLossPrice;
-                currentStopLossPips = position.EntryPrice - currentStopLossPrice;
-
-                //Is newStopLoss more risk than current SL
-                if (newStopLossPips < currentStopLossPips)
-                    return 0;
-
-                //Is newStopLoss more than the current Ask and therefore not valid
-                if (newStopLossPrice > Symbol.Ask)
-                    return 0;
-
-                //Is the difference between the newStopLoss and the current SL less than the tick size and therefore not valid
-                if (currentStopLossPips - newStopLossPips < Symbol.TickSize)
-                    return 0;
+                newTrailingSLPrice = Symbol.Ask - TrailingStopPips / _divideTrailingStopPips;
+                newTrailingSLPrice = isValidSL(position.TradeType, newTrailingSLPrice);
             }
 
             if (position.TradeType == TradeType.Sell)
             {
-                newStopLossPrice = Symbol.Bid + TrailingStopPips / _divideTrailingStopPips;
-                newStopLossPips = newStopLossPrice - position.EntryPrice;
-                currentStopLossPips = currentStopLossPrice - position.EntryPrice;
-
-                //Is newStopLoss more risk than current SL
-                if (newStopLossPips > currentStopLossPips)
-                    return 0;
-
-                //Is newStopLoss more than the current Ask and therefore not valid
-                if (newStopLossPrice < Symbol.Bid)
-                    return 0;
-
-                //Is the difference between the newStopLoss and the current SL less than the tick size and therefore not valid
-                if (currentStopLossPips - newStopLossPips < Symbol.TickSize)
-                    return 0;
+                newTrailingSLPrice = Symbol.Bid + TrailingStopPips / _divideTrailingStopPips;
+                newTrailingSLPrice = isValidSL(position.TradeType, newTrailingSLPrice);
             }
-
-            return newStopLossPrice;
+            return newTrailingSLPrice;
         }
 
         // Place Buy Orders
@@ -1017,6 +984,11 @@ namespace cAlgo
             return _marketTimeInfo.IsTimeBeforeOpen(IsBacktesting, Server.Time, mins);
         }
 
+        protected bool IsTradingTimeAfter(int mins)
+        {
+            return _marketTimeInfo.IsTimeAfterOpen(IsBacktesting, Server.Time, mins);
+        }
+
         //Increase the volume based on Orders places and volume levels and multiplier until max volume reached
         protected int setBuyVolume(int orderCount)
         {
@@ -1108,6 +1080,7 @@ namespace cAlgo
             _isHardSLSet = false;
             _isHardSLLastPositionEntryPrice = false;
             _isHardSLLastProfitPrice = false;
+            _IsSpikeStartBreakEvenSet = false;
 
             // swordfish bot state variables
             _startPriceCaptured = false;
@@ -1288,6 +1261,19 @@ public struct MarketTimeInfo
         else
         {
             return IsTimeBeforeOpen(DateTime.UtcNow, timeFromOpen);
+        }
+    }
+
+    //Time X minutes from open
+    public bool IsTimeAfterOpen(bool isBackTesting, DateTime serverTime, int timeAfterOpen)
+    {
+        if (isBackTesting)
+        {
+            return IsTimeAfterOpen(serverTime, timeAfterOpen);
+        }
+        else
+        {
+            return IsTimeAfterOpen(DateTime.UtcNow, timeAfterOpen);
         }
     }
 
