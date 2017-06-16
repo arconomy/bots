@@ -18,17 +18,23 @@ namespace cAlgo
         [Parameter("# of Limit Orders", DefaultValue = 15)]
         public int NumberOfBuyLimitOrders { get; set; }
 
-        [Parameter("Offset from 10.09am Price for 1st Limit Order", DefaultValue = 3)]
-        public int OrderEntryOffset { get; set; }
+        [Parameter("Pips offset from 10.09am Price for 1st Limit Order", DefaultValue = 3)]
+        public int BuyLimitOrderEntryOffsetPips { get; set; }
 
-        [Parameter("# of Buy Trades placed", DefaultValue = 10)]
-        public int NumberOfPositions { get; set; }
+        [Parameter("# of Buy positions placed", DefaultValue = 10)]
+        public int NumberOfBuyPositions { get; set; }
 
-        [Parameter("Volume (Lots)", DefaultValue = 20)]
-        public int Volume { get; set; }
+        [Parameter("% of Limit Orders opened to indicate DOWN Spike", DefaultValue = 30)]
+        public int BuyLimitOrdersOpenedSpikeIndicator { get; set; }
 
-        [Parameter("Volume Max (Lots)", DefaultValue = 100)]
-        public int VolumeMax { get; set; }
+        [Parameter("% of Buy positions closed to indicate UP Spike", DefaultValue = 40)]
+        public int BuyPositionsOpenedSpikeIndicator { get; set; }
+
+        [Parameter("Min Volume (Lots)", DefaultValue = 20)]
+        public int MinVolume { get; set; }
+
+        [Parameter("Max Volume (Lots)", DefaultValue = 100)]
+        public int MaxVolume { get; set; }
 
         [Parameter("# Order placed before Volume multiplies", DefaultValue = 2)]
         public int OrderVolumeLevels { get; set; }
@@ -36,44 +42,47 @@ namespace cAlgo
         [Parameter("Volume multipler", DefaultValue = 2)]
         public double VolumeMultipler { get; set; }
 
-        [Parameter("Take profity interval spacing in Pips", DefaultValue = 0.5)]
+        [Parameter("TP spacing in Pips", DefaultValue = 0.5)]
         public double TPSpacing { get; set; }
 
-        [Parameter("# positions open before TP spacing increases by multiplier", DefaultValue = 20)]
-        public int TPSpacingLevels { get; set; }
+        [Parameter("TP spacing pips before multiplier triggered", DefaultValue = 20)]
+        public int TPSpacingPips { get; set; }
 
-        [Parameter("Take profit spacing multipler", DefaultValue = 2)]
+        [Parameter("TP spacing multipler", DefaultValue = 2)]
         public double TPSpacingMultipler { get; set; }
 
-        [Parameter("Take profit spacing max", DefaultValue = 3)]
+        [Parameter("TP spacing max", DefaultValue = 3)]
         public int TPSpacingMax { get; set; }
 
-        [Parameter("Maximum Take Profit", DefaultValue = 0.5)]
+        [Parameter("Max Take Profit", DefaultValue = 0.5)]
         public double MaxTakeProfit { get; set; }
 
-        [Parameter("Minimum Take Profit", DefaultValue = 0.3)]
+        [Parameter("Extra Take Profit Pips if Chase Level 2 reached", DefaultValue = 0.5)]
+        public double ExtraChaseTargetPips { get; set; }
+
+        [Parameter("Min Take Profit", DefaultValue = 0.3)]
         public double MinTakeProfit { get; set; }
 
-        [Parameter("Mins after trading start reduce position risk", DefaultValue = 10)]
+        [Parameter("Reduce risk time mins after Start time", DefaultValue = 15)]
         public int ReducePositionRiskTime { get; set; }
 
         [Parameter("Enable chase risk management", DefaultValue = true)]
         public bool chaseEnabled { get; set; }
 
-        [Parameter("Chase level Percentage", DefaultValue = 20)]
+        [Parameter("Chase level 1 Percentage", DefaultValue = 20)]
         public int chaseLevel1 { get; set; }
 
-        [Parameter("Chase level Percentage", DefaultValue = 70)]
+        [Parameter("Chase level 2 Percentage", DefaultValue = 70)]
         public int chaseLevel2 { get; set; }
 
-        [Parameter("Initial Hard SL for last Order placed", DefaultValue = 5)]
+        [Parameter("Last Order placed - Hard SL", DefaultValue = 5)]
         public double FinalOrderStopLoss { get; set; }
 
-        [Parameter("Triggered Chase Level 2 Hard SL", DefaultValue = 20)]
-        public double HardStopLoss { get; set; }
-
-        [Parameter("Trailing SL fixed distance", DefaultValue = 5)]
+        [Parameter("Chase level 1 - Trailing fixed SL triggered", DefaultValue = 3)]
         public double TrailingStopPips { get; set; }
+
+        [Parameter("Chase Level 2 - Hard SL triggered", DefaultValue = 20)]
+        public double HardStopLoss { get; set; }
 
         protected MarketTimeInfo _marketTimeInfo;
 
@@ -86,17 +95,28 @@ namespace cAlgo
         protected double _lastClosedPositionEntryPrice;
         protected double _lastProfitPrice;
 
+        //Count variables are doubles as required in % calculations
         protected double _openedPositionsCount = 0;
         protected double _closedPositionsCount = 0;
+        protected double _openedSpikeUpPositionsCount = 0;
+        protected double _openedSpikeDownBuyOrdersPositionsCount = 0;
+        protected double _closedSpikeUpPositionsCount = 0;
+        protected double _closedSpikeDownBuyOrdersPositionsCount = 0;
         protected double _orderCountLabel = 0;
 
         //Stop Loss Variables
         protected double _divideTrailingStopPips = 1;
+        protected bool _isManagePositionRiskActive = false;
         protected bool _isTrailingStopsActive = false;
         protected bool _isHardSLLastProfitPrice = false;
         protected bool _isHardSLLastPositionEntryPrice = false;
         protected bool _isHardSLActive = false;
+        protected bool _isHardSLSet = false;
+        protected bool _isTriggeredChaseLevel1 = false;
+        protected bool _isTriggeredChaseLevel2 = false;
         protected bool _isBreakEvenStopLossActive = false;
+        protected bool _IsNewTPChaseActive = false;
+        protected bool _isNewTPChaseSet = false;
 
         //Swordfish State Variables
         protected bool _isPendingOrdersClosed = false;
@@ -127,9 +147,9 @@ namespace cAlgo
             Positions.Opened += OnPositionsOpened;
             Positions.Closed += OnPositionsClosed;
             debugCSV.Add("PARAMETERS");
-            debugCSV.Add("NumberOfOrders," + NumberOfPositions.ToString());
-            debugCSV.Add("Volume," + Volume.ToString());
-            debugCSV.Add("VolumeMax," + VolumeMax.ToString());
+            debugCSV.Add("NumberOfOrders," + NumberOfBuyPositions.ToString());
+            debugCSV.Add("Volume," + MinVolume.ToString());
+            debugCSV.Add("VolumeMax," + MaxVolume.ToString());
             debugCSV.Add("OrderVolumeLevels," + OrderVolumeLevels.ToString());
             debugCSV.Add("VolumeMultipler," + VolumeMultipler.ToString());
             debugCSV.Add("MaxTakeProfit," + MaxTakeProfit.ToString());
@@ -213,56 +233,55 @@ namespace cAlgo
                             CloseAllPositions();
                             _isTerminated = true;
                         }
-
-                        //Manage the open positions
-                        ManagePositionRisk();
                     }
 
+                    //Activate manage position risk if it is not already active
+                    if (!_isManagePositionRiskActive)
+                        _isManagePositionRiskActive = true;
 
                     //Out of Trading time and all positions that were opened are now closed
                     if (_openedPositionsCount > 0 && _openedPositionsCount - _closedPositionsCount == 0)
                         ResetSwordFish();
                 }
             }
+
+            if (_isManagePositionRiskActive)
+            {
+                //Manage the open positions
+                ManagePositionRisk();
+            }
         }
 
         protected void ManagePositionRisk()
         {
+            //Activated on either Buy Positions SPIKE UP Indicator triggered OR Into Close Time.
 
             if (chaseEnabled)
             {
                 //Calculate spike retrace factor
-                double chaseFactor = calculateChaseFactor();
+                double chaseFactor = calculateChaseFactorForSpikeUp();
 
-                //Activate BreakEven SL if chaseLevel1 has been passed
-                if (chaseLevel1 < chaseFactor)
+                //ChaseLevel1 has been passed
+                if (chaseLevel1 <= chaseFactor)
                 {
+                    //Set Hard SL
+                    _isHardSLActive = true;
+                    
                     //Activate Trailing Stop Losses
                     _isBreakEvenStopLossActive = true;
+
+                    _isTriggeredChaseLevel1 = true;
                 }
 
-                //Activate HardSL if chaseLevel2 has been passed
-                if (chaseLevel2 < chaseFactor)
+                //ChaseLevel2 has been passed
+                if (chaseLevel2 <= chaseFactor)
                 {
-                    //Activate Hard SL
-                    _isHardSLActive = true;
-                    if (_isHardSLActive)
-                    {
-                        setStopLossForAllPositions(HardStopLoss);
-                    }
+                    _IsNewTPChaseActive = true;
+                    _isTriggeredChaseLevel2 = true;
                 }
 
-                //Try and set a BreakEvenSL as soon as trades start taking profit
-                if (_isBreakEvenStopLossActive)
-                {
-                    setBreakEvenSL();
-                }
-
-                // If Trailing stop is active update position SL's - Remove TP as trailing position.
-                if (_isTrailingStopsActive)
-                {
-                    setTrailingSL();
-                }
+                //Modify Orders based on Position Risk indicators
+                ManagePositions();
             }
         }
 
@@ -300,7 +319,7 @@ namespace cAlgo
             }
         }
 
-        protected void setTrailingSL()
+        protected void ManagePositions()
         {
             foreach (Position p in Positions)
             {
@@ -309,18 +328,123 @@ namespace cAlgo
                     {
                         if (isThisBotId(p.Label))
                         {
-                            double newStopLossPrice = calcTrailingStopLoss(p);
-                            if (newStopLossPrice > 0)
-                            {
-                                ModifyPositionAsync(p, newStopLossPrice, p.TakeProfit, OnModifyTrailingStop);
-                            }
+                             ModifyPositionAsync(p, calcNewStopLoss(p), calcNewTakeProfit(p), OnModifyTrailingStop);
                         }
-                    } catch (Exception e)
+                    }
+                    catch(Exception Ex)
                     {
-                        Print("Failed to Modify Position:" + e.Message);
+                        Print("FAILED to manage position: " + Ex.ToString());
                     }
                 }
             }
+        }
+
+        protected double calcNewStopLoss(Position p)
+        {
+            double currentSLPrice = 0;
+            double trailingSLPrice = 0;
+            double hardSLPrice = 0;
+            double breakEvenSLPrice = 0;
+            List<double> SLPrices = new List<double>();
+
+
+            if(p.StopLoss.HasValue)
+                currentSLPrice = (double) p.StopLoss;
+
+            if (!_isHardSLSet && _isHardSLActive)
+            {
+                hardSLPrice = calcHardSLPrice(p);
+                SLPrices.Add(hardSLPrice);
+                _isHardSLSet = true;
+            }
+
+            if (_isBreakEvenStopLossActive)
+            {
+                breakEvenSLPrice = calcBreakEvenSLPrice(p);
+                SLPrices.Add(breakEvenSLPrice);
+            }
+
+            if (_isTrailingStopsActive)
+            {
+                trailingSLPrice = calcTrailingSLPrice(p);
+                SLPrices.Add(trailingSLPrice);
+            }
+
+            return calcClosestSL(p.TradeType,SLPrices);
+        }
+
+        protected double calcNewTakeProfit(Position p)
+        {
+            double currentTPPrice = 0;
+            double newChaseTP = 0;
+
+             if(p.TakeProfit.HasValue)
+                currentTPPrice = (double) p.TakeProfit;
+
+            if (!_isNewTPChaseSet && _IsNewTPChaseActive)
+            {
+                newChaseTP = calcNewChaseTPPrice(p);
+                _isNewTPChaseSet = true;
+            }
+
+            List<double> TPPrices = new List<double>{currentTPPrice,newChaseTP};
+            
+            return calcFurthestTP(p.TradeType,TPPrices);
+        }
+
+
+        protected double calcNewChaseTPPrice(Position p)
+        {
+            double newChaseTPPrice = 0;
+            if (p.TradeType == TradeType.Buy)
+            {
+                newChaseTPPrice = (double) p.TakeProfit + ExtraChaseTargetPips * (1/Symbol.TickSize);
+            }
+
+            if (p.TradeType == TradeType.Sell)
+            {
+                newChaseTPPrice = (double)p.TakeProfit - ExtraChaseTargetPips * (1 / Symbol.TickSize); ;
+            }
+            return newChaseTPPrice;
+        }
+
+        protected double calcHardSLPrice(Position p)
+        {
+            double hardPrice = p.EntryPrice;
+            if (_lastPositionEntryPrice > 0)
+                hardPrice = _lastPositionEntryPrice;
+
+            double hardSLPrice = 0;
+            if (p.TradeType == TradeType.Buy)
+            {
+                hardSLPrice = hardPrice - HardStopLoss;
+            }
+
+            if (p.TradeType == TradeType.Sell)
+            {
+                hardSLPrice = hardPrice - HardStopLoss;
+            }
+            return isValidSL(p.TradeType,hardSLPrice);
+        }
+
+
+        protected double isValidSL(TradeType tradeType, double newSLPrice)
+        {
+            double validSLPrice = newSLPrice;
+            if (tradeType == TradeType.Buy)
+            {
+                //Is newStopLoss more than the current Ask and therefore not valid
+                if (newSLPrice > Symbol.Ask)
+                    validSLPrice = 0;
+            }
+
+            if (tradeType == TradeType.Sell)
+            {
+                //Is newStopLoss more than the current Ask and therefore not valid
+                if (newSLPrice < Symbol.Bid)
+                    validSLPrice = 0;
+            }
+            return validSLPrice;
         }
 
 
@@ -328,108 +452,81 @@ namespace cAlgo
         {
             foreach (Position p in Positions)
             {
-                //check if SL is already better than break even
-                if (isCurrentTPBreakEven(p, p.EntryPrice))
-                    continue;
-
-                //If this position was a Buy Order catching the Spike down then continue
-                if (isSpikeDownBuyOrder(p))
-                    continue;
-
                 try
                 {
                     if (isThisBotId(p.Label))
                     {
+                        //Set the newTP to Breakeven or Spike Start
+                        double newTP = _spikeStartPrice;
+                        if (IsSpikeDownBuyLimitOrder(p.Label))
+                        {
+                            //check if TP for Buy Limit Order is already closer than Spike Start
+                            if (isTPCloserThanSpikeStart(p))
+                                continue;
+                        }
+                        else
+                        {
+                            //If Buy position set TP to BreakEven
+                            newTP = p.EntryPrice;
+                        }
+
                         if (_lastPositionTradeType == TradeType.Buy)
                         {
-                                ModifyPositionAsync(p, 0, p.EntryPrice, OnModifyBreakEvenStopComplete);
+                            ModifyPositionAsync(p, 0, newTP, OnModifySpikeStartStopComplete);
                         }
 
                         if (_lastPositionTradeType == TradeType.Sell)
                         {
-                                ModifyPositionAsync(p, 0, p.EntryPrice, OnModifyBreakEvenStopComplete);
+                            ModifyPositionAsync(p, 0, newTP, OnModifySpikeStartStopComplete);
                         }
                     }
-                }
-                catch (Exception e)
+                } catch (Exception e)
                 {
                     Print("Failed to Modify Position:" + e.Message);
                 }
             }
         }
 
-
-        protected bool isSpikeDownBuyOrder(Position p)
+        protected bool IsSpikeDownBuyLimitOrder(string positionLabel)
         {
-
-            char positionLabelLastChar = p.Label[p.Label.Length - 1];
+            char positionLabelLastChar = positionLabel[positionLabel.Length - 1];
             if (positionLabelLastChar == 'O')
                 return true;
 
             return false;
         }
-        
 
-
-
-        protected void setBreakEvenSL()
+        protected bool IsSpikeUpBuyPosition(string positionLabel)
         {
-            foreach (Position p in Positions)
-            {
-                //check if SL is already better than break even
-                if (isCurrentSLCloser(p, p.EntryPrice))
-                    continue;
+            char positionLabelLastChar = positionLabel[positionLabel.Length - 1];
+            if (positionLabelLastChar == 'X')
+                return true;
 
-                try
-                {
-                    if (isThisBotId(p.Label))
-                    {
-                        if (_lastPositionTradeType == TradeType.Buy)
-                        {
-                            if (Symbol.Ask - MinTakeProfit * (1 / Symbol.TickSize) > p.EntryPrice)
-                            {
-                                ModifyPositionAsync(p, p.EntryPrice, p.TakeProfit, OnModifyBreakEvenStopComplete);
-                            }
-                        }
-
-                        if (_lastPositionTradeType == TradeType.Sell)
-                        {
-                            if (Symbol.Bid + MinTakeProfit * (1 / Symbol.TickSize) < p.EntryPrice)
-                            {
-                                ModifyPositionAsync(p, p.EntryPrice, p.TakeProfit, OnModifyBreakEvenStopComplete);
-                            }
-                        }
-                    }
-                } catch (Exception e)
-                {
-                    Print("Failed to Modify Position:" + e.Message);
-                }
-            }
+            return false;
         }
 
-        protected void setStopLossForAllPositions(double stopLossPrice)
+        protected double calcBreakEvenSLPrice(Position p)
         {
-            foreach (Position p in Positions)
+            double breakEvenSL = 0;
+            if (_lastPositionTradeType == TradeType.Buy)
             {
-                //check if SL is already better than break even
-                if (isCurrentSLCloser(p, stopLossPrice))
-                    continue;
-
-                try
+                if (Symbol.Ask - MinTakeProfit * (1 / Symbol.TickSize) > p.EntryPrice)
                 {
-                    if (isThisBotId(p.Label))
-                    {
-                        ModifyPositionAsync(p, stopLossPrice, p.TakeProfit, OnModifyHardSLComplete);
-                    }
-                } catch (Exception e)
-                {
-                    Print("Failed to Modify Position: " + e.Message);
+                    breakEvenSL = p.EntryPrice;
                 }
             }
+
+            if (_lastPositionTradeType == TradeType.Sell)
+            {
+                if (Symbol.Bid + MinTakeProfit * (1 / Symbol.TickSize) < p.EntryPrice)
+                {
+                    breakEvenSL = p.EntryPrice;
+                }
+            }
+            return breakEvenSL;
         }
 
-
-        protected bool isCurrentTPBreakEven(Position p, double newTPValue)
+        protected bool isTPCloserThanSpikeStart(Position p)
         {
             if (p.TakeProfit.HasValue)
             {
@@ -437,11 +534,11 @@ namespace cAlgo
                 {
                     case TradeType.Sell:
                         {
-                            return p.TakeProfit.Value == p.EntryPrice;
+                            return p.TakeProfit.Value >= _spikeStartPrice;
                         }
                     case TradeType.Buy:
                         {
-                            return p.TakeProfit.Value == p.EntryPrice;
+                            return p.TakeProfit.Value <= _spikeStartPrice;
                         }
                     default:
                         return false;
@@ -453,35 +550,56 @@ namespace cAlgo
             }
         }
 
-
-
-        protected bool isCurrentSLCloser(Position p, double newSLValue)
+        protected double calcFurthestTP(TradeType tradetype, List<double> TPPrices)
         {
-            if (p.StopLoss.HasValue)
+            double newTakeProfitPrice = 0;
+            switch (tradetype)
             {
-                switch (p.TradeType)
-                {
-                    case TradeType.Sell:
-                        {
-                            return p.StopLoss.Value < newSLValue;
-                        }
-                    case TradeType.Buy:
-                        {
-                            return p.StopLoss.Value > newSLValue;
-                        }
-                    default:
-                        return false;
-                }
+                case TradeType.Sell:
+                    {
+                        //Sort the list to get the Lowest price first
+                        List<double> TPSortedPrices = TPPrices.OrderBy(d => d).ToList();
+                        newTakeProfitPrice = TPSortedPrices[0];
+                    }
+                    break;
+                case TradeType.Buy:
+                    {
+                        //Sort the list to get the highest price first
+                        List<double> TPSortedPrices = TPPrices.OrderByDescending(d => d).ToList();
+                        newTakeProfitPrice = TPSortedPrices[0];
+                    }
+                    break;
             }
-            else
+            return newTakeProfitPrice;
+        }
+
+        protected double calcClosestSL(TradeType tradetype, List<double> SLPrices)
+        {
+
+           double newStopLossPrice = 0;
+           switch (tradetype)
             {
-                return false;
+                case TradeType.Sell:
+                    {
+                        //Sort the list to get the Lowest price first
+                        List<double> SLSortedPrices = SLPrices.OrderBy(d => d).ToList();
+                        newStopLossPrice = SLSortedPrices[0];
+                    }
+                    break;
+                case TradeType.Buy:
+                    {
+                        //Sort the list to get the highest price first
+                        List<double> SLSortedPrices = SLPrices.OrderByDescending(d => d).ToList();
+                        newStopLossPrice = SLSortedPrices[0];
+                    }
+                    break;
             }
+            return newStopLossPrice;
         }
 
 
         //calculate Trailing Stop Loss
-        protected double calcTrailingStopLoss(Position position)
+        protected double calcTrailingSLPrice(Position position)
         {
             double newStopLossPips = 0;
             double newStopLossPrice = 0;
@@ -545,7 +663,7 @@ namespace cAlgo
         protected void placeBuyOrders()
         {
             //Place Buy Limit Orders
-            for (int OrderCount = 0; OrderCount < NumberOfPositions; OrderCount++)
+            for (int OrderCount = 0; OrderCount < NumberOfBuyPositions; OrderCount++)
             {
                 try
                 {
@@ -613,7 +731,7 @@ namespace cAlgo
 
         protected double calcBuyOrderEntryPrice(int orderCount)
         {
-            return _orderEntryStartPrice - OrderEntryOffset - orderCount;
+            return _orderEntryStartPrice - BuyLimitOrderEntryOffsetPips - orderCount;
         }
 
         //Set a stop loss on the last Pending Order set to catch the break away train that never comes back!
@@ -659,6 +777,11 @@ namespace cAlgo
             OnTradeOperationComplete(tr, "FAILED to modify BREAKEVEN stop loss: ");
         }
 
+        protected void OnModifySpikeStartStopComplete(TradeResult tr)
+        {
+            OnTradeOperationComplete(tr, "FAILED to modify SPIKE START stop loss: ");
+        }
+
         protected void OnModifyTakeProfitComplete(TradeResult tr)
         {
             OnTradeOperationComplete(tr, "FAILED to modify TAKE PROFIT: ");
@@ -672,6 +795,13 @@ namespace cAlgo
         protected void OnModifyTrailingStop(TradeResult tr)
         {
             OnTradeOperationComplete(tr, "FAILED to modify TRAILING stop loss: ");
+        }
+
+        protected void OnModifyNewChaseTPTarget(TradeResult tr)
+        {
+            OnTradeOperationComplete(tr, "FAILED to modify TAKE PROFIT: ");
+            if (tr.IsSuccessful)
+                _IsNewTPChaseActive = true;
         }
 
         protected void OnPlaceOrderOperationComplete(TradeResult tr)
@@ -750,34 +880,41 @@ namespace cAlgo
         {
             if (isThisBotId(args.Position.Label))
             {
-                _openedPositionsCount++;
+                updateOpenPositionCounts(args.Position.Label);
 
-                //Capture last Position Opened i.e. the furthest away
-                _lastPositionTradeType = args.Position.TradeType;
-                _lastPositionEntryPrice = args.Position.EntryPrice;
-                _lastPositionLabel = args.Position.Label;
+                //Capture the last position info for the first Buy Position if no Orders have been opened
+                if (IsSpikeDownBuyLimitOrder(args.Position.Label) && _openedSpikeDownBuyOrdersPositionsCount < 1)
+                {
+                    _lastPositionTradeType = args.Position.TradeType;
+                    _lastPositionEntryPrice = args.Position.EntryPrice;
+                    _lastPositionLabel = args.Position.Label;
+                }
 
-                //Set TP for all positions based on their entry point if Pending Orders are triggered
-                if (Positions.Count > NumberOfPositions)
+
+                //Only Capture last Position info for Pending Order entries i.e. the furthest away
+                if (IsSpikeDownBuyLimitOrder(args.Position.Label))
+                {
+                    _lastPositionTradeType = args.Position.TradeType;
+                    _lastPositionEntryPrice = args.Position.EntryPrice;
+                    _lastPositionLabel = args.Position.Label;
+                }
+
+                //If Spike Down Buy Orders have opened but are fewer than SPIKE DOWN indicator % of orders then this is still a spike UP and reset the TP
+                if (0 < _openedSpikeDownBuyOrdersPositionsCount && _openedSpikeDownBuyOrdersPositionsCount < NumberOfBuyLimitOrders * BuyLimitOrdersOpenedSpikeIndicator / 100)
                     setCascadingTakeProfit();
+
+                //If the number of Buy Order positions opened is greater than SPIKE DOWN indicator % of orders then spike is DOWN
+                if (_openedSpikeDownBuyOrdersPositionsCount > NumberOfBuyLimitOrders * BuyLimitOrdersOpenedSpikeIndicator / 100)
+                    setBreakEvenTPForBuySpikePositions();
             }
-
-            //If the number of positions opened is greater than the expected number of positions plus 2 then spike is down
-            if (_openedPositionsCount > NumberOfPositions + 2)
-                setBreakEvenTPForBuySpikePositions();
-
         }
 
         protected void OnPositionsClosed(PositionClosedEventArgs args)
         {
             if (isThisBotId(args.Position.Label))
             {
-                _closedPositionsCount++;
-
-                _dayProfitTotal += args.Position.GrossProfit;
-                _dayPipsTotal += args.Position.Pips;
-
-                debugCSV.Add(args.Position.Label + "," + args.Position.GrossProfit + "," + args.Position.Pips + "," + args.Position.EntryPrice + "," + History.FindLast(args.Position.Label, Symbol, args.Position.TradeType).ClosingPrice + "," + args.Position.StopLoss + "," + args.Position.TakeProfit + "," + Time.DayOfWeek + "," + Time + debugState());
+                updateClosedPositionCounts(args.Position.Label);
+                updateProfitReporting(args.Position);
 
                 //Taking profit
                 if (args.Position.GrossProfit > 0)
@@ -790,11 +927,63 @@ namespace cAlgo
 
                     //Set trailing SL
                     _isTrailingStopsActive = true;
+
+                    //If Buy Positions SPIKE UP Indicator triggered
+                    if (_closedSpikeUpPositionsCount > NumberOfBuyPositions * BuyPositionsOpenedSpikeIndicator / 100)
+                    {
+                        CancelAllPendingOrders();
+
+                        //activate manage positions
+                        _isManagePositionRiskActive = true;
+                    }
                 }
             }
         }
 
-        protected double calculateChaseFactor()
+        protected void updateProfitReporting(Position p)
+        {
+            _dayProfitTotal += p.GrossProfit;
+            _dayPipsTotal += p.Pips;
+            debugCSV.Add(p.Label + "," + p.GrossProfit + "," + p.Pips + "," + p.EntryPrice + "," + History.FindLast(p.Label, Symbol, p.TradeType).ClosingPrice + "," + p.StopLoss + "," + p.TakeProfit + "," + Time.DayOfWeek + "," + Time + debugState());
+        }
+
+
+        protected void updateClosedPositionCounts(string positionLabel)
+        {
+            _closedPositionsCount++;
+
+            if (IsSpikeUpBuyPosition(positionLabel))
+            {
+                _closedSpikeUpPositionsCount++;
+            }
+
+            if (IsSpikeDownBuyLimitOrder(positionLabel))
+            {
+                _closedSpikeDownBuyOrdersPositionsCount++;
+            }
+        }
+
+        protected void updateOpenPositionCounts(string positionLabel)
+        {
+            _openedPositionsCount++;
+
+            if (IsSpikeUpBuyPosition(positionLabel))
+            {
+                _openedSpikeUpPositionsCount++;
+            }
+
+            if (IsSpikeDownBuyLimitOrder(positionLabel))
+            {
+                _openedSpikeDownBuyOrdersPositionsCount++;
+            }
+
+
+
+        }
+
+
+
+        protected double calculateChaseFactorForSpikeUp()
         {
             double percentClosed = 0;
             if (_openedPositionsCount > 0)
@@ -828,29 +1017,16 @@ namespace cAlgo
             return _marketTimeInfo.IsTimeBeforeOpen(IsBacktesting, Server.Time, mins);
         }
 
-        protected void setAllStopLossesWithBuffer(double SLPrice)
-        {
-            switch (_lastPositionTradeType)
-            {
-                case TradeType.Buy:
-                    setStopLossForAllPositions(SLPrice - HardStopLoss);
-                    break;
-                case TradeType.Sell:
-                    setStopLossForAllPositions(SLPrice + HardStopLoss);
-                    break;
-            }
-        }
-
         //Increase the volume based on Orders places and volume levels and multiplier until max volume reached
         protected int setBuyVolume(int orderCount)
         {
 
             double orderVolumeLevel = orderCount / OrderVolumeLevels;
-            double volume = VolumeMax / Math.Pow(VolumeMultipler, orderVolumeLevel);
+            double volume = MaxVolume / Math.Pow(VolumeMultipler, orderVolumeLevel);
 
-            if (volume < Volume)
+            if (volume < MinVolume)
             {
-                volume = Volume;
+                volume = MinVolume;
             }
 
             return (int)volume;
@@ -861,11 +1037,11 @@ namespace cAlgo
         {
 
             double orderVolumeLevel = orderCount / OrderVolumeLevels;
-            double volume = Math.Pow(VolumeMultipler, orderVolumeLevel) * Volume;
+            double volume = Math.Pow(VolumeMultipler, orderVolumeLevel) * MinVolume;
 
-            if (volume > VolumeMax)
+            if (volume > MaxVolume)
             {
-                volume = VolumeMax;
+                volume = MaxVolume;
             }
 
             return (int)volume;
@@ -909,6 +1085,10 @@ namespace cAlgo
             //reset position counters
             _openedPositionsCount = 0;
             _closedPositionsCount = 0;
+            _openedSpikeUpPositionsCount = 0;
+            _openedSpikeDownBuyOrdersPositionsCount = 0;
+            _closedSpikeUpPositionsCount = 0;
+            _closedSpikeDownBuyOrdersPositionsCount = 0;
             _orderCountLabel = 0;
 
             //reset Last Position variables
@@ -918,10 +1098,14 @@ namespace cAlgo
             _lastProfitPrice = 0;
 
             //reset risk management variables
+            _isManagePositionRiskActive = false;
             _divideTrailingStopPips = 1;
             _isTrailingStopsActive = false;
             _isBreakEvenStopLossActive = false;
+            _IsNewTPChaseActive = false;
+            _isNewTPChaseSet = false;
             _isHardSLActive = false;
+            _isHardSLSet = false;
             _isHardSLLastPositionEntryPrice = false;
             _isHardSLLastProfitPrice = false;
 
@@ -1009,7 +1193,7 @@ namespace cAlgo
                     _marketTimeInfo.market = "FTSE";
                     _marketTimeInfo.tz = TimeZoneInfo.FindSystemTimeZoneById("GMT Standard Time");
                     // Market for swordfish trades opens at 10:08am.
-                    _marketTimeInfo.open = new TimeSpan(10, 9, 0);
+                    _marketTimeInfo.open = new TimeSpan(10, 10, 0);
                     // Market for swordfish trades closes at 10:13am.
                     _marketTimeInfo.close = new TimeSpan(10, 15, 0);
                     // Close all open Swordfish position at 11:29am before US opens.
@@ -1139,7 +1323,7 @@ public struct MarketTimeInfo
     private bool IsTimeBeforeOpen(DateTime dateTimeUtc, int timeToOpen)
     {
         DateTime tzTime = TimeZoneInfo.ConvertTimeFromUtc(dateTimeUtc, tz);
-        return (tzTime.TimeOfDay >= open.Subtract(TimeSpan.FromMinutes(timeToOpen)));
+        return (tzTime.TimeOfDay < open && tzTime.TimeOfDay >= open.Subtract(TimeSpan.FromMinutes(timeToOpen)));
     }
 
     //Is the current time within the period Swordfish positions can remain open.
