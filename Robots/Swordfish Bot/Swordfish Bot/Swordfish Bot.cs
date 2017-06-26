@@ -623,10 +623,6 @@ namespace cAlgo
         protected void ManagePositionRisk()
         {
 
-            //Close any positions that have not been triggered
-            if (!_isPendingOrdersClosed)
-                CloseAllPendingOrders();
-
             if (retraceEnabled)
             {
                 //Calculate spike retrace factor
@@ -634,9 +630,6 @@ namespace cAlgo
 
                 if (_isReducedRiskTime)
                 {
-                    //reset HARD SL Limits with reduced SL's
-                    _isHardSLLastPositionEntryPrice = true;
-
                     //Reduce all retrace limits
                     retraceLevel1 = retraceLevel1 / 2;
                     retraceLevel2 = retraceLevel2 / 2;
@@ -646,6 +639,10 @@ namespace cAlgo
                 //Set hard stop losses as soon as Swordfish time is over
                 if (!_isHardSLLastPositionEntryPrice && !IsSwordFishTime())
                 {
+                    //Close any positions that have not been triggered
+                    if (!_isPendingOrdersClosed)
+                        CloseAllPendingOrders();
+
                     setAllStopLosses(_lastPositionEntryPrice);
                     _isHardSLLastPositionEntryPrice = true;
                 }
@@ -653,6 +650,10 @@ namespace cAlgo
                 //Set hard stop losses and activate Trail if Spike has retraced between than retraceLevel1 and retraceLevel2
                 if (_isReducedRiskTime || (retraceLevel2 > retraceFactor && retraceFactor > retraceLevel1))
                 {
+                    //Close any positions that have not been triggered
+                    if (!_isPendingOrdersClosed)
+                        CloseAllPendingOrders();
+
                     //If Hard SL has not been set yet
                     if (!_isHardSLLastPositionEntryPrice && _lastPositionEntryPrice > 0)
                     {
