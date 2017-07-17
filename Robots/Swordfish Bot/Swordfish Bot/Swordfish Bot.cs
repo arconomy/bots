@@ -179,6 +179,7 @@ namespace cAlgo
                 {
                     //Get the Market Open Price
                     _openPrice = MarketSeries.Close.LastValue;
+                    Print("OPEN PRICE: " + _openPrice);
                     _openPriceCaptured = true;
                 }
 
