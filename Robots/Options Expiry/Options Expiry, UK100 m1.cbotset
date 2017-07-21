@@ -5,7 +5,7 @@ Timeframe = m1
 [cBotParameters]
 DataSeriesSource = Close
 SpikeIndicatorPips = 7
-CloseTime = 3
+CloseTime = 5
 ReducePositionRiskTime = 10
 NumberOfBuyLimitOrders = 20
 LimitOrderPlacedSpacingLevel1 = 5
@@ -30,6 +30,7 @@ MaxTakeProfit = 0.7
 ExtraChaseTargetPips = 0.5
 MinTakeProfit = 0.4
 chaseEnabled = True
+retraceLevel = 40
 chaseLevel1 = 25
 chaseLevel2 = 59
 FinalOrderStopLoss = 10
