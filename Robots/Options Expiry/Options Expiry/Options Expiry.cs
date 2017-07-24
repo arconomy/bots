@@ -250,7 +250,7 @@ namespace cAlgo
                 _isCloseTime = true;
 
                 //CalcSpikeDirection
-                 _IsSpikeDirectionDown = isSpikeDown(false);
+                _IsSpikeDirectionDown = isSpikeDown(false);
 
                 //Cancel all open pending Orders
                 CancelAllPendingOrders();
@@ -260,7 +260,7 @@ namespace cAlgo
                     if (_openedPositionsCount - _closedPositionsCount > 0)
                     {
                         //If a spike has not happened then set breakeven SL
-                        if(_spikePeakPips < SpikeIndicatorPips)
+                        if (_spikePeakPips < SpikeIndicatorPips)
                         {
                             _isSetHardBreakEvenSLActive = true;
                         }
@@ -358,10 +358,10 @@ namespace cAlgo
             _isPendingOrdersClosed = true;
         }
 
-         
+
         protected void captureSpikePeak()
         {
-            if(_spikeStartPrice < Symbol.Ask)
+            if (_spikeStartPrice < Symbol.Ask)
             {
                 //OptionsBot only has Buy positions - look for highest Ask price (to close Buy position) above Spike Start
                 if (Symbol.Ask > _spikeUpPeakPrice || _spikeUpPeakPrice == 0)
@@ -371,7 +371,7 @@ namespace cAlgo
                     updateSpikePeakPips(_spikeUpPeakPips);
                 }
             }
-            else if(_spikeStartPrice > Symbol.Bid)
+            else if (_spikeStartPrice > Symbol.Bid)
             {
                 //Look for lowest Bid (to enter Buy position) below spike Start
                 if (Symbol.Bid < _spikeDownPeakPrice || _spikeDownPeakPrice == 0)
@@ -599,7 +599,7 @@ namespace cAlgo
             {
                 minBreakEvenProfit = 0;
             }
-            
+
             if (_lastPositionTradeType == TradeType.Buy)
             {
                 if (Symbol.Ask - minBreakEvenProfit * (1 / Symbol.TickSize) > p.EntryPrice)
@@ -784,27 +784,27 @@ namespace cAlgo
             double offset = BuyLimitOrderEntryOffsetPips;
 
             //Ordercount less than Level1 spacing level
-           if(orderCount < LimitOrderPlacedSpacingLevel1)
-           {
-               offset += orderCount * LimitOrderSpacingLevel1;
-           }
+            if (orderCount < LimitOrderPlacedSpacingLevel1)
+            {
+                offset += orderCount * LimitOrderSpacingLevel1;
+            }
 
-           //Ordercount between Level1 and level2 spacing level
-           if (orderCount >= LimitOrderPlacedSpacingLevel1 && orderCount < LimitOrderPlacedSpacingLevel1 + LimitOrderPlacedSpacingLevel2)
-           {
-               offset += LimitOrderPlacedSpacingLevel1 * LimitOrderSpacingLevel1;
-               offset += (orderCount - LimitOrderPlacedSpacingLevel1) * LimitOrderSpacingLevel2;
-           }
+            //Ordercount between Level1 and level2 spacing level
+            if (orderCount >= LimitOrderPlacedSpacingLevel1 && orderCount < LimitOrderPlacedSpacingLevel1 + LimitOrderPlacedSpacingLevel2)
+            {
+                offset += LimitOrderPlacedSpacingLevel1 * LimitOrderSpacingLevel1;
+                offset += (orderCount - LimitOrderPlacedSpacingLevel1) * LimitOrderSpacingLevel2;
+            }
 
-           //Ordercount greater than # orders placed at Level 1 and Level2 spacing
-           if (orderCount >= LimitOrderPlacedSpacingLevel1 + LimitOrderPlacedSpacingLevel2)
-           {
-               offset += LimitOrderPlacedSpacingLevel1 * LimitOrderSpacingLevel1;
-               offset += LimitOrderPlacedSpacingLevel2 * LimitOrderSpacingLevel2;
-               offset += (orderCount - LimitOrderPlacedSpacingLevel1 - LimitOrderPlacedSpacingLevel2) * LimitOrderSpacingLevel3;
-           }
+            //Ordercount greater than # orders placed at Level 1 and Level2 spacing
+            if (orderCount >= LimitOrderPlacedSpacingLevel1 + LimitOrderPlacedSpacingLevel2)
+            {
+                offset += LimitOrderPlacedSpacingLevel1 * LimitOrderSpacingLevel1;
+                offset += LimitOrderPlacedSpacingLevel2 * LimitOrderSpacingLevel2;
+                offset += (orderCount - LimitOrderPlacedSpacingLevel1 - LimitOrderPlacedSpacingLevel2) * LimitOrderSpacingLevel3;
+            }
 
-            return _orderEntryStartPrice - offset; 
+            return _orderEntryStartPrice - offset;
         }
 
         //Set a stop loss on the last Pending Order set to catch the break away train that never comes back!
@@ -981,21 +981,21 @@ namespace cAlgo
                 {
                     setBreakEvenTPForBuySpikePositions();
                 }
-                    
+
             }
         }
 
 
         protected bool isSpikeDown(bool positionClosed)
         {
-            if(_openedSpikeDownBuyOrdersPositionsCount > NumberOfBuyLimitOrders * BuyLimitOrdersOpenedSpikeIndicator / 100)
+            if (_openedSpikeDownBuyOrdersPositionsCount > NumberOfBuyLimitOrders * BuyLimitOrdersOpenedSpikeIndicator / 100)
             {
                 return true;
             }
 
-            if(_isCloseTime && _spikeDownPeakPips > _spikeUpPeakPips)
+            if (_isCloseTime && _spikeDownPeakPips > _spikeUpPeakPips)
             {
-               return true;
+                return true;
             }
 
             if (positionClosed && _spikeDownPeakPips > _spikeUpPeakPips)
@@ -1300,7 +1300,7 @@ namespace cAlgo
                     _marketTimeInfo.market = "FTSE";
                     _marketTimeInfo.tz = TimeZoneInfo.FindSystemTimeZoneById("GMT Standard Time");
                     // Market for swordfish trades opens at 10:08am.
-                    _marketTimeInfo.open = new TimeSpan(10, 10, 0);
+                    _marketTimeInfo.open = new TimeSpan(10, 9, 50);
                     // Market for swordfish trades closes at 10:13am.
                     _marketTimeInfo.close = _marketTimeInfo.open.Add(TimeSpan.FromMinutes(CloseTime));
                     // Close all open Swordfish position at 11:29am before US opens.
