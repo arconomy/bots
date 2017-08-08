@@ -158,6 +158,7 @@ namespace cAlgo
                     //Get the Price 5mins before open
                     _earlyEntryPrice = Symbol.Ask;
                     _earlyEntryPriceCaptured = true;
+                    Print(Time + " : " +_earlyEntryPrice);
                 }
             }
 
@@ -231,7 +232,7 @@ namespace cAlgo
                 double chaseFactor = calculateChaseFactor();
 
                 //Activate BreakEven SL if chaseLevel1 has been passed
-                if (chaseLevel1 < chaseFactor)
+                if (chaseLevel1 < chaseFactor || _isReducedRiskTime)
                 {
                     //Activate Trailing Stop Losses
                     _isBreakEvenStopLossActive = true;
@@ -895,7 +896,7 @@ namespace cAlgo
                     _marketTimeInfo.market = "FTSE";
                     _marketTimeInfo.tz = TimeZoneInfo.FindSystemTimeZoneById("GMT Standard Time");
                     // Market for swordfish trades opens at 8:00am.
-                    _marketTimeInfo.open = new TimeSpan(16, 29, 0);
+                    _marketTimeInfo.open = new TimeSpan(16, 28, 45);
                     // Market for swordfish trades closes at 8:05am.
                     _marketTimeInfo.close = new TimeSpan(16, 31, 0);
                     // Close all open Swordfish position at 11:29am before US opens.
