@@ -170,25 +170,6 @@ namespace cAlgo
 
         protected override void OnTick()
         {
-
-            switch (_count)
-            {
-
-                case 0:
-                    {
-                        Print(Time);
-                        break;
-                    }
-                case 10:
-                    {
-                        _count = 0;
-                        break;
-                    }
-                default:
-                    _count++;
-                    break;
-            }
-
             // If backtesting use the Server.Time.        
             if (IsSwordFishTime())
             {
@@ -987,9 +968,9 @@ namespace cAlgo
                     _swordFishTimeInfo.market = "FTSE";
                     _swordFishTimeInfo.tz = TimeZoneInfo.FindSystemTimeZoneById("GMT Standard Time");
                     // Market for swordfish trades opens at 8:00am.
-                    _swordFishTimeInfo.open = new TimeSpan(7, 59, 50);
+                    _swordFishTimeInfo.open = new TimeSpan(7, 59, 59);
                     // Market for swordfish trades closes at 8:05am.
-                    _swordFishTimeInfo.close = new TimeSpan(8, 5, 0);
+                    _swordFishTimeInfo.close = new TimeSpan(8, 4, 30);
                     // Close all open Swordfish position at 11:29am before US opens.
                     _swordFishTimeInfo.closeAll = new TimeSpan(11, 29, 0);
 
@@ -998,9 +979,9 @@ namespace cAlgo
                     _swordFishTimeInfo.market = "DAX";
                     _swordFishTimeInfo.tz = TimeZoneInfo.FindSystemTimeZoneById("W. Europe Standard Time");
                     // Market for swordfish opens at 9:00.
-                    _swordFishTimeInfo.open = new TimeSpan(8, 59, 50);
+                    _swordFishTimeInfo.open = new TimeSpan(8, 59, 59);
                     // Market for swordfish closes at 9:05.
-                    _swordFishTimeInfo.close = new TimeSpan(9, 3, 0);
+                    _swordFishTimeInfo.close = new TimeSpan(9, 3, 30);
                     // Close all open Swordfish position at 11:29am before US opens.
                     _swordFishTimeInfo.closeAll = new TimeSpan(11, 29, 0);
                     break;
