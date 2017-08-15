@@ -120,6 +120,8 @@ namespace cAlgo
         protected double _spikePeakPips = 0;
         protected double _spikePeakPrice = 0;
 
+        protected int _count = 0;
+
         protected override void OnStart()
         {
             _botId = generateBotId();
@@ -168,6 +170,25 @@ namespace cAlgo
 
         protected override void OnTick()
         {
+
+            switch (_count)
+            {
+
+                case 0:
+                    {
+                        Print(Time);
+                        break;
+                    }
+                case 10:
+                    {
+                        _count = 0;
+                        break;
+                    }
+                default:
+                    _count++;
+                    break;
+            }
+
             // If backtesting use the Server.Time.        
             if (IsSwordFishTime())
             {

@@ -63,9 +63,13 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Niffler.Core\Niffler\Niffler.Core.csproj">
+    <ProjectReference Include="..\..\Niffler.App\Niffler\Niffler.App.csproj">
       <Project>{652e984a-9b0e-4b42-8251-ece5677862e6}</Project>
-      <Name>Niffler.Core</Name>
+      <Name>Niffler.App</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Niffler.Website\Niffler.Website\Niffler.Website.csproj">
+      <Project>{7e179e47-b5de-45eb-bf05-6823a1e05d3d}</Project>
+      <Name>Niffler.Website</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
