@@ -8,10 +8,12 @@ using cAlgo.API;
 using Niffler.Common.BackTest;
 using Niffler.Messaging;
 using System;
+using Niffler.Rules;
+using Niffler.Strategy;
 
-namespace Niffler.Rules
+namespace Niffler.Microservices
 {
-    class RulesManager : IResetState
+    class ServicesManager : IResetState
     {
         public SellLimitOrdersTrader SellLimitOrdersTrader { get; }
         public BuyLimitOrdersTrader BuyLimitOrdersTrader { get; }
@@ -19,8 +21,7 @@ namespace Niffler.Rules
         public SpikeManager SpikeManager { get; }
         public StopLossManager StopLossManager { get; }
         public FixedTrailingStop FixedTrailingStop { get; }
-        public State BotState { get; }
-        public GooglePubSubBroker MessageBroker {get;}
+        public StateManager StateManager { get; }
         private Reporter Reporter { get; set; }
         private List<IRule> OnTickRules = new List<IRule>();
         private List<IRuleOnPositionEvent> OnPositionOpenedRules = new List<IRuleOnPositionEvent>();
@@ -28,26 +29,111 @@ namespace Niffler.Rules
         private List<IRule> OnTimerRules = new List<IRule>();
         private List<IRule> OnBarRules = new List<IRule>();
 
-        public RulesManager(State botState, SellLimitOrdersTrader sellLimitOrdersTrader, BuyLimitOrdersTrader buyLimitOrdersTrader, StopLossManager stopLossManager, FixedTrailingStop fixedTrailingStop)
+        private StopLossManager StopLossManager;
+        private MarketTradeTimeInfo SwfMarketInfo;
+        private SellLimitOrdersTrader SellLimitOrdersTrader;
+        private BuyLimitOrdersTrader BuyLimitOrdersTrader;
+        private ServicesManager ServicesManager;
+
+        public ServicesManager(StrategyConfig strategyConfig)
         {
-            BotState = botState;
+
+            //For each BotConfig Initialise a micro-service for each service required and listen for updates on appropriate queues
+            foreach (BotConfig botConfig in strategyConfig.BotConfig)
+            {
+
+                //Need to refactor StateManager to only store persistent state info - all data used for rules is passed directly to the rules. i.e. Open time etc.
+                //Once timing rules have fired the state will need to notified i.e. IsTrading = true.
+                StateManager = new StateManager(botConfig.Name, botConfig.Config);
+                
+                foreach(RuleConfig ruleConfig in botConfig.Rules)
+                {
+                    if(RuleFactory.exists(ruleConfig.Name))
+                    {
+                        RuleFactory.createRuleService(ruleConfig);
+                    }
+                }
+
+                //Create default microservices
+
+                TradingTime
+                SpikeManager = new SpikeManager();
+                Reporter = new Reporter();
+            }
+
+
+
+            fbotState;
+
+
             Reporter = botState.GetReporter();
             SellLimitOrdersTrader = sellLimitOrdersTrader;
             BuyLimitOrdersTrader = buyLimitOrdersTrader;
-            PositionsManager = new PositionsManager(BotState);
-            SpikeManager = new SpikeManager(BotState);
+            PositionsManager = new PositionsManager(StateManager);
+            SpikeManager = new SpikeManager(StateManager);
             StopLossManager = stopLossManager;
             FixedTrailingStop = fixedTrailingStop;
-
-            try
-            {
-                MessageBroker = new GooglePubSubBroker();
-            }
-            catch (Exception e)
-            {
-                BotState.Bot.Print(e);
-            }
         }
+
+
+        //
+
+        //BotState = new State(this);
+        //SwfMarketInfo = BotState.GetMarketInfo();
+        //SwfMarketInfo.SetCloseAfterMinutes(CloseAfterMins);
+        //SwfMarketInfo.SetReduceRiskAfterMinutes(ReduceRiskAfterMins);
+
+        //SellLimitOrdersTrader = new SellLimitOrdersTrader(BotState, NumberOfOrders, TriggerOrderPlacementPips, OrderEntryOffset, DefaultTakeProfit, FinalOrderStopLoss);
+        //SellLimitOrdersTrader.SetVolumeMultipler(VolumeMultiplierOrderLevels, VolumeMultipler, VolumeMax, VolumeBase);
+        //BuyLimitOrdersTrader = new BuyLimitOrdersTrader(BotState, NumberOfOrders, TriggerOrderPlacementPips, OrderEntryOffset, DefaultTakeProfit, FinalOrderStopLoss);
+        //BuyLimitOrdersTrader.SetVolumeMultipler(VolumeMultiplierOrderLevels, VolumeMultipler, VolumeMax, VolumeBase);
+        //StopLossManager = new StopLossManager(BotState, HardStopLossBuffer, FinalOrderStopLoss);
+
+        //RulesManager = new RulesManager(BotState, SellLimitOrdersTrader, BuyLimitOrdersTrader, StopLossManager, new FixedTrailingStop(BotState, TrailingStopPips));
+
+        //RulesManager.SetOnTickRules(new List<IRule>
+        //    {
+        //        new OpenTimeSetBotState(1),
+        //   new OpenTimeCapturePrice(2),
+        //   new OpenTimeCaptureSpike(3),
+        //   new OpenTimePlaceLimitOrders(4),
+        //   new CloseTimeSetBotState(5),
+        //   new CloseTimeCancelPendingOrders(6),
+        //   new CloseTimeSetHardSLToLastPositionEntryWithBuffer(7),
+        //   new CloseTimeNoPositionsOpenedReset(8),
+        //   new CloseTimeNoPositionsRemainOpenReset(9),
+        //   new ReduceRiskTimeSetBotState(10),
+        //   new ReduceRiskTimeReduceRetraceLevels(11),
+        //   new ReduceRiskTimeSetHardSLToLastProfitPositionCloseWithBuffer(12),
+        //   new ReduceRiskTimeSetTrailingStop(13),
+        //   new TerminateTimeSetBotState(14),
+        //   new TerminateTimeCloseAllPositionsReset(15),
+        //   new RetracedLevel1To2SetHardSLToLastProfitPositionEntryWithBuffer(16),
+        //   new RetracedLevel1To2SetBreakEvenSLActive(17),
+        //   new RetracedLevel2To3SetHardSLToLastProfitPositionEntry(18),
+        //   new RetracedLevel2To3SetHardSLToLastProfitPositionEntry(19),
+        //    new RetracedLevel3PlusReduceHardSLBuffer(20),
+        //   new RetracedLevel3PlusSetHardSLToLastProfitPositionCloseWithBuffer(21),
+        //    new OnTickBreakEvenSLActiveSetLastProfitPositionEntry(22),
+        //    new OnTickChaseFixedTrailingSL(23),
+        //    new StartTrading(24), //Start Trading is based on flags set by the other non-trading rules therefore run afer all other rules
+        //    new EndTrading(25), //End Trading is based on flags set by the other trading rules therefore run afer all other rules
+        //});
+
+        //RulesManager.SetOnPositionOpenedRules(new List<IRuleOnPositionEvent>
+        //    {
+        //        new OnPositionOpenedCaptureLastPositionInfo(1)
+        //});
+
+        //RulesManager.SetOnPositionClosedRules(new List<IRuleOnPositionEvent>
+        //    {
+        //        new OnPositionClosedReportTrade(1),
+        //        new OnPositionClosedLastEntryPositionStopLossTriggeredCloseAll(2),
+        //        new OnPositionClosedInProfitSetBreakEvenWithBufferIfActive(3),
+        //        new OnPositionClosedInProfitCaptureProfitPositionInfo(4)
+        //});
+        // }
+
 
         public void AddOnTickRule(IRule rule)
         {
@@ -187,7 +273,7 @@ namespace Niffler.Rules
             OnTimerRules.ForEach(IRule => IRule.ReportExecutionCount());
             OnPositionOpenedRules.ForEach(IRule => IRule.ReportExecutionCount());
             OnPositionClosedRules.ForEach(IRule => IRule.ReportExecutionCount());
-            BotState.GetReporter().Report();
+            StateManager.GetReporter().Report();
         }
 
 

@@ -1,6 +1,4 @@
-﻿#region Includes
-
-using Daishi.AMQP;
+﻿#region Includesusing Niffler.AMQPusing Niffler.Messaging.RabbitMQ;
 using Niffler.Messaging.RabbitMQ;
 using System;
 

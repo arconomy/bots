@@ -3,7 +3,8 @@
 using System;
 using System.Linq;
 using System.Threading;
-using Daishi.AMQP;
+using Niffler.Messaging.RabbitMQ;
+using Niffler.Messaging.AMQP;
 
 #endregion
 
@@ -21,8 +22,8 @@ namespace Niffler.Microservices {
                             new QueueLengthIncreasedAMQPQueueMetricAnalyser(
                                 new ConsumptionRateDecreasedAMQPQueueMetricAnalyser(
                                     new StableAMQPQueueMetricAnalyser()))))), 20);
-            AMQPConsumerNotifier amqpConsumerNotifier = new RabbitMQConsumerNotifier(RabbitMQAdapter.Instance, "monitor");
-            RabbitMQAdapter.Instance.Init("localhost", 5672, "paul", "password", 50);
+            AMQPConsumerNotifier amqpConsumerNotifier = new RabbitMQConsumerNotifier(Adapter.Instance, "monitor");
+            Adapter.Instance.Init();
             _queueWatch = new QueueWatch(amqpQueueMetricsManager, amqpQueueMetricsAnalyser, amqpConsumerNotifier, 5000);
             _queueWatch.AMQPQueueMetricsAnalysed += QueueWatchOnAMQPQueueMetricsAnalysed;
 
@@ -42,8 +43,7 @@ namespace Niffler.Microservices {
 
             Console.WriteLine("-----");
 
-            int workerThreads, ioThreads;
-            ThreadPool.GetAvailableThreads(out workerThreads, out ioThreads);
+            ThreadPool.GetAvailableThreads(out int workerThreads, out int ioThreads);
             Console.WriteLine(string.Concat("Worker Threads: ", workerThreads));
             Console.WriteLine(string.Concat("IO Threads: ", ioThreads));
 

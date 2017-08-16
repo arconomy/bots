@@ -12,18 +12,18 @@ using Niffler.Microservices;
 
 namespace Niffler.Rules
 {
-    abstract class IRule : IConsumerService
+    abstract class IRule
     {
-        protected State BotState;
+        protected StateManager BotState;
         protected Robot Bot;
-        protected RulesManager RulesManager;
+        protected ServicesManager RulesManager;
         protected PositionsManager PositionsManager;
         protected SellLimitOrdersTrader SellLimitOrdersTrader;
         protected BuyLimitOrdersTrader BuyLimitOrdersTrader;
         protected SpikeManager SpikeManager;
         protected StopLossManager StopLossManager;
         protected FixedTrailingStop FixedTrailingStop;
-        protected MarketInfo MarketInfo;
+        protected MarketTradeTimeInfo MarketInfo;
         protected Reporter Reporter;
         protected SimplePublisher SimplePublisher;
         protected GooglePubSubBroker MessageBroker;
@@ -39,10 +39,10 @@ namespace Niffler.Rules
             Priority = priority;
         }
 
-        public void Init(RulesManager rulesManager)
+        public void Init(ServicesManager rulesManager)
         {
             RulesManager = rulesManager;
-            BotState = rulesManager.BotState;
+            BotState = rulesManager.StateManager;
             Bot = BotState.Bot;
             MarketInfo = BotState.GetMarketInfo();
             PositionsManager = rulesManager.PositionsManager;

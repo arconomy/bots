@@ -7,7 +7,7 @@ namespace Niffler.Common.Trade
 {
     abstract class OrdersManager
     {
-        protected State BotState { get; set; }
+        protected StateManager BotState { get; set; }
         protected Robot Bot { get; set; }
         protected Reporter Reporter { get; set; }
         protected bool useBollingerBandEntry;
@@ -34,7 +34,7 @@ namespace Niffler.Common.Trade
         protected BollingerBands BollingerBand;
 
 
-        public OrdersManager(State s, int numberOfOrders, int entryTriggerOrderPlacementPips, int entryOffSetPips, double defaultTakeProfitPips, double finalOrderStopLossPips)
+        public OrdersManager(StateManager s, int numberOfOrders, int entryTriggerOrderPlacementPips, int entryOffSetPips, double defaultTakeProfitPips, double finalOrderStopLossPips)
         { 
             BotState = s;
             Bot = BotState.Bot;

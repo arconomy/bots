@@ -1,6 +1,5 @@
 ﻿#region Includes
 
-using Daishi.AMQP;
 using Niffler.Messaging.RabbitMQ;
 using RabbitMQ.Client;
 using System;
@@ -12,22 +11,31 @@ namespace Niffler.Microservices {
         public abstract class IConsumerService : IService {
         private Adapter Adapter;
         private readonly List<Consumer> Consumers = new List<Consumer>();
+        private ConsumerConfig ConsumerConfig { get; set; }
 
         private Consumer Consumer;
         private Consumer AutoScaleConsumer;
 
-        public abstract void Init();
-        public abstract void OnMessageReceived(object sender, MessageReceivedEventArgs e);
+        public abstract ConsumerConfig SetConsumerConfig();
 
-        public void Init(string exchangeName, string exchangeType, string queueName, string[] routingKeys)
+        public void OnMessageReceived(object sender, MessageReceivedEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IConsumerService()
         {
             Adapter = Adapter.Instance;
             Adapter.Init();
             Adapter.Connect();
+            Init();
+        }
 
+        public void Init()
+        {
             var defaultMsgTimeOut = Convert.ToInt32(System.Configuration.ConfigurationManager.AppSettings["rabbitmq-default-msg-timeout"]);
-
-            Consumer = new Consumer((IConnection)Adapter.GetConnection(), exchangeName, exchangeType, queueName, routingKeys, defaultMsgTimeOut);
+            ConsumerConfig = SetConsumerConfig();
+            Consumer = new Consumer((IConnection)Adapter.GetConnection(), ConsumerConfig.ExchangeName, ConsumerConfig.ExchangeType, ConsumerConfig.QueueName, ConsumerConfig.RoutingKeys, defaultMsgTimeOut);
             Consumer.MessageReceived += OnMessageReceived;
 
             AutoScaleConsumer = new Consumer((IConnection)Adapter.GetConnection(), "AutoScaleX", "direct", "AutoScaleQ", new string[] { "autoscale" }, defaultMsgTimeOut);
@@ -37,11 +45,8 @@ namespace Niffler.Microservices {
 
             Adapter.ConsumeAsync(AutoScaleConsumer);
             Adapter.ConsumeAsync(Consumer);
-
-            //Initialise Service inheriting from IConsumerService
-            Init();
         }
-
+        
         private void OnAutoScaleConsumerMessageReceived(object sender, MessageReceivedEventArgs e)
         {
             if (e.Message.Contains("scale-out"))

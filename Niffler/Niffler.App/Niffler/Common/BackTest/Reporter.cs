@@ -9,7 +9,7 @@ namespace Niffler.Common.BackTest
     class Reporter : IResetState
     {
 
-        private State BotState;
+        private StateManager BotState;
         private Robot Bot;
         private SpikeManager SpikeManager;
         private double ProfitTotal = 0;
@@ -21,7 +21,7 @@ namespace Niffler.Common.BackTest
         private string ReportDirectory;
         private string ReportFile;
 
-        public Reporter(State s, SpikeManager spikeManager)
+        public Reporter(StateManager s, SpikeManager spikeManager)
         {
             BotState = s;
             Bot = BotState.Bot;

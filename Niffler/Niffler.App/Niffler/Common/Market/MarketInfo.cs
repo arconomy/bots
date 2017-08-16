@@ -1,10 +1,13 @@
 ﻿using System;
 using cAlgo.API;
+using System.Collections.Generic;
 
 namespace Niffler.Common.Market
 {
-    class MarketInfo
+    class MarketTradeTimeInfo
     {
+        //CLASS NOT REQUIRED AS THIS DATA SHOULD BE PASSED INTO THE APPLICABLE RULE SERVICE
+
         private TimeZoneInfo TimeZone;
         private TimeSpan OpenTime; //  Open time for Bot to place new trades (not necessarily same as the actual market open)
         private TimeSpan CloseTime; // Close time for Bot to place new trades (not necessarily same as the actual market close)
@@ -13,11 +16,14 @@ namespace Niffler.Common.Market
         private int CloseAfterMinutes; // Closed for Bot to place new trades after minutes
         private int ReduceRiskAfterMinutes; // ReduceRisk time for Bot to manage trades after minutes
         private int TerminateAfterMinutes; // Terminate Bot activity after minutes
-        private bool IsBackTesting;
         private Robot Bot;
         private bool UseCloseTime;
         private bool UseReduceRiskTime;
         private bool UseTerminateTime;
+
+        //STATE SHOULD BE PERSISTED IN THE STATEMANAGER
+
+        private bool IsBackTesting;
         private bool IsTradeMonday = true;
         private bool IsTradeTuesday = true;
         private bool IsTradeWednesday = true;
@@ -29,8 +35,22 @@ namespace Niffler.Common.Market
         public String MarketName { get; set; }
 
         //Construtor to initialise with Times
-        public MarketInfo(Robot bot, TimeSpan openTime, TimeSpan closeTime, TimeSpan reduceRiskTime, TimeSpan terminateTime)
+        public MarketTradeTimeInfo(IDictionary<string,string> marketInfoConfig)
         {
+
+            marketInfoConfig.TryGetValue("Market", out string market);
+            marketInfoConfig.TryGetValue("OpenTime", out string openTime);
+            marketInfoConfig.TryGetValue("CloseTime", out string closeTime);
+
+
+
+
+
+            marketInfoConfig.TryGetValue("OpenTime", out string openTime);
+            marketInfoConfig.TryGetValue("OpenTime", out string openTime);
+            marketInfoConfig.TryGetValue("OpenTime", out string openTime);
+
+
             InitMarketInfo(bot);
             OpenTime = openTime;
             CloseTime = closeTime;
@@ -42,7 +62,7 @@ namespace Niffler.Common.Market
         }
 
         //Construtor to initialise with close, reduce risk and terminate minutes after Open time
-        public MarketInfo(Robot bot, TimeSpan openTime, int closeAfterMinutes, int reduceRiskAfterMinutes, int terminateAfterMinutes)
+        public MarketTradeTimeInfo(Robot bot, TimeSpan openTime, int closeAfterMinutes, int reduceRiskAfterMinutes, int terminateAfterMinutes)
         {
             InitMarketInfo(bot);
             OpenTime = openTime;
@@ -50,7 +70,7 @@ namespace Niffler.Common.Market
         }
 
         //Construtor to initialise with default Market Opening, Close and Terminate times
-        public MarketInfo(Robot bot)
+        public MarketTradeTimeInfo(Robot bot)
         {
             InitMarketInfo(bot);
             SetDefaultMarketTimes(bot.Symbol.Code);

@@ -3,21 +3,15 @@ using System.Collections.Generic;
 using cAlgo.API;
 using Niffler.Common.Market;
 using Niffler.Common.BackTest;
+using Niffler.Microservices;
+using Niffler.Messaging.RabbitMQ;
 
 namespace Niffler.Common
 {
-    class State
-    {
-        // Define the Type of Bot this State manages
-        public enum BotType
-        {
-            SWORDFISH,
-            DIVIDEND,
-        };
+    class StateManager : IConsumerService
+    { 
 
-        public BotType Type { get; }
         public string BotId { get; set; }
-
 
         //Only State variable that is not Reset - it is set in a rule to start trading and a rule to stop trading
         public bool IsTrading { get; set; }
@@ -43,19 +37,22 @@ namespace Niffler.Common
         public double OpenedPositionsCount { get; set; }
         public double ClosedPositionsCount { get; set; }
 
-        public Robot Bot { get; set; }
-        private MarketInfo MarketInfo;
+        public string BotName { get; set; }
+        private MarketTradeTimeInfo MarketInfo;
         private Reporter Reporter;
         private SpikeManager SpikeManager;
 
-        public State(Robot r)
+        public StateManager(String botName, IDictionary<string,string> config)
         {
-            Type = BotType.SWORDFISH;
-            Bot = r;
+            BotName = botName;
             BotId = GenerateBotId();
-            MarketInfo = new MarketInfo(Bot);
-            SpikeManager = new SpikeManager(this);
-            Reporter = new Reporter(this, SpikeManager);
+            MarketInfo = new MarketTradeTimeInfo(config);
+        }
+
+
+        public override ConsumerConfig SetConsumerConfig()
+        {
+            return ConsumerFactory.CreateConsumerConfig("","topic","botStateQ",new string[]{ "updateState.*"});
         }
 
         public string GetMarketName()
@@ -63,7 +60,7 @@ namespace Niffler.Common
             return MarketInfo.MarketName;
         }
 
-        public MarketInfo GetMarketInfo()
+        public MarketTradeTimeInfo GetMarketInfo()
         {
             return MarketInfo;
         }

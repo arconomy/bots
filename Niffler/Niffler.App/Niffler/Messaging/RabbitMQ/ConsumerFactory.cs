@@ -14,5 +14,10 @@ namespace Niffler.Messaging.RabbitMQ {
         { 
             return new Consumer(connection, exchangeName, exchangeType,queueName, routingKeys, timeout, prefetchCount, autoAck, queueArgs);
         }
+
+        public static ConsumerConfig CreateConsumerConfig(string exchangeName, string exchangeType, string queueName, string[] routingKeys)
+        {
+            return new ConsumerConfig(exchangeName, exchangeType, queueName, routingKeys);
+        }
     }
 }

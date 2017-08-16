@@ -4,7 +4,7 @@ using System.ServiceProcess;
 
 #endregion
 
-namespace Daishi.Microservices {
+namespace Niffler.Microservices {
     partial class QueueWatchMicroserviceContainer : ServiceBase {
         public QueueWatchMicroserviceContainer() {
             InitializeComponent();

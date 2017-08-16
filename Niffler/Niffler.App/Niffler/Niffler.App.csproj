@@ -141,6 +141,7 @@
     <Reference Include="System.ServiceModel.Web">
       <Private>True</Private>
     </Reference>
+    <Reference Include="System.ServiceProcess" />
     <Reference Include="System.Web" />
     <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Windows.Forms" />
@@ -164,17 +165,16 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Messaging\RabbitMQ\ConsumerConfig.cs" />
     <Compile Include="Microservices\IConsumerService.cs" />
     <Compile Include="Microservices\IService.cs" />
     <Compile Include="Microservices\QueueWatchMicroservice.cs" />
-    <Compile Include="Microservices\QueueWatchMicroserviceContainer.cs" />
+    <Compile Include="Microservices\QueueWatchMicroserviceContainer.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Microservices\QueueWatchMicroserviceContainer.Designer.cs" />
     <Compile Include="Microservices\OpenTimeCapturePrice.cs" />
-    <Compile Include="Microservices\SimpleMathMicroserviceContainer.cs" />
-    <Compile Include="Microservices\SimpleMathMicroserviceContainer.Designer.cs" />
-    <Compile Include="Microservices\SimpleWordMicroservice.cs" />
-    <Compile Include="Microservices\SimpleWordMicroserviceContainer.cs" />
-    <Compile Include="Microservices\SimpleWordMicroserviceContainer.Designer.cs" />
+    <Compile Include="Strategy\StrategyConfig.cs" />
     <Compile Include="Strategy\OptionsExpiry\Entry.cs" />
     <Compile Include="Strategy\RandomWalk\Bot.cs" />
     <Compile Include="Strategy\Swordfish\Teddy.cs" />
@@ -281,7 +281,7 @@
     <Compile Include="Rules\RetraceLevel2\RetracedLevel2To3SetHardSLToLastProfitPositionEntry.cs" />
     <Compile Include="Rules\RetraceLevel1\RetracedLevel1To2SetHardSLToLastProfitPositionEntryWithBuffer.cs" />
     <Compile Include="Rules\IRule.cs" />
-    <Compile Include="Rules\RulesManager.cs" />
+    <Compile Include="Microservices\ServicesManager.cs" />
     <Compile Include="Rules\CloseTime\CloseTimeCancelPendingOrders.cs" />
   </ItemGroup>
   <ItemGroup />

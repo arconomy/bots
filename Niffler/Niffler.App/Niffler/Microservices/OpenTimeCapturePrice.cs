@@ -7,12 +7,9 @@ using RabbitMQ.Client;
 #endregion
 
 namespace Niffler.Microservices {
-    public class OpenTimeCapturePrice : IRuleService {
+    public class OpenTimeCapturePrice {
 
-
-        override 
-
-        override public void OnMessageReceived(object sender, MessageReceivedEventArgs e)
+        public void OnMessageReceived(object sender, MessageReceivedEventArgs e)
         {
 
         }

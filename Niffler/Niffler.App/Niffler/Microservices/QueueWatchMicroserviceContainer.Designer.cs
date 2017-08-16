@@ -1,4 +1,4 @@
-﻿namespace Daishi.Microservices
+﻿namespace Niffler.Microservices
 {
     partial class QueueWatchMicroserviceContainer
     {
