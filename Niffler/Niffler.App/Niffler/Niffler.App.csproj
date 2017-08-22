@@ -165,7 +165,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Messaging\RabbitMQ\ConsumerConfig.cs" />
+    <Compile Include="Messaging\RabbitMQ\ExchangeType.cs" />
+    <Compile Include="Microservices\AutoScaleManager.cs" />
+    <Compile Include="Messaging\RabbitMQ\RoutingKey.cs" />
     <Compile Include="Microservices\IConsumerService.cs" />
     <Compile Include="Microservices\IService.cs" />
     <Compile Include="Microservices\QueueWatchMicroservice.cs" />
@@ -173,7 +175,12 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Microservices\QueueWatchMicroserviceContainer.Designer.cs" />
-    <Compile Include="Microservices\OpenTimeCapturePrice.cs" />
+    <Compile Include="Managers\StateManager.cs" />
+    <Compile Include="Rules\CheckTime\OnTerminateTime.cs" />
+    <Compile Include="Rules\CheckTime\OnReduceRiskTime.cs" />
+    <Compile Include="Rules\CheckTime\OnOpenTime.cs" />
+    <Compile Include="Rules\CheckTime\OnCloseTime.cs" />
+    <Compile Include="Rules\RuleFactory.cs" />
     <Compile Include="Strategy\StrategyConfig.cs" />
     <Compile Include="Strategy\OptionsExpiry\Entry.cs" />
     <Compile Include="Strategy\RandomWalk\Bot.cs" />
@@ -187,7 +194,7 @@
     <Compile Include="Common\BackTest\Reporter.cs" />
     <Compile Include="Common\IResetState.cs" />
     <Compile Include="Common\Utils.cs" />
-    <Compile Include="Common\Market\MarketInfo.cs" />
+    <Compile Include="Common\Market\TradingTimeInfo.cs" />
     <Compile Include="Common\Market\Spike.cs" />
     <Compile Include="Common\Market\SpikeManager.cs" />
     <Compile Include="Common\Notifications.cs" />
@@ -228,8 +235,7 @@
     <Compile Include="Messaging\RabbitMQ\Adapter.cs" />
     <Compile Include="Messaging\RabbitMQAuthorizationHeader.cs" />
     <Compile Include="Messaging\GooglePubSubBroker.cs" />
-    <Compile Include="Messaging\RabbitMQ\Consumer.cs" />
-    <Compile Include="Messaging\RabbitMQ\ConsumerFactory.cs" />
+    <Compile Include="Messaging\RabbitMQ\IConsumer.cs" />
     <Compile Include="Messaging\RabbitMQConsumerNotifier.cs" />
     <Compile Include="Messaging\RabbitMQHTTPRequest.cs" />
     <Compile Include="Messaging\RabbitMQProperties.cs" />
@@ -281,7 +287,7 @@
     <Compile Include="Rules\RetraceLevel2\RetracedLevel2To3SetHardSLToLastProfitPositionEntry.cs" />
     <Compile Include="Rules\RetraceLevel1\RetracedLevel1To2SetHardSLToLastProfitPositionEntryWithBuffer.cs" />
     <Compile Include="Rules\IRule.cs" />
-    <Compile Include="Microservices\ServicesManager.cs" />
+    <Compile Include="Managers\ServicesManager.cs" />
     <Compile Include="Rules\CloseTime\CloseTimeCancelPendingOrders.cs" />
   </ItemGroup>
   <ItemGroup />

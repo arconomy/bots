@@ -36,6 +36,7 @@ namespace NifflerClient
 
         private IConnection connection;
         private IModel channel;
+        private string exchangeName;
         private static bool IsBottyRunning = true;
 
         protected override void OnStart()
@@ -45,11 +46,12 @@ namespace NifflerClient
             var factory = new ConnectionFactory() { HostName = "localhost", VirtualHost = "nifflermq", UserName = "niffler", Password = "niffler" };
             connection = factory.CreateConnection();
             channel = connection.CreateModel();
-            channel.ExchangeDeclare(exchange: "FTSE100X", type: "topic");
 
-            CreateConsumer();
+            //Create an exchange per market
+            exchangeName = MarketSeries.SymbolCode + "-X";
+            channel.ExchangeDeclare(exchange: exchangeName, type: "topic");
 
-            SendMsg("OnStart.InitBotState", "OnStart Message");
+            CreateConsumers();
         }
 
         protected override void OnTick()
@@ -80,27 +82,24 @@ namespace NifflerClient
         private void SendMsg(string routingkey, string message)
         {
             var body = Encoding.UTF8.GetBytes(message);
-            channel.BasicPublish(exchange: "FTSE100X", routingKey: routingkey, basicProperties: null, body: body);
+            channel.BasicPublish(exchange: exchangeName, routingKey: routingkey, basicProperties: null, body: body);
             Print(" [x] sent '{0}':'{1}'", routingkey, message);
         }
 
-        private void CreateConsumer()
+        private void CreateConsumers()
         {
-            // Define and run the consumer listening task.
-            Task ConsumerListeningTask = Task.Run(() => ConsumeMessages() );
+            // Define and run consumers to listen for trade msgs
+            Task OpenPositionsConsumer = Task.Run(() => ConsumeMessages("OpenPositions.*"));
+            Task PlaceBuyLimitTradesConsumer = Task.Run(() => ConsumeMessages("PlaceBuyLimitTrades.*"));
+            Task ModifyPositionsConsumer = Task.Run(() => ConsumeMessages("ModifyPositions.*"));
+            Task CloseAllPositionsConsumer = Task.Run(() => ConsumeMessages("CloseAllPositions.*"));
         }
 
 
-        private void ConsumeMessages()
+        private void ConsumeMessages(string routingkey)
         {
-            channel.ExchangeDeclare(exchange: "FTSE100X", type: "topic");
-
-            var queueName = channel.QueueDeclare().QueueName;
-            channel.QueueBind(queue: queueName, exchange: "FTSE100X", routingKey: "OnInitBotState.*");
-            channel.QueueBind(queue: queueName, exchange: "FTSE100X", routingKey: "*.OpenPosition");
-            channel.QueueBind(queue: queueName, exchange: "FTSE100X", routingKey: "*.PlaceLimitTrades");
-            channel.QueueBind(queue: queueName, exchange: "FTSE100X", routingKey: "*.ModifyPositions");
-            channel.QueueBind(queue: queueName, exchange: "FTSE100X", routingKey: "*.CloseAllPositions");
+            var queueName = channel.QueueDeclare();
+            channel.QueueBind(queue: queueName, exchange: exchangeName, routingKey: routingkey);
 
             while (IsBottyRunning)
             {

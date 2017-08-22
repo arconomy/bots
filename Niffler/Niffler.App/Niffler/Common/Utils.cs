@@ -36,5 +36,21 @@ namespace Niffler.Common
             DateTime datetime = System.DateTime.Now;
             return datetime.Year.ToString() + datetime.Month + datetime.Day + datetime.Hour + datetime.Minute + datetime.Second;
         }
+
+        public static bool ParseStringToTimeSpan(string timespan, ref TimeSpan parsedTimeSpan)
+        {
+            try
+            {
+                parsedTimeSpan = TimeSpan.Parse(timespan);
+            }
+            catch (FormatException fe)
+            {
+                Console.Write("FAILED to parse timespan: "+ timespan + " : "+ fe);
+                return false;
+            }
+            return true;
+        }
+
+
     }
 }

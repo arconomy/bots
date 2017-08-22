@@ -6,7 +6,7 @@ namespace Niffler.Common.Trade
     class SellLimitOrdersTrader : OrdersManager
     {
 
-        public SellLimitOrdersTrader(StateManager botState, int numberOfOrders, int entryTriggerOrderPlacementPips, int entryOffSetPips, double defaultTakeProfitPips, double finalOrderStopLossPips) 
+        public SellLimitOrdersTrader(State botState, int numberOfOrders, int entryTriggerOrderPlacementPips, int entryOffSetPips, double defaultTakeProfitPips, double finalOrderStopLossPips) 
             : base(botState,  numberOfOrders, entryTriggerOrderPlacementPips, entryOffSetPips,  defaultTakeProfitPips, finalOrderStopLossPips) { }
 
         // Place Sell Limit Orders

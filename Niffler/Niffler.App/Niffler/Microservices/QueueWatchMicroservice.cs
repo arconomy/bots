@@ -54,7 +54,7 @@ namespace Niffler.Microservices {
             throw new NotImplementedException();
         }
 
-        public void Shutdown() {
+        public void Stop() {
 
             if (_queueWatch != null) {
                 _queueWatch.Stop();

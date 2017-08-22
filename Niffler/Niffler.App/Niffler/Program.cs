@@ -28,11 +28,13 @@ namespace Niffler.App
 
         public static void Main()
         {
+
+
             //Fetch StrategyConfig requried
             StrategyConfig StrategyConfig = LoadJson();
 
             //Set up Micro-services Required
-            ServicesManager ServicesManager = new ServicesManager(StrategyConfig);
+            ServicesManager ServicesManager = new ServicesManager(adapter.GetConnection(), StrategyConfig);
         }
     }
 

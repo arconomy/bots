@@ -8,7 +8,7 @@ using Niffler.Messaging.RabbitMQ;
 
 namespace Niffler.Common
 {
-    class StateManager : IConsumerService
+    class State
     { 
 
         public string BotId { get; set; }
@@ -37,22 +37,25 @@ namespace Niffler.Common
         public double OpenedPositionsCount { get; set; }
         public double ClosedPositionsCount { get; set; }
 
+        private bool IsBackTesting;
+        private bool IsTradeMonday = true;
+        private bool IsTradeTuesday = true;
+        private bool IsTradeWednesday = true;
+        private bool IsTradeThursday = true;
+        private bool IsTradeFriday = true;
+        private bool IsTradeSaturday = false;
+        private bool IsTradeSunday = false;
+
+        public String MarketName { get; set; }
+
         public string BotName { get; set; }
-        private MarketTradeTimeInfo MarketInfo;
+        private TradingTimeInfo MarketInfo;
         private Reporter Reporter;
         private SpikeManager SpikeManager;
 
-        public StateManager(String botName, IDictionary<string,string> config)
+        public State(string botId)
         {
-            BotName = botName;
-            BotId = GenerateBotId();
-            MarketInfo = new MarketTradeTimeInfo(config);
-        }
-
-
-        public override ConsumerConfig SetConsumerConfig()
-        {
-            return ConsumerFactory.CreateConsumerConfig("","topic","botStateQ",new string[]{ "updateState.*"});
+            BotId = botId;
         }
 
         public string GetMarketName()
@@ -60,7 +63,7 @@ namespace Niffler.Common
             return MarketInfo.MarketName;
         }
 
-        public MarketTradeTimeInfo GetMarketInfo()
+        public TradingTimeInfo GetMarketInfo()
         {
             return MarketInfo;
         }
@@ -69,14 +72,7 @@ namespace Niffler.Common
         {
             return Reporter;
         }
-
-        private string GenerateBotId()
-        {
-            Random randomIdGenerator = new Random();
-            int id = randomIdGenerator.Next(0, 99999);
-            return id.ToString("00000");
-        }
-
+        
         public bool PositionsRemainOpen()
         {
             return OpenedPositionsCount > 0 && OpenedPositionsCount - ClosedPositionsCount > 0;

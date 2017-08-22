@@ -1,21 +1,30 @@
 ﻿using System;
 using Google.Protobuf.Collections;
 using Niffler.Strategy;
+using Niffler.Common;
 
 namespace Niffler.Rules
 {
-    class OpenTimeCapturePrice : IRule
+    class OnReduceRiskTime : IRule
     {
-        public OpenTimeCapturePrice() : base() { }
+        public OnReduceRiskTime() : base() { }
 
+        private TimeZoneInfo TimeZone;
+        private TimeSpan OpenTime; //  Open time for Bot to place new trades (not necessarily same as the actual market open)
+        private TimeSpan ReduceRiskTime; // ReduceRisk time for Bot to manage trades (not necessarily same as the actual market close)    
+        private TimeSpan ReduceRiskAfter; // TimeSpan after OpenTime to ReduceRisk
+        private bool UseReduceRiskTime;
 
         public override void Init(RuleConfig ruleConfig)
         {
+            ruleConfig.Params.TryGetValue("OpenTime", out string openTime);
+            Utils.ParseStringToTimeSpan(openTime, ref OpenTime);
 
-            
+            ruleConfig.Params.TryGetValue("ReduceRiskTime", out string reduceRiskTime);
+            UseReduceRiskTime = Utils.ParseStringToTimeSpan(reduceRiskTime, ref ReduceRiskTime);
 
-
-
+            ruleConfig.Params.TryGetValue("ReduceRiskAfter", out string reduceRiskAfter);
+            Utils.ParseStringToTimeSpan(reduceRiskAfter, ref ReduceRiskAfter);
         }
 
         //If rule should only execute when bot is trading return TRUE, default is FALSE
@@ -57,7 +66,5 @@ namespace Niffler.Rules
         {
             return "OpenTimeCapturePrice";
         }
-
-        
     }
 }

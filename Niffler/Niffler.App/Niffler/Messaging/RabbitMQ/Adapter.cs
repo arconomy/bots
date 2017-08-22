@@ -24,7 +24,7 @@ namespace Niffler.Messaging.RabbitMQ {
 
         static Adapter() { }
 
-        public void ConsumeAsync(Consumer consumer)
+        public void ConsumeAsync(IConsumer consumer)
         {
             if (!IsConnected) Connect();
 
@@ -35,7 +35,7 @@ namespace Niffler.Messaging.RabbitMQ {
                 Thread.Sleep(1);
         }
 
-        public void StopConsumingAsync(Consumer consumer)
+        public void StopConsumingAsync(IConsumer consumer)
         {
             consumer.Stop();
         }
@@ -83,7 +83,7 @@ namespace Niffler.Messaging.RabbitMQ {
             if (Connection != null) Connection.Dispose();
         }
 
-        public object GetConnection()
+        public IConnection GetConnection()
         {
             return Connection;
         }

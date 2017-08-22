@@ -4,7 +4,7 @@ namespace Niffler.Common.Market
 {
     class SpikeManager : IResetState
     {
-        private StateManager BotState;
+        private State BotState;
         private Robot Bot;
         private Spike Spike;
         public int Level1 { get; set; }
@@ -12,7 +12,7 @@ namespace Niffler.Common.Market
         public int Level3 { get; set; }
         private int RetraceFactor { get; set; }
 
-        public SpikeManager(StateManager s)
+        public SpikeManager(State s)
         {
             BotState = s;
             Bot = BotState.Bot;

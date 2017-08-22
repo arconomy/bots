@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Niffler.Common.Market
 {
-    class MarketTradeTimeInfo
+    class TradingTimeInfo
     {
         //CLASS NOT REQUIRED AS THIS DATA SHOULD BE PASSED INTO THE APPLICABLE RULE SERVICE
 
@@ -23,32 +23,13 @@ namespace Niffler.Common.Market
 
         //STATE SHOULD BE PERSISTED IN THE STATEMANAGER
 
-        private bool IsBackTesting;
-        private bool IsTradeMonday = true;
-        private bool IsTradeTuesday = true;
-        private bool IsTradeWednesday = true;
-        private bool IsTradeThursday = true;
-        private bool IsTradeFriday = true;
-        private bool IsTradeSaturday = false;
-        private bool IsTradeSunday = false;
-
         public String MarketName { get; set; }
 
         //Construtor to initialise with Times
-        public MarketTradeTimeInfo(IDictionary<string,string> marketInfoConfig)
+        public TradingTimeInfo(IDictionary<string,string> marketInfoConfig)
         {
+           
 
-            marketInfoConfig.TryGetValue("Market", out string market);
-            marketInfoConfig.TryGetValue("OpenTime", out string openTime);
-            marketInfoConfig.TryGetValue("CloseTime", out string closeTime);
-
-
-
-
-
-            marketInfoConfig.TryGetValue("OpenTime", out string openTime);
-            marketInfoConfig.TryGetValue("OpenTime", out string openTime);
-            marketInfoConfig.TryGetValue("OpenTime", out string openTime);
 
 
             InitMarketInfo(bot);
@@ -62,7 +43,7 @@ namespace Niffler.Common.Market
         }
 
         //Construtor to initialise with close, reduce risk and terminate minutes after Open time
-        public MarketTradeTimeInfo(Robot bot, TimeSpan openTime, int closeAfterMinutes, int reduceRiskAfterMinutes, int terminateAfterMinutes)
+        public TradingTimeInfo(Robot bot, TimeSpan openTime, int closeAfterMinutes, int reduceRiskAfterMinutes, int terminateAfterMinutes)
         {
             InitMarketInfo(bot);
             OpenTime = openTime;
@@ -70,7 +51,7 @@ namespace Niffler.Common.Market
         }
 
         //Construtor to initialise with default Market Opening, Close and Terminate times
-        public MarketTradeTimeInfo(Robot bot)
+        public TradingTimeInfo(Robot bot)
         {
             InitMarketInfo(bot);
             SetDefaultMarketTimes(bot.Symbol.Code);

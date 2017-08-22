@@ -10,6 +10,8 @@ using Niffler.Messaging;
 using System;
 using Niffler.Rules;
 using Niffler.Strategy;
+using RabbitMQ.Client;
+using Niffler.Messaging.RabbitMQ;
 
 namespace Niffler.Microservices
 {
@@ -30,35 +32,40 @@ namespace Niffler.Microservices
         private List<IRule> OnBarRules = new List<IRule>();
 
         private StopLossManager StopLossManager;
-        private MarketTradeTimeInfo SwfMarketInfo;
+        private TradingTimeInfo SwfMarketInfo;
         private SellLimitOrdersTrader SellLimitOrdersTrader;
         private BuyLimitOrdersTrader BuyLimitOrdersTrader;
-        private ServicesManager ServicesManager;
 
-        public ServicesManager(StrategyConfig strategyConfig)
+        private RulesFactory RulesFactory = new RulesFactory();
+        private List<IRule> Rules;
+
+        private List<StateManager> StateManagers;
+
+        public IConnection Connection;
+
+        public ServicesManager(IConnection connection, StrategyConfig strategyConfig)
         {
+
+            this.Connection = connection;
 
             //For each BotConfig Initialise a micro-service for each service required and listen for updates on appropriate queues
             foreach (BotConfig botConfig in strategyConfig.BotConfig)
             {
+                // Need to refactor StateManager to manage a State object to store persistent state info
+                // All data used for rules is passed to the ruleService when intatiated. i.e. Open time etc.
+                // Once timing rules have fired the state will need to notified i.e. IsTrading = true.
 
-                //Need to refactor StateManager to only store persistent state info - all data used for rules is passed directly to the rules. i.e. Open time etc.
-                //Once timing rules have fired the state will need to notified i.e. IsTrading = true.
-                StateManager = new StateManager(botConfig.Name, botConfig.Config);
-                
-                foreach(RuleConfig ruleConfig in botConfig.Rules)
-                {
-                    if(RuleFactory.exists(ruleConfig.Name))
-                    {
-                        RuleFactory.createRuleService(ruleConfig);
-                    }
-                }
+                //Create a State Manager per bot
+                StateManager = new StateManager(botConfig.Config);
+                StateManager.Start();
+                StateManagers.Add(StateManager);
+                Rules = RulesFactory.CreateRules(botConfig);
 
-                //Create default microservices
 
-                TradingTime
+                //Create default microservices per market
                 SpikeManager = new SpikeManager();
                 Reporter = new Reporter();
+
             }
 
 
