@@ -7,7 +7,7 @@ using System.Collections.Generic;
 
 namespace Niffler.Microservices {
     internal interface IService {
-        void Init();
+        bool Init();
         void Start();
         void Stop();
         void Shutdown();

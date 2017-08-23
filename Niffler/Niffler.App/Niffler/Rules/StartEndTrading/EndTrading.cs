@@ -14,7 +14,7 @@ namespace Niffler.Rules
         }
 
         //The IsTrading flag is the only state variable that is not reset by the rule that sets it
-        override protected bool Execute()
+        override protected bool ExcuteRuleLogic()
         {
             if (BotState.IsAfterTerminateTime || BotState.IsReset)
             {

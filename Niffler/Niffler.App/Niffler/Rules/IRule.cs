@@ -12,6 +12,7 @@ using Niffler.Microservices;
 using Niffler.Strategy;
 using Niffler.Messaging.RabbitMQ;
 using System.Collections.Generic;
+using Niffler.Messaging.Protobuf;
 
 namespace Niffler.Rules
 {
@@ -31,106 +32,104 @@ namespace Niffler.Rules
         //protected SimplePublisher SimplePublisher;
         //protected GooglePubSubBroker MessageBroker;
         //public int Priority { get; set; }
-        //protected int ExecutionCount;
-        //protected bool ExecuteOnce;
-        //protected bool LogEveryExecution;
+
+        //  {
+        //RulesManager = rulesManager;
+        //BotState = rulesManager.StateManager;
+        //Bot = BotState.Bot;
+        //MarketInfo = BotState.GetMarketInfo();
+        //PositionsManager = rulesManager.PositionsManager;
+        //SellLimitOrdersTrader = rulesManager.SellLimitOrdersTrader;
+        //BuyLimitOrdersTrader = rulesManager.BuyLimitOrdersTrader;
+        //SpikeManager = rulesManager.SpikeManager;
+        //StopLossManager = rulesManager.StopLossManager;
+        //FixedTrailingStop = rulesManager.FixedTrailingStop;
+        //Reporter = BotState.GetReporter();
+
+        protected bool IsActive;
         protected RuleConfig RuleConfig;
+        protected Messaging.RabbitMQ.Publisher Publisher;
 
         public IRule(IDictionary<string, string> botConfig, RuleConfig ruleConfig) : base(botConfig)
         {
             this.RuleConfig = ruleConfig;
-        }
-        
-      //  {
-            //RulesManager = rulesManager;
-            //BotState = rulesManager.StateManager;
-            //Bot = BotState.Bot;
-            //MarketInfo = BotState.GetMarketInfo();
-            //PositionsManager = rulesManager.PositionsManager;
-            //SellLimitOrdersTrader = rulesManager.SellLimitOrdersTrader;
-            //BuyLimitOrdersTrader = rulesManager.BuyLimitOrdersTrader;
-            //SpikeManager = rulesManager.SpikeManager;
-            //StopLossManager = rulesManager.StopLossManager;
-            //FixedTrailingStop = rulesManager.FixedTrailingStop;
-            //Reporter = BotState.GetReporter();
-            //MessageBroker = rulesManager.MessageBroker;
-            //CreateSimplePublisher(GetPubSubTopicName());
-        //}
-        
-        //public async void CreateSimplePublisher(String topicId)
-        //{
-        //    TopicName topicName = MessageBroker.CreatePubSubTopic(topicId);
-        //    SimplePublisher = await SimplePublisher.CreateAsync(topicName);
-        //}
-
-        public void Run()
-        {
-            if (!Initialised)
-                return;
-
-            if(IsTradingRule())
-            {
-                if (!BotState.IsTrading)
-                    return;
-            }
-
-            if(!ExecuteOnce)
-            {
-                ExecutionCount++;
-                PublishExecutionResult(Execute());
-                RunExecutionLogging();
-            }
+            Publisher = new Messaging.RabbitMQ.Publisher(Connection,ExchangeName);
+            IsActive = Init();
         }
 
-        protected void RunExecutionLogging()
+        public override void MessageReceived(MessageReceivedEventArgs e)
         {
-            if (LogEveryExecution)
-                LogExecution();
+            switch(e.Message.Type)
+            {
+                case Niffle.Types.Type.Updateservice:
+                    ManageRule(e.Message);
+                    break;
+                default:
+                    {
+                    if (!IsActive) return;
+                    PublishResult(ExcuteRuleLogic());
+                    break;
+                    }
+            };
+        }
+
+        //Only publishing Success or Fail - may need to look into more granualar reporting
+        protected void PublishResult(bool LogicExecutionSuccess)
+        {
+            Service results = new Service
+            {
+                Action = Service.Types.Action.Notify,
+                Success = LogicExecutionSuccess
+            };
+
+            RoutingKey routingKey = new RoutingKey(GetServiceName());
+            Publisher.ServiceNotify(results, routingKey);
+        }
+
+        protected void ManageRule(Niffle message)
+        {
+            switch(message.Service.Action)
+            {
+                case Service.Types.Action.Activate:
+                    {
+                        IsActive = true;
+                        break;
+                    }
+                case Service.Types.Action.Deactivate:
+                    {
+                        IsActive = false;
+                        break;
+                    }
+                case Service.Types.Action.Scaleup:
+                    {
+                        InitAutoScale(QueueName);
+                        break;
+                    }
+                case Service.Types.Action.Scaledown:
+                    {
+                        break;
+                    }
+                case Service.Types.Action.Shutdown:
+                    {
+                        Shutdown();
+                        break;
+                    }
+                case Service.Types.Action.Reset:
+                    {
+                        ResetRule();
+                        break;
+                    }
+            }
         }
 
         public void ResetRule()
         {
-            ExecuteOnce = false;
-            ExecutionCount = 0;
+            Init();
             Reset();
         }
-
-        //Flag that can be set by implemented Rule to ensure rule is only executed once
-        protected void ExecuteOnceOnly()
-        {
-            ExecuteOnce = true;
-        }
         
-        public void ReportExecutionCount()
-        {
-            Reporter.ReportRuleExecutionCount(this,ExecutionCount);
-        }
-        
-        //Use to log Rules everytime Rule executes in order to see which rules executed prior to a trade closing
-        protected void LogExecutions()
-        {
-            LogEveryExecution = true;
-        }
-
-        private void LogExecution()
-        {
-            Reporter.LogRuleExecution(this);
-        }
-
-        //Publish rule action if completed successfully
-        protected async void PublishExecutionResult(bool ruleActionCompleted)
-        {
-            //Only publish if rule action was completed
-            if(ruleActionCompleted)
-            {
-                await SimplePublisher.PublishAsync(MessageBroker.GetPubSubMessage(ruleActionCompleted, GetLastExecutionData()));
-            }
-        }
-        
-        abstract protected bool IsTradingRule();
-        abstract protected bool Execute();
+        abstract protected string GetServiceName();
+        abstract protected bool ExcuteRuleLogic();
         abstract protected void Reset();
-        //abstract public MapField<String, String> GetLastExecutionData();
-        //abstract public string GetPubSubTopicName();
     }
 }

@@ -4,7 +4,7 @@ using Google.Protobuf.Collections;
 
 namespace Niffler.Rules
 {
-    class OnPositionOpenedCaptureLastPositionInfo : IRuleOnPositionEvent
+    class OnPositionOpenedCaptureLastPositionInfo : IPositionRule
     {
         public OnPositionOpenedCaptureLastPositionInfo(int priority) : base(priority) {}
 

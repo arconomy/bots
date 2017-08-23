@@ -4,7 +4,7 @@ using Google.Protobuf.Collections;
 
 namespace Niffler.Rules
 {
-    class OnPositionClosedInProfitSetBreakEvenWithBufferIfActive : IRuleOnPositionEvent
+    class OnPositionClosedInProfitSetBreakEvenWithBufferIfActive : IPositionRule
     {
         public OnPositionClosedInProfitSetBreakEvenWithBufferIfActive(int priority) : base(priority) { }
 

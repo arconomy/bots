@@ -14,7 +14,7 @@ namespace Niffler.Rules
         }
 
         // If it is after Reduce Risk Time then reduce retrace levels by 50%
-        override protected bool Execute()
+        override protected bool ExcuteRuleLogic()
         {
 
             if (BotState.IsAfterReducedRiskTime)

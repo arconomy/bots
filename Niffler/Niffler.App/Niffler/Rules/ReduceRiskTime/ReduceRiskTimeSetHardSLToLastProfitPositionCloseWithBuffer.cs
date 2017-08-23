@@ -14,7 +14,7 @@ namespace Niffler.Rules
         }
 
         //If after reduce risk time then set hard stop losses to Last Profit Positions Entry Price with buffer
-        override protected bool Execute()
+        override protected bool ExcuteRuleLogic()
         {
             if (BotState.IsAfterReducedRiskTime)
             {

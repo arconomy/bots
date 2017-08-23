@@ -14,7 +14,7 @@ namespace Niffler.Rules
         }
 
         //If BreakEven SL is Active then set BreakEven Stop Losses for all orders if the current price is past the entry point of the Last position to close with profit
-        override protected bool Execute()
+        override protected bool ExcuteRuleLogic()
         {
             if (BotState.OrdersPlaced && BotState.PositionsRemainOpen())
             {

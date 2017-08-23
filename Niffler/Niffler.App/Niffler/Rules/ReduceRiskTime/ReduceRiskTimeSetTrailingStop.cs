@@ -14,7 +14,7 @@ namespace Niffler.Rules
         }
 
         //If it is after reduce risk time then set the fixed trailing stop 
-        override protected bool Execute()
+        override protected bool ExcuteRuleLogic()
         {
             if (BotState.IsAfterReducedRiskTime)
             {

@@ -14,10 +14,17 @@ namespace Niffler.Rules
 
         public OnOpenTime(IDictionary<string, string> botConfig, RuleConfig ruleConfig) : base(botConfig, ruleConfig) { }
 
-        public override void Init()
+        public override bool Init()
         {
             RuleConfig.Params.TryGetValue("OpenTime", out string openTime);
-            Utils.ParseStringToTimeSpan(openTime, ref OpenTime);
+            if (Utils.ParseStringToTimeSpan(openTime, ref OpenTime))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         //If rule should only execute when bot is trading return TRUE, default is FALSE
@@ -25,17 +32,9 @@ namespace Niffler.Rules
         {
             return true;
         }
-
-        public override void MessageReceived(MessageReceivedEventArgs e)
-        {
-            //Execute logic and publish back to msg bus
-
-            //If message says deactivate
-            Shutdown();
-        }
-
+        
         //Get the Opening price for the trading period
-        override protected bool Execute()
+        override protected bool ExcuteRuleLogic()
         {
             if (BotState.IsOpenTime)
             {

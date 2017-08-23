@@ -14,7 +14,7 @@ namespace Niffler.Rules
         }
 
         //Get the Opening price for the trading period
-        override protected bool Execute()
+        override protected bool ExcuteRuleLogic()
         {
             if (BotState.IsOpenTime)
             {

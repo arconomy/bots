@@ -14,7 +14,7 @@ namespace Niffler.Rules
         }
 
         // If it is after CloseTime and remaining pending orders have not been closed then close all pending orders
-        override protected bool Execute()
+        override protected bool ExcuteRuleLogic()
         {
             if (BotState.OrdersPlaced && BotState.PositionsRemainOpen())
             {

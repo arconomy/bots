@@ -1,0 +1,97 @@
+﻿
+// [START declaration]
+syntax = "proto3";
+package Niffler.Messaging.Protobuf;
+// [END declaration]
+
+// [START java_declaration]
+//option java_package = "com.example.tutorial";
+//option java_outer_classname = "AddressBookProtos";
+// [END java_declaration]
+
+// [START csharp_declaration]
+option csharp_namespace = "Niffler.Messaging.Protobuf";
+// [END csharp_declaration]
+
+// [START messages]
+
+message Niffle {
+    enum Type   {
+        TICK = 0;
+        POSITION = 1;
+        POSITIONS = 2;
+        UPDATESERVICE = 3;
+        UPDATESTATE = 4;
+    }
+    Type type = 1;
+    Tick tick = 2;
+    Position position = 3;
+    Positions positions = 4;
+    Service service = 5;
+    State state = 6;
+}
+
+message Tick {
+  string code = 1;
+  double ask = 2;
+  double bid = 3;
+  int32 digits = 4;
+  double pipsize = 5;
+  double ticksize = 6;
+  double spread = 7;
+  string timestamp = 8;
+  Positions positions = 9;
+}
+    
+message Position {
+
+    enum TradeType {
+        BUY = 0;
+        SELL = 1;
+    }
+
+    enum StateChange {
+        NONE = 0;
+        OPENED = 1;
+        CLOSED = 2;
+    }
+
+    string label = 1;
+    int32 id = 2;
+    string symbolcode = 3;
+    TradeType tradetype = 4;
+    double entryPrice = 5;
+    double stoplossprice = 6;
+    double takeprofitprice = 7;
+    string entrytime = 8;
+    double grossprofit = 9;
+    StateChange statechange = 10;
+    
+}
+
+message Positions {
+    int32 count = 1;
+    repeated Position position = 2;
+}
+
+message State  {
+    bool open = 1;
+    bool reducerisktime = 2;
+    bool terminatetime = 3;
+}
+
+message Service  {
+    enum Action {
+        DEACTIVATE = 0;
+        ACTIVATE = 1;
+        SHUTDOWN = 3;
+        SCALEUP = 4;
+        SCALEDOWN = 5;
+        RESET = 6;
+        NOTIFY = 7;
+    }
+    Action action = 1;
+    bool success = 2;
+}
+
+// [END messages]

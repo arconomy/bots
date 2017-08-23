@@ -7,6 +7,7 @@ using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using Niffler.Messaging.AMQP;
 using Niffler.Microservices;
+using Niffler.Messaging.Protobuf;
 
 #endregion
 
@@ -82,7 +83,7 @@ namespace Niffler.Messaging.RabbitMQ {
 
                     foreach (RoutingKey routingKey in RoutingKeys)
                     {
-                        Channel.QueueBind(queue: QueueName, exchange: ExchangeName, routingKey: routingKey.getRoutingKey());
+                        Channel.QueueBind(queue: QueueName, exchange: ExchangeName, routingKey: routingKey.GetRoutingKey());
                     }
 
                     Channel.BasicQos(0, PrefetchCount, false);
@@ -94,9 +95,9 @@ namespace Niffler.Messaging.RabbitMQ {
                         {
                             consumer.Received += (model, ea) =>
                             {
-                                MessageReceived(new MessageReceivedEventArgs()
-                                    {
-                                        Message = Encoding.UTF8.GetString(ea.Body),
+                                    MessageReceived(new MessageReceivedEventArgs()
+                                    {   
+                                        Message = Niffle.Parser.ParseFrom(ea.Body),
                                         EventArgs = ea
                                     }
                                 );

@@ -50,7 +50,7 @@ namespace Niffler.Microservices {
         }
 
         public abstract object Clone();
-        public abstract void Init();
+        public abstract bool Init();
         public abstract void Start();
         public abstract void Stop();
         public abstract void MessageReceived(MessageReceivedEventArgs e);

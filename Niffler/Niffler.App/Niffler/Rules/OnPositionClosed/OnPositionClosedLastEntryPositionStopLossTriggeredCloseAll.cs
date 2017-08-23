@@ -4,7 +4,7 @@ using Google.Protobuf.Collections;
 
 namespace Niffler.Rules
 {
-    class OnPositionClosedLastEntryPositionStopLossTriggeredCloseAll : IRuleOnPositionEvent
+    class OnPositionClosedLastEntryPositionStopLossTriggeredCloseAll : IPositionRule
     {
         public OnPositionClosedLastEntryPositionStopLossTriggeredCloseAll(int priority) : base(priority) {}
 

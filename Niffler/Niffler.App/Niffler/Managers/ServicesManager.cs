@@ -26,8 +26,8 @@ namespace Niffler.Microservices
         public StateManager StateManager { get; }
         private Reporter Reporter { get; set; }
         private List<IRule> OnTickRules = new List<IRule>();
-        private List<IRuleOnPositionEvent> OnPositionOpenedRules = new List<IRuleOnPositionEvent>();
-        private List<IRuleOnPositionEvent> OnPositionClosedRules = new List<IRuleOnPositionEvent>();
+        private List<IPositionRule> OnPositionOpenedRules = new List<IPositionRule>();
+        private List<IPositionRule> OnPositionClosedRules = new List<IPositionRule>();
         private List<IRule> OnTimerRules = new List<IRule>();
         private List<IRule> OnBarRules = new List<IRule>();
 
@@ -163,14 +163,14 @@ namespace Niffler.Microservices
             OnTimerRules = OnTimerRules.OrderBy(r => r.Priority).ToList();
         }
 
-        public void SetOnPositionClosedRule(IRuleOnPositionEvent rule)
+        public void SetOnPositionClosedRule(IPositionRule rule)
         {
             rule.Init(this);
             OnPositionClosedRules.Add(rule);
             OnPositionClosedRules = OnPositionClosedRules.OrderBy(r => r.Priority).ToList();
         }
 
-        public void SetOnPositionOpenedRule(IRuleOnPositionEvent rule)
+        public void SetOnPositionOpenedRule(IPositionRule rule)
         {
             rule.Init(this);
             OnPositionOpenedRules.Add(rule);
@@ -195,13 +195,13 @@ namespace Niffler.Microservices
             OnTimerRules = (rules.OrderBy(rule => rule.Priority).ToList());
         }
 
-        public void SetOnPositionClosedRules(List<IRuleOnPositionEvent> rules)
+        public void SetOnPositionClosedRules(List<IPositionRule> rules)
         {
             InitialiseRules(rules.ConvertAll(x => (IRule)x));
             OnPositionClosedRules = rules.OrderBy(rule => rule.Priority).ToList();
         }
 
-        public void SetOnPositionOpenedRules(List<IRuleOnPositionEvent> rules)
+        public void SetOnPositionOpenedRules(List<IPositionRule> rules)
         {
             InitialiseRules(rules.ConvertAll(x => (IRule)x));
             OnPositionOpenedRules = rules.OrderBy(rule => rule.Priority).ToList();
@@ -244,7 +244,7 @@ namespace Niffler.Microservices
             rule.Run();
         }
 
-        public void RunAllPositionRules(List<IRuleOnPositionEvent> rules,Position position)
+        public void RunAllPositionRules(List<IPositionRule> rules,Position position)
         {
             rules.ForEach(IRuleOnPositionEvent => IRuleOnPositionEvent.Run(position));
         }

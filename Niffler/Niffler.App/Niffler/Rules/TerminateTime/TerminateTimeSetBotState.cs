@@ -14,7 +14,7 @@ namespace Niffler.Rules
         }
 
         //After CLose time set hard stop losses at last position entry price with Buffer
-        override protected bool Execute()
+        override protected bool ExcuteRuleLogic()
         {
             if (!BotState.IsAfterTerminateTime && MarketInfo.IsAfterTerminateTime())
             {

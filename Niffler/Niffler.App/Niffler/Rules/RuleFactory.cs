@@ -9,7 +9,6 @@ namespace Niffler.Rules
 {
     public class RulesFactory
     {
-
         private List<string> RuleNames;
 
         public RulesFactory()
@@ -60,7 +59,7 @@ namespace Niffler.Rules
 
                 if(rule !=null)
                 {
-                    rule.Init(ruleConfig);
+                    rule.Init();
                     createdRules.Add(rule);
                 }
                 else

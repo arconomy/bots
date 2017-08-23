@@ -14,7 +14,7 @@ namespace Niffler.Rules
         }
 
         // If Trading time then capture spike
-        override protected bool Execute()
+        override protected bool ExcuteRuleLogic()
         {
             if (MarketInfo.IsBotTradingOpen())
             {

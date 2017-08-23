@@ -14,7 +14,7 @@ namespace Niffler.Rules
         }
 
         //If Spike retrace is greater than Level 1 but less than Level 2 set SL to last profit position entry price plus buffer
-        override protected bool Execute()
+        override protected bool ExcuteRuleLogic()
         {
             if (BotState.OrdersPlaced && BotState.PositionsRemainOpen())
             {

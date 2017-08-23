@@ -14,7 +14,7 @@ namespace Niffler.Rules
         }
 
         //If trades still open at Terminate Time then take the hit and close remaining positions
-        override protected bool Execute()
+        override protected bool ExcuteRuleLogic()
         {
             if(BotState.IsAfterTerminateTime)
             {

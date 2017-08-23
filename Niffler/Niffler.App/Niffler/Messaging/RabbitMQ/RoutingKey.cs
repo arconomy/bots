@@ -3,54 +3,117 @@ using System.Collections.Generic;
 
 namespace Niffler.Messaging.RabbitMQ
 {
+    //Allows consumers to listen for generic actions
+    public enum Action
+    {
+        WILDCARD = 0,
+        UPDATESTATE = 1,    //StateManager listens for this
+        NOTIFY = 2,         //ReportingManager listens for this
+        PLACEORDERS = 3,    //Niffler cAlgo Client listens for this
+        EXECUTEORDERS = 4,  //Niffler cAlgo Client listens for this
+        CANCELORDERS = 5,   //Niffler cAlgo Client listens for this
+        CLOSEPOSITIONS = 6  //Niffler cAlgo Client listens for this
+    }
+
+    //Allows consumers to listen for generic Events
+    public enum Event
+    {
+        WILDCARD = 0,
+        ONTICK = 1,
+        ONPOSITIONOPENED = 2,
+        ONPOSITIONCLOSED = 3
+    }
+
+    //Allows consumers to listen for specific Entity (rule) notifications
+    public enum Entity
+    {
+        WILDCARD = 0,
+    }
+
     public class RoutingKey
     {
         private string Entity;
         private string Action;
         private string Event;
        
-        public RoutingKey(string entityName = "*", string actionName = "*", string eventName = "*", bool useStarAsDefault = true)
+        public RoutingKey(Entity entityEnum = RabbitMQ.Entity.WILDCARD, Action actionEnum = RabbitMQ.Action.WILDCARD, Event eventEnum = RabbitMQ.Event.WILDCARD)
         {
-            if(useStarAsDefault)
+            SetEntity(entityEnum);
+            SetAction(actionEnum);
+            SetEvent(eventEnum);
+        }
+
+        public RoutingKey(string entityName, Action actionEnum = RabbitMQ.Action.WILDCARD, Event eventEnum = RabbitMQ.Event.WILDCARD)
+        {
+            //For Rules passing there nameof(class) name 
+            Entity = entityName;
+            SetAction(actionEnum);
+            SetEvent(eventEnum);
+        }
+
+
+
+        public void SetEvent(Event eventEnum)
+        {
+            string eventName;
+            switch (eventEnum)
             {
-                SetPatternUsingStarAsDefault(entityName, actionName, eventName);
+                case RabbitMQ.Event.WILDCARD:
+                    eventName = "*";
+                    break;
+                case RabbitMQ.Event.ONTICK:
+                    eventName = "OnTick";
+                    break;
+                case RabbitMQ.Event.ONPOSITIONOPENED:
+                    eventName = "OnPositionOpened";
+                    break;
+                case RabbitMQ.Event.ONPOSITIONCLOSED:
+                    eventName = "OnPositionClosed";
+                    break;
+                default:
+                    eventName = "*";
+                    break;
             }
-            else
+            Event = eventName;
+        }
+
+        public void SetEntity(Entity entityEnum)
+        {
+            string entityName;
+            switch (entityEnum)
             {
-                SetPatternUsingHashAsDefault(entityName, actionName, eventName);
+                case RabbitMQ.Entity.WILDCARD:
+                    entityName = "*";
+                    break;
+                default:
+                    entityName = "*";
+                    break;
             }
+            Entity = entityName;
         }
 
-        public void SetEntity(string entityName)
+        public void SetAction(Action actionEnum)
         {
-            UseStarWildCardForEmptyString(entityName);
+            string actionName;
+            switch(actionEnum)
+            {
+                case RabbitMQ.Action.WILDCARD:
+                    actionName = "*";
+                    break;
+                case RabbitMQ.Action.UPDATESERVICE:
+                    actionName = "UpdateService";
+                    break;
+                case RabbitMQ.Action.UPDATESTATE:
+                    actionName = "UpdateState";
+                    break;
+                default:
+                    actionName = "*";
+                    break;
+            }
+            Action = actionName;
         }
-
-        public void SetAction(string actionName)
-        {
-            UseStarWildCardForEmptyString(actionName);
-        }
-
-        public void SetEvent(string eventName)
-        {
-            UseStarWildCardForEmptyString(eventName);
-        }
-
-        public void SetPatternUsingHashAsDefault(string entityName, string actionName, string eventName)
-        {
-            this.Entity = UseHashWildCardForEmptyString(entityName);
-            this.Action = UseHashWildCardForEmptyString(actionName);
-            this.Event = UseHashWildCardForEmptyString(eventName);
-        }
-
-        public void SetPatternUsingStarAsDefault(string entityName, string actionName, string eventName)
-        {
-            this.Entity = UseStarWildCardForEmptyString(entityName);
-            this.Action = UseStarWildCardForEmptyString(actionName);
-            this.Event = UseStarWildCardForEmptyString(eventName);
-        }
-
-        public string getRoutingKey()
+        
+        public string GetRoutingKey()
         {
             return Entity + "." + Action + "." + Event;
         }
@@ -58,22 +121,6 @@ namespace Niffler.Messaging.RabbitMQ
         public List<RoutingKey> getRoutingKeyAsList()
         {
             return new List<RoutingKey> { this };
-        }
-
-        private string UseStarWildCardForEmptyString(string value)
-        {
-            if (value != null || value == "")
-                return "*";
-            else
-                return value;
-        }
-
-        private string UseHashWildCardForEmptyString(string value)
-        {
-            if (value != null || value == "")
-                return "#";
-            else
-                return value;
         }
     }
 }

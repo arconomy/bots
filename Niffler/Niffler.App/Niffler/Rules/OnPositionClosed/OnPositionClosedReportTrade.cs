@@ -4,7 +4,7 @@ using Google.Protobuf.Collections;
 
 namespace Niffler.Rules
 {
-    class OnPositionClosedReportTrade : IRuleOnPositionEvent
+    class OnPositionClosedReportTrade : IPositionRule
     {
         public OnPositionClosedReportTrade(int priority) : base(priority) {}
 

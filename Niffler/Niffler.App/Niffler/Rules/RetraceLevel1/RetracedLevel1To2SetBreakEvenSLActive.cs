@@ -14,7 +14,7 @@ namespace Niffler.Rules
         }
 
         //Set BreakEven SL if Spike has retraced between than retraceLevel1 and retraceLevel2
-        override protected bool Execute()
+        override protected bool ExcuteRuleLogic()
         {
             if (BotState.OrdersPlaced && BotState.PositionsRemainOpen())
             {
