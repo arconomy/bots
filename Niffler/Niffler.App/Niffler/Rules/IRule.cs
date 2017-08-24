@@ -1,15 +1,4 @@
-﻿using cAlgo.API;
-using Niffler.Common;
-using System;
-using Niffler.Common.Trade;
-using Niffler.Common.Market;
-using Niffler.Common.TrailingStop;
-using Niffler.Common.BackTest;
-using Google.Protobuf.Collections;
-using Google.Cloud.PubSub.V1;
-using Niffler.Messaging;
-using Niffler.Microservices;
-using Niffler.Strategy;
+﻿using Niffler.Strategy;
 using Niffler.Messaging.RabbitMQ;
 using System.Collections.Generic;
 using Niffler.Messaging.Protobuf;
@@ -18,35 +7,8 @@ namespace Niffler.Rules
 {
     abstract public class IRule : IConsumer
     {
-        //protected Common.State BotState;
-        //protected Robot Bot;
-        //protected ServicesManager RulesManager;
-        //protected PositionsManager PositionsManager;
-        //protected SellLimitOrdersTrader SellLimitOrdersTrader;
-        //protected BuyLimitOrdersTrader BuyLimitOrdersTrader;
-        //protected SpikeManager SpikeManager;
-        //protected StopLossManager StopLossManager;
-        //protected FixedTrailingStop FixedTrailingStop;
-        //protected TradingTimeInfo MarketInfo;
-        //protected Reporter Reporter;
-        //protected SimplePublisher SimplePublisher;
-        //protected GooglePubSubBroker MessageBroker;
-        //public int Priority { get; set; }
-
-        //  {
-        //RulesManager = rulesManager;
-        //BotState = rulesManager.StateManager;
-        //Bot = BotState.Bot;
-        //MarketInfo = BotState.GetMarketInfo();
-        //PositionsManager = rulesManager.PositionsManager;
-        //SellLimitOrdersTrader = rulesManager.SellLimitOrdersTrader;
-        //BuyLimitOrdersTrader = rulesManager.BuyLimitOrdersTrader;
-        //SpikeManager = rulesManager.SpikeManager;
-        //StopLossManager = rulesManager.StopLossManager;
-        //FixedTrailingStop = rulesManager.FixedTrailingStop;
-        //Reporter = BotState.GetReporter();
-
-        protected bool IsActive;
+        protected bool IsInitialised;
+        protected bool IsActive = true; //Default state is active
         protected RuleConfig RuleConfig;
         protected Messaging.RabbitMQ.Publisher Publisher;
 
@@ -54,26 +16,26 @@ namespace Niffler.Rules
         {
             this.RuleConfig = ruleConfig;
             Publisher = new Messaging.RabbitMQ.Publisher(Connection,ExchangeName);
-            IsActive = Init();
+            IsInitialised = Init();
         }
 
         public override void MessageReceived(MessageReceivedEventArgs e)
         {
             switch(e.Message.Type)
             {
-                case Niffle.Types.Type.Updateservice:
-                    ManageRule(e.Message);
+                case Niffle.Types.Type.Service:
+                    ManageRule(e.Message, new RoutingKey(e.EventArgs.RoutingKey));
                     break;
                 default:
                     {
-                    if (!IsActive) return;
-                    PublishResult(ExcuteRuleLogic());
+                    if (!IsInitialised && !IsActive) return;
+                    PublishResult(ExcuteRuleLogic(e.Message));
                     break;
                     }
             };
         }
 
-        //Only publishing Success or Fail - may need to look into more granualar reporting
+        //Only publishing Success or Fail - look at more granualar reporting action taken
         protected void PublishResult(bool LogicExecutionSuccess)
         {
             Service results = new Service
@@ -82,14 +44,18 @@ namespace Niffler.Rules
                 Success = LogicExecutionSuccess
             };
 
-            RoutingKey routingKey = new RoutingKey(GetServiceName());
-            Publisher.ServiceNotify(results, routingKey);
+            Publisher.ServiceNotify(results, GetServiceName());
         }
 
-        protected void ManageRule(Niffle message)
+        protected void ManageRule(Niffle message, RoutingKey routingKey)
         {
             switch(message.Service.Action)
             {
+                case Service.Types.Action.Notify:
+                    {
+                        OnServiceNotify(message, routingKey);
+                        break;
+                    }
                 case Service.Types.Action.Activate:
                     {
                         IsActive = true;
@@ -116,20 +82,47 @@ namespace Niffler.Rules
                     }
                 case Service.Types.Action.Reset:
                     {
-                        ResetRule();
+                        Reset();
                         break;
                     }
             }
         }
 
-        public void ResetRule()
+        protected bool IsTickMessageEmpty(Niffle message)
         {
-            Init();
-            Reset();
+            if (message.Type != Niffle.Types.Type.Tick) return false;
+            if (message.Tick == null) return false;
+            return true;
+        }
+
+        protected bool IsOnPositionMessageEmpty(Niffle message)
+        {
+            if (message.Type != Niffle.Types.Type.Position) return true;
+            if (message.Position == null) return true;
+            return false;
+        }
+
+        protected bool IsOnPositionsMessageEmpty(Niffle message)
+        {
+            if (message.Type != Niffle.Types.Type.Positions) return true;
+            if (message.Positions == null) return true;
+            return false;
+        }
+
+        protected bool IsServiceMessageEmpty(Niffle message)
+        {
+            if (message.Type != Niffle.Types.Type.Positions) return true;
+            if (message.Positions == null) return true;
+            return false;
+        }
+
+        public void Reset()
+        {
+            IsInitialised = Init();
         }
         
         abstract protected string GetServiceName();
-        abstract protected bool ExcuteRuleLogic();
-        abstract protected void Reset();
+        abstract protected bool ExcuteRuleLogic(Niffle message);
+        abstract protected void OnServiceNotify(Niffle message, RoutingKey routingKey);
     }
 }

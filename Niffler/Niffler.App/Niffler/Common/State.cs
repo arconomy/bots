@@ -49,7 +49,7 @@ namespace Niffler.Common
         public String MarketName { get; set; }
 
         public string BotName { get; set; }
-        private TradingTimeInfo MarketInfo;
+        private TimeInfo MarketInfo;
         private Reporter Reporter;
         private SpikeManager SpikeManager;
 
@@ -63,7 +63,7 @@ namespace Niffler.Common
             return MarketInfo.MarketName;
         }
 
-        public TradingTimeInfo GetMarketInfo()
+        public TimeInfo GetMarketInfo()
         {
             return MarketInfo;
         }

@@ -29,7 +29,7 @@ namespace Niffler.Messaging.RabbitMQ
 
             Niffle niffle = new Niffle
             {
-                Type = Niffle.Types.Type.Updatestate,
+                Type = Niffle.Types.Type.State,
                 State = state
             };
             ByteString body = niffle.ToByteString();
@@ -37,14 +37,29 @@ namespace Niffler.Messaging.RabbitMQ
             Channel.BasicPublish(exchange: ExchangeName, routingKey: routingKey.GetRoutingKey(), basicProperties: null, body: body.ToByteArray());
         }
 
-        public void ServiceNotify(Service service, RoutingKey routingKey)
+        public void ServiceNotify(Service service, string entityName)
         {
-            routingKey.SetAction(Action.NOTIFY);
+            RoutingKey routingKey = new RoutingKey(entityName,Action.NOTIFY);
 
             Niffle niffle = new Niffle
             {
-                Type = Niffle.Types.Type.Updateservice,
+                Type = Niffle.Types.Type.Service,
                 Service = service
+            };
+            ByteString body = niffle.ToByteString();
+
+            Channel.BasicPublish(exchange: ExchangeName, routingKey: routingKey.GetRoutingKey(), basicProperties: null, body: body.ToByteArray());
+        }
+
+        public void TradeOperation(Trade trade)
+        {
+            RoutingKey routingKey = new RoutingKey();
+            routingKey.SetAction(Action.TRADEOPERATION);
+
+            Niffle niffle = new Niffle
+            {
+                Type = Niffle.Types.Type.Trade,
+                Trade = trade
             };
             ByteString body = niffle.ToByteString();
 

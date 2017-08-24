@@ -24,6 +24,6 @@ namespace Niffler.Strategy
     public class RuleConfig
     {
         public string Name { get; set; }
-        public IDictionary<string, string> Params = new Dictionary<string, string>();
+        public IDictionary<string, object> Params = new Dictionary<string, object>();
     }
 }

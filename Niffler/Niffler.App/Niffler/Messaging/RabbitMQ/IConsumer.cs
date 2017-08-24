@@ -79,7 +79,7 @@ namespace Niffler.Messaging.RabbitMQ {
                         QueueName = Channel.QueueDeclare(QueueName);
                     }
 
-                    RoutingKeys = GetRoutingKeys();
+                    RoutingKeys = GetListeningRoutingKeys();
 
                     foreach (RoutingKey routingKey in RoutingKeys)
                     {
@@ -127,6 +127,6 @@ namespace Niffler.Messaging.RabbitMQ {
             StopConsuming = true;
         }
 
-        protected abstract List<RoutingKey> GetRoutingKeys();
+        protected abstract List<RoutingKey> GetListeningRoutingKeys();
     }
 }

@@ -13,7 +13,7 @@ namespace Niffler.Rules
 
         public RulesFactory()
         { 
-            RuleNames.Add(nameof(OnOpenTime));
+            RuleNames.Add(nameof(OnOpenForTrading));
             RuleNames.Add(nameof(CloseTimeCancelPendingOrders));
             RuleNames.Add(nameof(CloseTimeNoPositionsOpenedReset));
             RuleNames.Add(nameof(CloseTimeNoPositionsRemainOpenReset));

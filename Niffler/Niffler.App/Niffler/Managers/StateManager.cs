@@ -14,7 +14,7 @@ namespace Niffler.Microservices {
 
         private State State;
         private RoutingKey routingkey = new RoutingKey();
-        private TradingTimeInfo TradingTimeInfo;
+        private TimeInfo TradingTimeInfo;
 
         public StateManager(IDictionary<string, string> config) : base(config, GenerateBotId()) {}
 
@@ -42,7 +42,7 @@ namespace Niffler.Microservices {
             throw new NotImplementedException();
         }
 
-        protected override List<RoutingKey> GetRoutingKeys()
+        protected override List<RoutingKey> GetListeningRoutingKeys()
         {
             RoutingKey routingKey = new RoutingKey();
             routingKey.SetAction("UpdateState");

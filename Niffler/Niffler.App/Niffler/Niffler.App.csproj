@@ -179,10 +179,11 @@
     </Compile>
     <Compile Include="Microservices\QueueWatchMicroserviceContainer.Designer.cs" />
     <Compile Include="Managers\StateManager.cs" />
-    <Compile Include="Rules\CheckTime\OnTerminateTime.cs" />
-    <Compile Include="Rules\CheckTime\OnReduceRiskTime.cs" />
-    <Compile Include="Rules\CheckTime\OnOpenTime.cs" />
-    <Compile Include="Rules\CheckTime\OnCloseTime.cs" />
+    <Compile Include="Rules\TradingPeriods\OnCloseForTrading.cs" />
+    <Compile Include="Rules\TradingPeriods\OnTerminateTime.cs" />
+    <Compile Include="Rules\TradingPeriods\OnReduceRiskTime.cs" />
+    <Compile Include="Rules\TradingPeriods\OnOpenForTrading.cs" />
+    <Compile Include="Rules\TradingPeriods\OnCloseForTrading - old.cs" />
     <Compile Include="Rules\ITickRule.cs" />
     <Compile Include="Rules\RuleFactory.cs" />
     <Compile Include="Strategy\StrategyConfig.cs" />
@@ -198,7 +199,7 @@
     <Compile Include="Common\BackTest\Reporter.cs" />
     <Compile Include="Common\IResetState.cs" />
     <Compile Include="Common\Utils.cs" />
-    <Compile Include="Common\Market\TradingTimeInfo.cs" />
+    <Compile Include="Common\Helpers\DateTimeZoneCalculator.cs" />
     <Compile Include="Common\Market\Spike.cs" />
     <Compile Include="Common\Market\SpikeManager.cs" />
     <Compile Include="Common\Notifications.cs" />
@@ -277,8 +278,8 @@
     <Compile Include="Rules\RetraceLevel2\RetracedLevel2To3SetFixedTrailingStop.cs" />
     <Compile Include="Rules\RetraceLevel3\RetracedLevel3PlusReduceHardSLBuffer.cs" />
     <Compile Include="Rules\OpenTime\OpenTimeCapturePrice.cs" />
-    <Compile Include="Rules\StartEndTrading\EndTrading.cs" />
-    <Compile Include="Rules\StartEndTrading\StartTrading.cs" />
+    <Compile Include="Rules\TradingPeriods\EndTrading.cs" />
+    <Compile Include="Rules\TradingPeriods\StartTrading.cs" />
     <Compile Include="Rules\TerminateTime\TerminateTimeSetBotState.cs" />
     <Compile Include="Rules\TerminateTime\TerminateTimeCloseAllPositionsReset.cs" />
     <Compile Include="Rules\OnTick\OnTickChaseFixedTrailingSL.cs" />

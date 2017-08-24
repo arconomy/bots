@@ -23,46 +23,59 @@ namespace Niffler.Messaging.Protobuf {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
             "Cg5NZXNzYWdlcy5wcm90bxIaTmlmZmxlci5NZXNzYWdpbmcuUHJvdG9idWYi",
-            "nAMKBk5pZmZsZRI1CgR0eXBlGAEgASgOMicuTmlmZmxlci5NZXNzYWdpbmcu",
+            "jQQKBk5pZmZsZRI1CgR0eXBlGAEgASgOMicuTmlmZmxlci5NZXNzYWdpbmcu",
             "UHJvdG9idWYuTmlmZmxlLlR5cGUSLgoEdGljaxgCIAEoCzIgLk5pZmZsZXIu",
             "TWVzc2FnaW5nLlByb3RvYnVmLlRpY2sSNgoIcG9zaXRpb24YAyABKAsyJC5O",
             "aWZmbGVyLk1lc3NhZ2luZy5Qcm90b2J1Zi5Qb3NpdGlvbhI4Cglwb3NpdGlv",
             "bnMYBCABKAsyJS5OaWZmbGVyLk1lc3NhZ2luZy5Qcm90b2J1Zi5Qb3NpdGlv",
             "bnMSNAoHc2VydmljZRgFIAEoCzIjLk5pZmZsZXIuTWVzc2FnaW5nLlByb3Rv",
             "YnVmLlNlcnZpY2USMAoFc3RhdGUYBiABKAsyIS5OaWZmbGVyLk1lc3NhZ2lu",
-            "Zy5Qcm90b2J1Zi5TdGF0ZSJRCgRUeXBlEggKBFRJQ0sQABIMCghQT1NJVElP",
-            "ThABEg0KCVBPU0lUSU9OUxACEhEKDVVQREFURVNFUlZJQ0UQAxIPCgtVUERB",
-            "VEVTVEFURRAEIr4BCgRUaWNrEgwKBGNvZGUYASABKAkSCwoDYXNrGAIgASgB",
-            "EgsKA2JpZBgDIAEoARIOCgZkaWdpdHMYBCABKAUSDwoHcGlwc2l6ZRgFIAEo",
-            "ARIQCgh0aWNrc2l6ZRgGIAEoARIOCgZzcHJlYWQYByABKAESEQoJdGltZXN0",
-            "YW1wGAggASgJEjgKCXBvc2l0aW9ucxgJIAEoCzIlLk5pZmZsZXIuTWVzc2Fn",
-            "aW5nLlByb3RvYnVmLlBvc2l0aW9ucyKAAwoIUG9zaXRpb24SDQoFbGFiZWwY",
-            "ASABKAkSCgoCaWQYAiABKAUSEgoKc3ltYm9sY29kZRgDIAEoCRJBCgl0cmFk",
-            "ZXR5cGUYBCABKA4yLi5OaWZmbGVyLk1lc3NhZ2luZy5Qcm90b2J1Zi5Qb3Np",
-            "dGlvbi5UcmFkZVR5cGUSEgoKZW50cnlQcmljZRgFIAEoARIVCg1zdG9wbG9z",
-            "c3ByaWNlGAYgASgBEhcKD3Rha2Vwcm9maXRwcmljZRgHIAEoARIRCgllbnRy",
-            "eXRpbWUYCCABKAkSEwoLZ3Jvc3Nwcm9maXQYCSABKAESRQoLc3RhdGVjaGFu",
-            "Z2UYCiABKA4yMC5OaWZmbGVyLk1lc3NhZ2luZy5Qcm90b2J1Zi5Qb3NpdGlv",
-            "bi5TdGF0ZUNoYW5nZSIeCglUcmFkZVR5cGUSBwoDQlVZEAASCAoEU0VMTBAB",
-            "Ii8KC1N0YXRlQ2hhbmdlEggKBE5PTkUQABIKCgZPUEVORUQQARIKCgZDTE9T",
-            "RUQQAiJSCglQb3NpdGlvbnMSDQoFY291bnQYASABKAUSNgoIcG9zaXRpb24Y",
-            "AiADKAsyJC5OaWZmbGVyLk1lc3NhZ2luZy5Qcm90b2J1Zi5Qb3NpdGlvbiJE",
-            "CgVTdGF0ZRIMCgRvcGVuGAEgASgIEhYKDnJlZHVjZXJpc2t0aW1lGAIgASgI",
-            "EhUKDXRlcm1pbmF0ZXRpbWUYAyABKAgivwEKB1NlcnZpY2USOgoGYWN0aW9u",
-            "GAEgASgOMiouTmlmZmxlci5NZXNzYWdpbmcuUHJvdG9idWYuU2VydmljZS5B",
-            "Y3Rpb24SDwoHc3VjY2VzcxgCIAEoCCJnCgZBY3Rpb24SDgoKREVBQ1RJVkFU",
-            "RRAAEgwKCEFDVElWQVRFEAESDAoIU0hVVERPV04QAxILCgdTQ0FMRVVQEAQS",
-            "DQoJU0NBTEVET1dOEAUSCQoFUkVTRVQQBhIKCgZOT1RJRlkQB0IdqgIaTmlm",
-            "Zmxlci5NZXNzYWdpbmcuUHJvdG9idWZiBnByb3RvMw=="));
+            "Zy5Qcm90b2J1Zi5TdGF0ZRIwCgV0cmFkZRgHIAEoCzIhLk5pZmZsZXIuTWVz",
+            "c2FnaW5nLlByb3RvYnVmLlRyYWRlEjIKBnRyYWRlcxgIIAEoCzIiLk5pZmZs",
+            "ZXIuTWVzc2FnaW5nLlByb3RvYnVmLlRyYWRlcyJcCgRUeXBlEggKBFRJQ0sQ",
+            "ABIMCghQT1NJVElPThABEg0KCVBPU0lUSU9OUxACEgsKB1NFUlZJQ0UQAxIJ",
+            "CgVTVEFURRAEEgkKBVRSQURFEAUSCgoGVFJBREVTEAYivgEKBFRpY2sSDAoE",
+            "Y29kZRgBIAEoCRILCgNhc2sYAiABKAESCwoDYmlkGAMgASgBEg4KBmRpZ2l0",
+            "cxgEIAEoBRIPCgdwaXBzaXplGAUgASgBEhAKCHRpY2tzaXplGAYgASgBEg4K",
+            "BnNwcmVhZBgHIAEoARIRCgl0aW1lc3RhbXAYCCABKAkSOAoJcG9zaXRpb25z",
+            "GAkgASgLMiUuTmlmZmxlci5NZXNzYWdpbmcuUHJvdG9idWYuUG9zaXRpb25z",
+            "IoADCghQb3NpdGlvbhINCgVsYWJlbBgBIAEoCRIKCgJpZBgCIAEoBRISCgpz",
+            "eW1ib2xjb2RlGAMgASgJEkEKCXRyYWRldHlwZRgEIAEoDjIuLk5pZmZsZXIu",
+            "TWVzc2FnaW5nLlByb3RvYnVmLlBvc2l0aW9uLlRyYWRlVHlwZRISCgplbnRy",
+            "eVByaWNlGAUgASgBEhUKDXN0b3Bsb3NzcHJpY2UYBiABKAESFwoPdGFrZXBy",
+            "b2ZpdHByaWNlGAcgASgBEhEKCWVudHJ5dGltZRgIIAEoCRITCgtncm9zc3By",
+            "b2ZpdBgJIAEoARJFCgtzdGF0ZWNoYW5nZRgKIAEoDjIwLk5pZmZsZXIuTWVz",
+            "c2FnaW5nLlByb3RvYnVmLlBvc2l0aW9uLlN0YXRlQ2hhbmdlIh4KCVRyYWRl",
+            "VHlwZRIHCgNCVVkQABIICgRTRUxMEAEiLwoLU3RhdGVDaGFuZ2USCAoETk9O",
+            "RRAAEgoKBk9QRU5FRBABEgoKBkNMT1NFRBACIlIKCVBvc2l0aW9ucxINCgVj",
+            "b3VudBgBIAEoBRI2Cghwb3NpdGlvbhgCIAMoCzIkLk5pZmZsZXIuTWVzc2Fn",
+            "aW5nLlByb3RvYnVmLlBvc2l0aW9uIkQKBVN0YXRlEgwKBG9wZW4YASABKAgS",
+            "FgoOcmVkdWNlcmlza3RpbWUYAiABKAgSFQoNdGVybWluYXRldGltZRgDIAEo",
+            "CCK/AQoHU2VydmljZRI6CgZhY3Rpb24YASABKA4yKi5OaWZmbGVyLk1lc3Nh",
+            "Z2luZy5Qcm90b2J1Zi5TZXJ2aWNlLkFjdGlvbhIPCgdzdWNjZXNzGAIgASgI",
+            "ImcKBkFjdGlvbhIOCgpERUFDVElWQVRFEAASDAoIQUNUSVZBVEUQARIMCghT",
+            "SFVURE9XThADEgsKB1NDQUxFVVAQBBINCglTQ0FMRURPV04QBRIJCgVSRVNF",
+            "VBAGEgoKBk5PVElGWRAHIsoCCgVUcmFkZRI+Cgl0cmFkZXR5cGUYASABKA4y",
+            "Ky5OaWZmbGVyLk1lc3NhZ2luZy5Qcm90b2J1Zi5UcmFkZS5UcmFkZVR5cGUS",
+            "DgoGc3ltYm9sGAIgASgJEg4KBnZvbHVtZRgDIAEoAxISCgplbnRyeXByaWNl",
+            "GAQgASgBEg0KBWxhYmVsGAUgASgJEhQKDHN0b3BMb3NzUGlwcxgGIAEoARIW",
+            "Cg50YWtlUHJvZml0UGlwcxgHIAEoASKPAQoJVHJhZGVUeXBlEgcKA0JVWRAA",
+            "EggKBFNFTEwQARIRCg1CVVlMSU1JVE9SREVSEAMSEgoOU0VMTExJTUlUT1JE",
+            "RVIQBBIQCgxCVVlTVE9QT1JERVIQBRIRCg1TRUxMU1RPUE9SREVSEAYSEgoO",
+            "TU9ESUZZUE9TSVRJT04QBxIPCgtNT0RJRllPUkRFUhAIIjoKBlRyYWRlcxIw",
+            "CgV0cmFkZRgBIAMoCzIhLk5pZmZsZXIuTWVzc2FnaW5nLlByb3RvYnVmLlRy",
+            "YWRlQh2qAhpOaWZmbGVyLk1lc3NhZ2luZy5Qcm90b2J1ZmIGcHJvdG8z"));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::Niffler.Messaging.Protobuf.Niffle), global::Niffler.Messaging.Protobuf.Niffle.Parser, new[]{ "Type", "Tick", "Position", "Positions", "Service", "State" }, null, new[]{ typeof(global::Niffler.Messaging.Protobuf.Niffle.Types.Type) }, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Niffler.Messaging.Protobuf.Niffle), global::Niffler.Messaging.Protobuf.Niffle.Parser, new[]{ "Type", "Tick", "Position", "Positions", "Service", "State", "Trade", "Trades" }, null, new[]{ typeof(global::Niffler.Messaging.Protobuf.Niffle.Types.Type) }, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Niffler.Messaging.Protobuf.Tick), global::Niffler.Messaging.Protobuf.Tick.Parser, new[]{ "Code", "Ask", "Bid", "Digits", "Pipsize", "Ticksize", "Spread", "Timestamp", "Positions" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Niffler.Messaging.Protobuf.Position), global::Niffler.Messaging.Protobuf.Position.Parser, new[]{ "Label", "Id", "Symbolcode", "Tradetype", "EntryPrice", "Stoplossprice", "Takeprofitprice", "Entrytime", "Grossprofit", "Statechange" }, null, new[]{ typeof(global::Niffler.Messaging.Protobuf.Position.Types.TradeType), typeof(global::Niffler.Messaging.Protobuf.Position.Types.StateChange) }, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Niffler.Messaging.Protobuf.Positions), global::Niffler.Messaging.Protobuf.Positions.Parser, new[]{ "Count", "Position" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Niffler.Messaging.Protobuf.State), global::Niffler.Messaging.Protobuf.State.Parser, new[]{ "Open", "Reducerisktime", "Terminatetime" }, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Niffler.Messaging.Protobuf.Service), global::Niffler.Messaging.Protobuf.Service.Parser, new[]{ "Action", "Success" }, null, new[]{ typeof(global::Niffler.Messaging.Protobuf.Service.Types.Action) }, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::Niffler.Messaging.Protobuf.Service), global::Niffler.Messaging.Protobuf.Service.Parser, new[]{ "Action", "Success" }, null, new[]{ typeof(global::Niffler.Messaging.Protobuf.Service.Types.Action) }, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Niffler.Messaging.Protobuf.Trade), global::Niffler.Messaging.Protobuf.Trade.Parser, new[]{ "Tradetype", "Symbol", "Volume", "Entryprice", "Label", "StopLossPips", "TakeProfitPips" }, null, new[]{ typeof(global::Niffler.Messaging.Protobuf.Trade.Types.TradeType) }, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Niffler.Messaging.Protobuf.Trades), global::Niffler.Messaging.Protobuf.Trades.Parser, new[]{ "Trade" }, null, null, null)
           }));
     }
     #endregion
@@ -99,6 +112,8 @@ namespace Niffler.Messaging.Protobuf {
       Positions = other.positions_ != null ? other.Positions.Clone() : null;
       Service = other.service_ != null ? other.Service.Clone() : null;
       State = other.state_ != null ? other.State.Clone() : null;
+      Trade = other.trade_ != null ? other.Trade.Clone() : null;
+      Trades = other.trades_ != null ? other.Trades.Clone() : null;
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -172,6 +187,28 @@ namespace Niffler.Messaging.Protobuf {
       }
     }
 
+    /// <summary>Field number for the "trade" field.</summary>
+    public const int TradeFieldNumber = 7;
+    private global::Niffler.Messaging.Protobuf.Trade trade_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public global::Niffler.Messaging.Protobuf.Trade Trade {
+      get { return trade_; }
+      set {
+        trade_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "trades" field.</summary>
+    public const int TradesFieldNumber = 8;
+    private global::Niffler.Messaging.Protobuf.Trades trades_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public global::Niffler.Messaging.Protobuf.Trades Trades {
+      get { return trades_; }
+      set {
+        trades_ = value;
+      }
+    }
+
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override bool Equals(object other) {
       return Equals(other as Niffle);
@@ -191,6 +228,8 @@ namespace Niffler.Messaging.Protobuf {
       if (!object.Equals(Positions, other.Positions)) return false;
       if (!object.Equals(Service, other.Service)) return false;
       if (!object.Equals(State, other.State)) return false;
+      if (!object.Equals(Trade, other.Trade)) return false;
+      if (!object.Equals(Trades, other.Trades)) return false;
       return true;
     }
 
@@ -203,6 +242,8 @@ namespace Niffler.Messaging.Protobuf {
       if (positions_ != null) hash ^= Positions.GetHashCode();
       if (service_ != null) hash ^= Service.GetHashCode();
       if (state_ != null) hash ^= State.GetHashCode();
+      if (trade_ != null) hash ^= Trade.GetHashCode();
+      if (trades_ != null) hash ^= Trades.GetHashCode();
       return hash;
     }
 
@@ -237,6 +278,14 @@ namespace Niffler.Messaging.Protobuf {
         output.WriteRawTag(50);
         output.WriteMessage(State);
       }
+      if (trade_ != null) {
+        output.WriteRawTag(58);
+        output.WriteMessage(Trade);
+      }
+      if (trades_ != null) {
+        output.WriteRawTag(66);
+        output.WriteMessage(Trades);
+      }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -259,6 +308,12 @@ namespace Niffler.Messaging.Protobuf {
       }
       if (state_ != null) {
         size += 1 + pb::CodedOutputStream.ComputeMessageSize(State);
+      }
+      if (trade_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Trade);
+      }
+      if (trades_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Trades);
       }
       return size;
     }
@@ -300,6 +355,18 @@ namespace Niffler.Messaging.Protobuf {
           state_ = new global::Niffler.Messaging.Protobuf.State();
         }
         State.MergeFrom(other.State);
+      }
+      if (other.trade_ != null) {
+        if (trade_ == null) {
+          trade_ = new global::Niffler.Messaging.Protobuf.Trade();
+        }
+        Trade.MergeFrom(other.Trade);
+      }
+      if (other.trades_ != null) {
+        if (trades_ == null) {
+          trades_ = new global::Niffler.Messaging.Protobuf.Trades();
+        }
+        Trades.MergeFrom(other.Trades);
       }
     }
 
@@ -350,6 +417,20 @@ namespace Niffler.Messaging.Protobuf {
             input.ReadMessage(state_);
             break;
           }
+          case 58: {
+            if (trade_ == null) {
+              trade_ = new global::Niffler.Messaging.Protobuf.Trade();
+            }
+            input.ReadMessage(trade_);
+            break;
+          }
+          case 66: {
+            if (trades_ == null) {
+              trades_ = new global::Niffler.Messaging.Protobuf.Trades();
+            }
+            input.ReadMessage(trades_);
+            break;
+          }
         }
       }
     }
@@ -362,8 +443,10 @@ namespace Niffler.Messaging.Protobuf {
         [pbr::OriginalName("TICK")] Tick = 0,
         [pbr::OriginalName("POSITION")] Position = 1,
         [pbr::OriginalName("POSITIONS")] Positions = 2,
-        [pbr::OriginalName("UPDATESERVICE")] Updateservice = 3,
-        [pbr::OriginalName("UPDATESTATE")] Updatestate = 4,
+        [pbr::OriginalName("SERVICE")] Service = 3,
+        [pbr::OriginalName("STATE")] State = 4,
+        [pbr::OriginalName("TRADE")] Trade = 5,
+        [pbr::OriginalName("TRADES")] Trades = 6,
       }
 
     }
@@ -1574,6 +1657,418 @@ namespace Niffler.Messaging.Protobuf {
 
     }
     #endregion
+
+  }
+
+  public sealed partial class Trade : pb::IMessage<Trade> {
+    private static readonly pb::MessageParser<Trade> _parser = new pb::MessageParser<Trade>(() => new Trade());
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pb::MessageParser<Trade> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Niffler.Messaging.Protobuf.MessagesReflection.Descriptor.MessageTypes[6]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public Trade() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public Trade(Trade other) : this() {
+      tradetype_ = other.tradetype_;
+      symbol_ = other.symbol_;
+      volume_ = other.volume_;
+      entryprice_ = other.entryprice_;
+      label_ = other.label_;
+      stopLossPips_ = other.stopLossPips_;
+      takeProfitPips_ = other.takeProfitPips_;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public Trade Clone() {
+      return new Trade(this);
+    }
+
+    /// <summary>Field number for the "tradetype" field.</summary>
+    public const int TradetypeFieldNumber = 1;
+    private global::Niffler.Messaging.Protobuf.Trade.Types.TradeType tradetype_ = 0;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public global::Niffler.Messaging.Protobuf.Trade.Types.TradeType Tradetype {
+      get { return tradetype_; }
+      set {
+        tradetype_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "symbol" field.</summary>
+    public const int SymbolFieldNumber = 2;
+    private string symbol_ = "";
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public string Symbol {
+      get { return symbol_; }
+      set {
+        symbol_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+
+    /// <summary>Field number for the "volume" field.</summary>
+    public const int VolumeFieldNumber = 3;
+    private long volume_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public long Volume {
+      get { return volume_; }
+      set {
+        volume_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "entryprice" field.</summary>
+    public const int EntrypriceFieldNumber = 4;
+    private double entryprice_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public double Entryprice {
+      get { return entryprice_; }
+      set {
+        entryprice_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "label" field.</summary>
+    public const int LabelFieldNumber = 5;
+    private string label_ = "";
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public string Label {
+      get { return label_; }
+      set {
+        label_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+
+    /// <summary>Field number for the "stopLossPips" field.</summary>
+    public const int StopLossPipsFieldNumber = 6;
+    private double stopLossPips_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public double StopLossPips {
+      get { return stopLossPips_; }
+      set {
+        stopLossPips_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "takeProfitPips" field.</summary>
+    public const int TakeProfitPipsFieldNumber = 7;
+    private double takeProfitPips_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public double TakeProfitPips {
+      get { return takeProfitPips_; }
+      set {
+        takeProfitPips_ = value;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override bool Equals(object other) {
+      return Equals(other as Trade);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool Equals(Trade other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (Tradetype != other.Tradetype) return false;
+      if (Symbol != other.Symbol) return false;
+      if (Volume != other.Volume) return false;
+      if (Entryprice != other.Entryprice) return false;
+      if (Label != other.Label) return false;
+      if (StopLossPips != other.StopLossPips) return false;
+      if (TakeProfitPips != other.TakeProfitPips) return false;
+      return true;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (Tradetype != 0) hash ^= Tradetype.GetHashCode();
+      if (Symbol.Length != 0) hash ^= Symbol.GetHashCode();
+      if (Volume != 0L) hash ^= Volume.GetHashCode();
+      if (Entryprice != 0D) hash ^= Entryprice.GetHashCode();
+      if (Label.Length != 0) hash ^= Label.GetHashCode();
+      if (StopLossPips != 0D) hash ^= StopLossPips.GetHashCode();
+      if (TakeProfitPips != 0D) hash ^= TakeProfitPips.GetHashCode();
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void WriteTo(pb::CodedOutputStream output) {
+      if (Tradetype != 0) {
+        output.WriteRawTag(8);
+        output.WriteEnum((int) Tradetype);
+      }
+      if (Symbol.Length != 0) {
+        output.WriteRawTag(18);
+        output.WriteString(Symbol);
+      }
+      if (Volume != 0L) {
+        output.WriteRawTag(24);
+        output.WriteInt64(Volume);
+      }
+      if (Entryprice != 0D) {
+        output.WriteRawTag(33);
+        output.WriteDouble(Entryprice);
+      }
+      if (Label.Length != 0) {
+        output.WriteRawTag(42);
+        output.WriteString(Label);
+      }
+      if (StopLossPips != 0D) {
+        output.WriteRawTag(49);
+        output.WriteDouble(StopLossPips);
+      }
+      if (TakeProfitPips != 0D) {
+        output.WriteRawTag(57);
+        output.WriteDouble(TakeProfitPips);
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int CalculateSize() {
+      int size = 0;
+      if (Tradetype != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeEnumSize((int) Tradetype);
+      }
+      if (Symbol.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(Symbol);
+      }
+      if (Volume != 0L) {
+        size += 1 + pb::CodedOutputStream.ComputeInt64Size(Volume);
+      }
+      if (Entryprice != 0D) {
+        size += 1 + 8;
+      }
+      if (Label.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(Label);
+      }
+      if (StopLossPips != 0D) {
+        size += 1 + 8;
+      }
+      if (TakeProfitPips != 0D) {
+        size += 1 + 8;
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(Trade other) {
+      if (other == null) {
+        return;
+      }
+      if (other.Tradetype != 0) {
+        Tradetype = other.Tradetype;
+      }
+      if (other.Symbol.Length != 0) {
+        Symbol = other.Symbol;
+      }
+      if (other.Volume != 0L) {
+        Volume = other.Volume;
+      }
+      if (other.Entryprice != 0D) {
+        Entryprice = other.Entryprice;
+      }
+      if (other.Label.Length != 0) {
+        Label = other.Label;
+      }
+      if (other.StopLossPips != 0D) {
+        StopLossPips = other.StopLossPips;
+      }
+      if (other.TakeProfitPips != 0D) {
+        TakeProfitPips = other.TakeProfitPips;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(pb::CodedInputStream input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            input.SkipLastField();
+            break;
+          case 8: {
+            tradetype_ = (global::Niffler.Messaging.Protobuf.Trade.Types.TradeType) input.ReadEnum();
+            break;
+          }
+          case 18: {
+            Symbol = input.ReadString();
+            break;
+          }
+          case 24: {
+            Volume = input.ReadInt64();
+            break;
+          }
+          case 33: {
+            Entryprice = input.ReadDouble();
+            break;
+          }
+          case 42: {
+            Label = input.ReadString();
+            break;
+          }
+          case 49: {
+            StopLossPips = input.ReadDouble();
+            break;
+          }
+          case 57: {
+            TakeProfitPips = input.ReadDouble();
+            break;
+          }
+        }
+      }
+    }
+
+    #region Nested types
+    /// <summary>Container for nested types declared in the Trade message type.</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static partial class Types {
+      public enum TradeType {
+        [pbr::OriginalName("BUY")] Buy = 0,
+        [pbr::OriginalName("SELL")] Sell = 1,
+        [pbr::OriginalName("BUYLIMITORDER")] Buylimitorder = 3,
+        [pbr::OriginalName("SELLLIMITORDER")] Selllimitorder = 4,
+        [pbr::OriginalName("BUYSTOPORDER")] Buystoporder = 5,
+        [pbr::OriginalName("SELLSTOPORDER")] Sellstoporder = 6,
+        [pbr::OriginalName("MODIFYPOSITION")] Modifyposition = 7,
+        [pbr::OriginalName("MODIFYORDER")] Modifyorder = 8,
+      }
+
+    }
+    #endregion
+
+  }
+
+  public sealed partial class Trades : pb::IMessage<Trades> {
+    private static readonly pb::MessageParser<Trades> _parser = new pb::MessageParser<Trades>(() => new Trades());
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pb::MessageParser<Trades> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Niffler.Messaging.Protobuf.MessagesReflection.Descriptor.MessageTypes[7]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public Trades() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public Trades(Trades other) : this() {
+      trade_ = other.trade_.Clone();
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public Trades Clone() {
+      return new Trades(this);
+    }
+
+    /// <summary>Field number for the "trade" field.</summary>
+    public const int TradeFieldNumber = 1;
+    private static readonly pb::FieldCodec<global::Niffler.Messaging.Protobuf.Trade> _repeated_trade_codec
+        = pb::FieldCodec.ForMessage(10, global::Niffler.Messaging.Protobuf.Trade.Parser);
+    private readonly pbc::RepeatedField<global::Niffler.Messaging.Protobuf.Trade> trade_ = new pbc::RepeatedField<global::Niffler.Messaging.Protobuf.Trade>();
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public pbc::RepeatedField<global::Niffler.Messaging.Protobuf.Trade> Trade {
+      get { return trade_; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override bool Equals(object other) {
+      return Equals(other as Trades);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool Equals(Trades other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if(!trade_.Equals(other.trade_)) return false;
+      return true;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override int GetHashCode() {
+      int hash = 1;
+      hash ^= trade_.GetHashCode();
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void WriteTo(pb::CodedOutputStream output) {
+      trade_.WriteTo(output, _repeated_trade_codec);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int CalculateSize() {
+      int size = 0;
+      size += trade_.CalculateSize(_repeated_trade_codec);
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(Trades other) {
+      if (other == null) {
+        return;
+      }
+      trade_.Add(other.trade_);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(pb::CodedInputStream input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            input.SkipLastField();
+            break;
+          case 10: {
+            trade_.AddEntriesFrom(input, _repeated_trade_codec);
+            break;
+          }
+        }
+      }
+    }
 
   }
 

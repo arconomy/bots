@@ -32,7 +32,7 @@ namespace Niffler.Microservices
         private List<IRule> OnBarRules = new List<IRule>();
 
         private StopLossManager StopLossManager;
-        private TradingTimeInfo SwfMarketInfo;
+        private TimeInfo SwfMarketInfo;
         private SellLimitOrdersTrader SellLimitOrdersTrader;
         private BuyLimitOrdersTrader BuyLimitOrdersTrader;
 
@@ -256,11 +256,11 @@ namespace Niffler.Microservices
 
         public void ResetRules()
         {
-            OnTickRules.ForEach(IRule => IRule.ResetRule());
-            OnBarRules.ForEach(IRule => IRule.ResetRule());
-            OnTimerRules.ForEach(IRule => IRule.ResetRule());
-            OnPositionClosedRules.ForEach(IRule => IRule.ResetRule());
-            OnPositionOpenedRules.ForEach(IRule => IRule.ResetRule());
+            OnTickRules.ForEach(IRule => IRule.Reset());
+            OnBarRules.ForEach(IRule => IRule.Reset());
+            OnTimerRules.ForEach(IRule => IRule.Reset());
+            OnPositionClosedRules.ForEach(IRule => IRule.Reset());
+            OnPositionOpenedRules.ForEach(IRule => IRule.Reset());
         }
 
         public void Reset()

@@ -20,8 +20,10 @@ message Niffle {
         TICK = 0;
         POSITION = 1;
         POSITIONS = 2;
-        UPDATESERVICE = 3;
-        UPDATESTATE = 4;
+        SERVICE = 3;
+        STATE = 4;
+        TRADE = 5;
+        TRADES = 6;
     }
     Type type = 1;
     Tick tick = 2;
@@ -29,6 +31,8 @@ message Niffle {
     Positions positions = 4;
     Service service = 5;
     State state = 6;
+    Trade trade = 7;
+    Trades trades = 8;
 }
 
 message Tick {
@@ -92,6 +96,31 @@ message Service  {
     }
     Action action = 1;
     bool success = 2;
+}
+
+message Trade   {
+
+    enum TradeType   {
+    BUY = 0;
+    SELL = 1;
+    BUYLIMITORDER = 3;
+    SELLLIMITORDER = 4;
+    BUYSTOPORDER = 5;
+    SELLSTOPORDER = 6;
+    MODIFYPOSITION = 7;
+    MODIFYORDER = 8;
+    }
+    TradeType tradetype = 1;
+    string symbol = 2;
+    int64 volume = 3;
+    double entryprice = 4;
+    string label = 5;
+    double stopLossPips = 6;
+    double takeProfitPips = 7;
+}
+
+message Trades  {
+    repeated Trade trade = 1;
 }
 
 // [END messages]

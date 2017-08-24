@@ -1,5 +1,6 @@
 ﻿using System;
 using cAlgo.API;
+using System.Collections;
 
 namespace Niffler.Common
 {
@@ -14,7 +15,6 @@ namespace Niffler.Common
 
             return datetime;
         }
-
 
         public static string GetTimeStamp(Robot bot, bool unformatted = false)
         {
@@ -36,21 +36,5 @@ namespace Niffler.Common
             DateTime datetime = System.DateTime.Now;
             return datetime.Year.ToString() + datetime.Month + datetime.Day + datetime.Hour + datetime.Minute + datetime.Second;
         }
-
-        public static bool ParseStringToTimeSpan(string timespan, ref TimeSpan parsedTimeSpan)
-        {
-            try
-            {
-                parsedTimeSpan = TimeSpan.Parse(timespan);
-            }
-            catch (FormatException fe)
-            {
-                Console.Write("FAILED to parse timespan: "+ timespan + " : "+ fe);
-                return false;
-            }
-            return true;
-        }
-
-
     }
 }

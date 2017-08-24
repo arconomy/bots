@@ -1,5 +1,6 @@
 ﻿
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Niffler.Messaging.RabbitMQ
 {
@@ -9,19 +10,16 @@ namespace Niffler.Messaging.RabbitMQ
         WILDCARD = 0,
         UPDATESTATE = 1,    //StateManager listens for this
         NOTIFY = 2,         //ReportingManager listens for this
-        PLACEORDERS = 3,    //Niffler cAlgo Client listens for this
-        EXECUTEORDERS = 4,  //Niffler cAlgo Client listens for this
-        CANCELORDERS = 5,   //Niffler cAlgo Client listens for this
-        CLOSEPOSITIONS = 6  //Niffler cAlgo Client listens for this
+        TRADEOPERATION = 3  //Niffler cAlgo Client listens for this
     }
 
     //Allows consumers to listen for generic Events
     public enum Event
     {
         WILDCARD = 0,
-        ONTICK = 1,
-        ONPOSITIONOPENED = 2,
-        ONPOSITIONCLOSED = 3
+        ONTICK = 1,             //Rules interested in Ticks listen for this
+        ONPOSITIONOPENED = 2,   //Rules interested in a Position Opened event listen for this
+        ONPOSITIONCLOSED = 3    //Rules interested in a Position Closed event listen for this
     }
 
     //Allows consumers to listen for specific Entity (rule) notifications
@@ -32,11 +30,39 @@ namespace Niffler.Messaging.RabbitMQ
 
     public class RoutingKey
     {
-        private string Entity;
+        public string Entity { get; }
         private string Action;
         private string Event;
-       
-        public RoutingKey(Entity entityEnum = RabbitMQ.Entity.WILDCARD, Action actionEnum = RabbitMQ.Action.WILDCARD, Event eventEnum = RabbitMQ.Event.WILDCARD)
+        private Dictionary<Entity, string> EntityLookup = new Dictionary<Entity, string>()
+        {
+            { RabbitMQ.Entity.WILDCARD,"*" }
+        };
+        private Dictionary<Action, string> ActionLookup = new Dictionary<Action, string>()
+        {
+            { RabbitMQ.Action.WILDCARD,"*" },
+            { RabbitMQ.Action.UPDATESTATE,"UpdateState" },
+            { RabbitMQ.Action.NOTIFY,"Notify" },
+            { RabbitMQ.Action.TRADEOPERATION,"TradeOperation" }
+
+        };
+        private Dictionary<Event, string> EventLookup = new Dictionary<Event, string>()
+        {
+            { RabbitMQ.Event.WILDCARD,"*" },
+            { RabbitMQ.Event.ONTICK,"OnTick" },
+            { RabbitMQ.Event.ONPOSITIONOPENED,"OnPositionOpened" },
+            { RabbitMQ.Event.ONPOSITIONCLOSED,"OnPositionClosed" }
+        };
+
+        public RoutingKey (string routingKey)
+        {
+            string[] routingKeySplit = routingKey.Split('.');
+
+            Entity = routingKeySplit[0];
+            Action = routingKeySplit[1];
+            Event = routingKeySplit[2];
+        }
+
+            public RoutingKey(Entity entityEnum = RabbitMQ.Entity.WILDCARD, Action actionEnum = RabbitMQ.Action.WILDCARD, Event eventEnum = RabbitMQ.Event.WILDCARD)
         {
             SetEntity(entityEnum);
             SetAction(actionEnum);
@@ -51,72 +77,36 @@ namespace Niffler.Messaging.RabbitMQ
             SetEvent(eventEnum);
         }
 
-
-
         public void SetEvent(Event eventEnum)
         {
-            string eventName;
-            switch (eventEnum)
-            {
-                case RabbitMQ.Event.WILDCARD:
-                    eventName = "*";
-                    break;
-                case RabbitMQ.Event.ONTICK:
-                    eventName = "OnTick";
-                    break;
-                case RabbitMQ.Event.ONPOSITIONOPENED:
-                    eventName = "OnPositionOpened";
-                    break;
-                case RabbitMQ.Event.ONPOSITIONCLOSED:
-                    eventName = "OnPositionClosed";
-                    break;
-                default:
-                    eventName = "*";
-                    break;
-            }
-            Event = eventName;
+            EventLookup.TryGetValue(eventEnum, out Event);
         }
 
         public void SetEntity(Entity entityEnum)
         {
-            string entityName;
-            switch (entityEnum)
-            {
-                case RabbitMQ.Entity.WILDCARD:
-                    entityName = "*";
-                    break;
-                default:
-                    entityName = "*";
-                    break;
-            }
-            Entity = entityName;
+            EntityLookup.TryGetValue(entityEnum, out Entity);
         }
 
         public void SetAction(Action actionEnum)
         {
-            string actionName;
-            switch(actionEnum)
-            {
-                case RabbitMQ.Action.WILDCARD:
-                    actionName = "*";
-                    break;
-                case RabbitMQ.Action.UPDATESERVICE:
-                    actionName = "UpdateService";
-                    break;
-                case RabbitMQ.Action.UPDATESTATE:
-                    actionName = "UpdateState";
-                    break;
-                default:
-                    actionName = "*";
-                    break;
-            }
-            Action = actionName;
+            ActionLookup.TryGetValue(actionEnum, out Action);
         }
         
         public string GetRoutingKey()
         {
             return Entity + "." + Action + "." + Event;
         }
+
+        public static RoutingKey Create(Entity entityEnum = RabbitMQ.Entity.WILDCARD, Action actionEnum = RabbitMQ.Action.WILDCARD, Event eventEnum = RabbitMQ.Event.WILDCARD)
+        {
+            return new RoutingKey(entityEnum, actionEnum, eventEnum);
+        }
+
+        public static RoutingKey Create(string entityName, Action actionEnum = RabbitMQ.Action.WILDCARD, Event eventEnum = RabbitMQ.Event.WILDCARD)
+        {
+            return new RoutingKey(entityName, actionEnum, eventEnum);
+        }
+
 
         public List<RoutingKey> getRoutingKeyAsList()
         {
