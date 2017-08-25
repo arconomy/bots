@@ -14,9 +14,13 @@ namespace Niffler.Microservices {
 
         private State State;
         private RoutingKey routingkey = new RoutingKey();
-        private TimeInfo TradingTimeInfo;
+        private string StrategyId;
 
-        public StateManager(IDictionary<string, string> config) : base(config, GenerateBotId()) {}
+
+        public StateManager(IDictionary<string, string> config) : base(config)
+        {
+            config.TryGetValue("StrategyId", out string StrategyId));
+        }
 
         public override object Clone()
         {
@@ -28,13 +32,6 @@ namespace Niffler.Microservices {
             //The queue name is the generated Bot Id
             State = new State(QueueName);
             //TradingTimeInfo = new TradingTimeInfo(Config);
-        }
-
-        static private string GenerateBotId()
-        {
-            Random randomIdGenerator = new Random();
-            int id = randomIdGenerator.Next(0, 99999);
-            return id.ToString("00000");
         }
 
         public override void MessageReceived(MessageReceivedEventArgs e)

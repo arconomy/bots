@@ -51,20 +51,20 @@ namespace Niffler.Messaging.Protobuf {
             "b3VudBgBIAEoBRI2Cghwb3NpdGlvbhgCIAMoCzIkLk5pZmZsZXIuTWVzc2Fn",
             "aW5nLlByb3RvYnVmLlBvc2l0aW9uIkQKBVN0YXRlEgwKBG9wZW4YASABKAgS",
             "FgoOcmVkdWNlcmlza3RpbWUYAiABKAgSFQoNdGVybWluYXRldGltZRgDIAEo",
-            "CCK/AQoHU2VydmljZRI6CgZhY3Rpb24YASABKA4yKi5OaWZmbGVyLk1lc3Nh",
-            "Z2luZy5Qcm90b2J1Zi5TZXJ2aWNlLkFjdGlvbhIPCgdzdWNjZXNzGAIgASgI",
-            "ImcKBkFjdGlvbhIOCgpERUFDVElWQVRFEAASDAoIQUNUSVZBVEUQARIMCghT",
-            "SFVURE9XThADEgsKB1NDQUxFVVAQBBINCglTQ0FMRURPV04QBRIJCgVSRVNF",
-            "VBAGEgoKBk5PVElGWRAHIsoCCgVUcmFkZRI+Cgl0cmFkZXR5cGUYASABKA4y",
-            "Ky5OaWZmbGVyLk1lc3NhZ2luZy5Qcm90b2J1Zi5UcmFkZS5UcmFkZVR5cGUS",
-            "DgoGc3ltYm9sGAIgASgJEg4KBnZvbHVtZRgDIAEoAxISCgplbnRyeXByaWNl",
-            "GAQgASgBEg0KBWxhYmVsGAUgASgJEhQKDHN0b3BMb3NzUGlwcxgGIAEoARIW",
-            "Cg50YWtlUHJvZml0UGlwcxgHIAEoASKPAQoJVHJhZGVUeXBlEgcKA0JVWRAA",
-            "EggKBFNFTEwQARIRCg1CVVlMSU1JVE9SREVSEAMSEgoOU0VMTExJTUlUT1JE",
-            "RVIQBBIQCgxCVVlTVE9QT1JERVIQBRIRCg1TRUxMU1RPUE9SREVSEAYSEgoO",
-            "TU9ESUZZUE9TSVRJT04QBxIPCgtNT0RJRllPUkRFUhAIIjoKBlRyYWRlcxIw",
-            "CgV0cmFkZRgBIAMoCzIhLk5pZmZsZXIuTWVzc2FnaW5nLlByb3RvYnVmLlRy",
-            "YWRlQh2qAhpOaWZmbGVyLk1lc3NhZ2luZy5Qcm90b2J1ZmIGcHJvdG8z"));
+            "CCKkAQoHU2VydmljZRI8Cgdjb21tYW5kGAEgASgOMisuTmlmZmxlci5NZXNz",
+            "YWdpbmcuUHJvdG9idWYuU2VydmljZS5Db21tYW5kEg8KB3N1Y2Nlc3MYAiAB",
+            "KAgiSgoHQ29tbWFuZBIJCgVSRVNFVBAAEgoKBk5PVElGWRABEgsKB1NDQUxF",
+            "VVAQAhINCglTQ0FMRURPV04QAxIMCghTSFVURE9XThAEIsoCCgVUcmFkZRI+",
+            "Cgl0cmFkZXR5cGUYASABKA4yKy5OaWZmbGVyLk1lc3NhZ2luZy5Qcm90b2J1",
+            "Zi5UcmFkZS5UcmFkZVR5cGUSDgoGc3ltYm9sGAIgASgJEg4KBnZvbHVtZRgD",
+            "IAEoAxISCgplbnRyeXByaWNlGAQgASgBEg0KBWxhYmVsGAUgASgJEhQKDHN0",
+            "b3BMb3NzUGlwcxgGIAEoARIWCg50YWtlUHJvZml0UGlwcxgHIAEoASKPAQoJ",
+            "VHJhZGVUeXBlEgcKA0JVWRAAEggKBFNFTEwQARIRCg1CVVlMSU1JVE9SREVS",
+            "EAMSEgoOU0VMTExJTUlUT1JERVIQBBIQCgxCVVlTVE9QT1JERVIQBRIRCg1T",
+            "RUxMU1RPUE9SREVSEAYSEgoOTU9ESUZZUE9TSVRJT04QBxIPCgtNT0RJRllP",
+            "UkRFUhAIIjoKBlRyYWRlcxIwCgV0cmFkZRgBIAMoCzIhLk5pZmZsZXIuTWVz",
+            "c2FnaW5nLlByb3RvYnVmLlRyYWRlQh2qAhpOaWZmbGVyLk1lc3NhZ2luZy5Q",
+            "cm90b2J1ZmIGcHJvdG8z"));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(null, new pbr::GeneratedClrTypeInfo[] {
@@ -73,7 +73,7 @@ namespace Niffler.Messaging.Protobuf {
             new pbr::GeneratedClrTypeInfo(typeof(global::Niffler.Messaging.Protobuf.Position), global::Niffler.Messaging.Protobuf.Position.Parser, new[]{ "Label", "Id", "Symbolcode", "Tradetype", "EntryPrice", "Stoplossprice", "Takeprofitprice", "Entrytime", "Grossprofit", "Statechange" }, null, new[]{ typeof(global::Niffler.Messaging.Protobuf.Position.Types.TradeType), typeof(global::Niffler.Messaging.Protobuf.Position.Types.StateChange) }, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Niffler.Messaging.Protobuf.Positions), global::Niffler.Messaging.Protobuf.Positions.Parser, new[]{ "Count", "Position" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Niffler.Messaging.Protobuf.State), global::Niffler.Messaging.Protobuf.State.Parser, new[]{ "Open", "Reducerisktime", "Terminatetime" }, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Niffler.Messaging.Protobuf.Service), global::Niffler.Messaging.Protobuf.Service.Parser, new[]{ "Action", "Success" }, null, new[]{ typeof(global::Niffler.Messaging.Protobuf.Service.Types.Action) }, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Niffler.Messaging.Protobuf.Service), global::Niffler.Messaging.Protobuf.Service.Parser, new[]{ "Command", "Success" }, null, new[]{ typeof(global::Niffler.Messaging.Protobuf.Service.Types.Command) }, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Niffler.Messaging.Protobuf.Trade), global::Niffler.Messaging.Protobuf.Trade.Parser, new[]{ "Tradetype", "Symbol", "Volume", "Entryprice", "Label", "StopLossPips", "TakeProfitPips" }, null, new[]{ typeof(global::Niffler.Messaging.Protobuf.Trade.Types.TradeType) }, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Niffler.Messaging.Protobuf.Trades), global::Niffler.Messaging.Protobuf.Trades.Parser, new[]{ "Trade" }, null, null, null)
           }));
@@ -1522,7 +1522,7 @@ namespace Niffler.Messaging.Protobuf {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public Service(Service other) : this() {
-      action_ = other.action_;
+      command_ = other.command_;
       success_ = other.success_;
     }
 
@@ -1531,14 +1531,14 @@ namespace Niffler.Messaging.Protobuf {
       return new Service(this);
     }
 
-    /// <summary>Field number for the "action" field.</summary>
-    public const int ActionFieldNumber = 1;
-    private global::Niffler.Messaging.Protobuf.Service.Types.Action action_ = 0;
+    /// <summary>Field number for the "command" field.</summary>
+    public const int CommandFieldNumber = 1;
+    private global::Niffler.Messaging.Protobuf.Service.Types.Command command_ = 0;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public global::Niffler.Messaging.Protobuf.Service.Types.Action Action {
-      get { return action_; }
+    public global::Niffler.Messaging.Protobuf.Service.Types.Command Command {
+      get { return command_; }
       set {
-        action_ = value;
+        command_ = value;
       }
     }
 
@@ -1566,7 +1566,7 @@ namespace Niffler.Messaging.Protobuf {
       if (ReferenceEquals(other, this)) {
         return true;
       }
-      if (Action != other.Action) return false;
+      if (Command != other.Command) return false;
       if (Success != other.Success) return false;
       return true;
     }
@@ -1574,7 +1574,7 @@ namespace Niffler.Messaging.Protobuf {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override int GetHashCode() {
       int hash = 1;
-      if (Action != 0) hash ^= Action.GetHashCode();
+      if (Command != 0) hash ^= Command.GetHashCode();
       if (Success != false) hash ^= Success.GetHashCode();
       return hash;
     }
@@ -1586,9 +1586,9 @@ namespace Niffler.Messaging.Protobuf {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void WriteTo(pb::CodedOutputStream output) {
-      if (Action != 0) {
+      if (Command != 0) {
         output.WriteRawTag(8);
-        output.WriteEnum((int) Action);
+        output.WriteEnum((int) Command);
       }
       if (Success != false) {
         output.WriteRawTag(16);
@@ -1599,8 +1599,8 @@ namespace Niffler.Messaging.Protobuf {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public int CalculateSize() {
       int size = 0;
-      if (Action != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeEnumSize((int) Action);
+      if (Command != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeEnumSize((int) Command);
       }
       if (Success != false) {
         size += 1 + 1;
@@ -1613,8 +1613,8 @@ namespace Niffler.Messaging.Protobuf {
       if (other == null) {
         return;
       }
-      if (other.Action != 0) {
-        Action = other.Action;
+      if (other.Command != 0) {
+        Command = other.Command;
       }
       if (other.Success != false) {
         Success = other.Success;
@@ -1630,7 +1630,7 @@ namespace Niffler.Messaging.Protobuf {
             input.SkipLastField();
             break;
           case 8: {
-            action_ = (global::Niffler.Messaging.Protobuf.Service.Types.Action) input.ReadEnum();
+            command_ = (global::Niffler.Messaging.Protobuf.Service.Types.Command) input.ReadEnum();
             break;
           }
           case 16: {
@@ -1645,14 +1645,12 @@ namespace Niffler.Messaging.Protobuf {
     /// <summary>Container for nested types declared in the Service message type.</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static partial class Types {
-      public enum Action {
-        [pbr::OriginalName("DEACTIVATE")] Deactivate = 0,
-        [pbr::OriginalName("ACTIVATE")] Activate = 1,
-        [pbr::OriginalName("SHUTDOWN")] Shutdown = 3,
-        [pbr::OriginalName("SCALEUP")] Scaleup = 4,
-        [pbr::OriginalName("SCALEDOWN")] Scaledown = 5,
-        [pbr::OriginalName("RESET")] Reset = 6,
-        [pbr::OriginalName("NOTIFY")] Notify = 7,
+      public enum Command {
+        [pbr::OriginalName("RESET")] Reset = 0,
+        [pbr::OriginalName("NOTIFY")] Notify = 1,
+        [pbr::OriginalName("SCALEUP")] Scaleup = 2,
+        [pbr::OriginalName("SCALEDOWN")] Scaledown = 3,
+        [pbr::OriginalName("SHUTDOWN")] Shutdown = 4,
       }
 
     }

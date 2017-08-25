@@ -29,7 +29,7 @@ namespace Niffler.Messaging.RabbitMQ {
 
         protected volatile bool StopConsuming;
 
-        public IConsumer(IDictionary<string, string> botConfig, string queueName, bool autoscale = false,
+        public IConsumer(IDictionary<string, string> botConfig, bool autoscale = false,
                        int timeout = 10, ushort prefetchCount = 1, bool autoAck = true,
                                    IDictionary<string, object> queueArgs = null) : base()
         {
@@ -37,31 +37,12 @@ namespace Niffler.Messaging.RabbitMQ {
             Channel = Adapter.GetConnection().CreateModel();
             BotConfig.TryGetValue("Market", out ExchangeName);
             this.ExchangeType = Exchange.GetExchangeType(RabbitMQ.ExchangeType.TOPIC);
-            this.QueueName = queueName;
             this.PrefetchCount = prefetchCount;
             this.AutoAck = autoAck;
             this.Timeout = timeout;
             this.QueueArgs = queueArgs;
         }
-
-        public IConsumer(IDictionary<string, string> botConfig, bool autoScale = false,
-                        int timeout = 10, ushort prefetchCount = 1, bool autoAck = true,
-                                    IDictionary<string, object> queueArgs = null) : base()
-        {
-            this.BotConfig = botConfig;
-            Channel = Adapter.GetConnection().CreateModel();
-            this.BotConfig.TryGetValue("Market", out ExchangeName);
-            this.ExchangeType = Exchange.GetExchangeType(RabbitMQ.ExchangeType.TOPIC);
-            this.PrefetchCount = prefetchCount;
-            this.AutoAck = autoAck;
-            this.Timeout = timeout;
-            this.QueueArgs = queueArgs;
-            if(autoScale)
-            {
-                InitAutoScale(QueueName);
-            }
-        }
-       
+ 
         public override void Start() {
             StopConsuming = false;
             
@@ -76,6 +57,7 @@ namespace Niffler.Messaging.RabbitMQ {
                     }
                     else
                     {
+                        //For Autoscaling need to use the existing queue
                         QueueName = Channel.QueueDeclare(QueueName);
                     }
 

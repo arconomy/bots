@@ -81,7 +81,7 @@ namespace Niffler.Rules.TradingPeriods
             if (IsServiceMessageEmpty(message)) return;
 
             //Listening for OpenForTrading
-            if (routingKey.Entity == nameof(OnOpenForTrading) && message.Service.Success)
+            if (routingKey.Source == nameof(OnOpenForTrading) && message.Service.Success)
             {
                 IsActive = true;
             }
@@ -90,7 +90,7 @@ namespace Niffler.Rules.TradingPeriods
         protected override List<RoutingKey> GetListeningRoutingKeys()
         {
             //Listen for OnTick
-            List<RoutingKey> routingKeys = RoutingKey.Create(Entity.WILDCARD, Messaging.RabbitMQ.Action.WILDCARD, Event.ONTICK).getRoutingKeyAsList();
+            List<RoutingKey> routingKeys = RoutingKey.Create(Source.WILDCARD, Messaging.RabbitMQ.Action.WILDCARD, Event.ONTICK).getRoutingKeyAsList();
 
             //Listen for Notification from OnOpenForTrading
             routingKeys.Add(RoutingKey.Create(nameof(OnOpenForTrading), Messaging.RabbitMQ.Action.NOTIFY, Event.WILDCARD));

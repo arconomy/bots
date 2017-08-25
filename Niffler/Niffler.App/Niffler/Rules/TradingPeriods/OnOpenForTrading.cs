@@ -146,7 +146,7 @@ namespace Niffler.Rules.TradingPeriods
 
         protected override List<RoutingKey> GetListeningRoutingKeys()
         {
-            return RoutingKey.Create(Entity.WILDCARD, Messaging.RabbitMQ.Action.WILDCARD, Event.ONTICK).getRoutingKeyAsList();
+            return RoutingKey.Create(Source.WILDCARD, Messaging.RabbitMQ.Action.WILDCARD, Event.ONTICK).getRoutingKeyAsList();
         }
 
         public override object Clone()

@@ -48,6 +48,11 @@ namespace Niffler.Microservices
 
             this.Connection = connection;
 
+
+            //Create default microservices
+            SpikeManager = new SpikeManager();
+            Reporter = new Reporter();
+
             //For each BotConfig Initialise a micro-service for each service required and listen for updates on appropriate queues
             foreach (BotConfig botConfig in strategyConfig.BotConfig)
             {
@@ -55,22 +60,16 @@ namespace Niffler.Microservices
                 // All data used for rules is passed to the ruleService when intatiated. i.e. Open time etc.
                 // Once timing rules have fired the state will need to notified i.e. IsTrading = true.
 
+                //Generate Strategy ID here and pass to the State and Rules
+                botConfig.Config.Add("StategyId", GenerateStrategyId());
+
                 //Create a State Manager per bot
                 StateManager = new StateManager(botConfig.Config);
                 StateManager.Start();
                 StateManagers.Add(StateManager);
                 Rules = RulesFactory.CreateRules(botConfig);
 
-
-                //Create default microservices per market
-                SpikeManager = new SpikeManager();
-                Reporter = new Reporter();
-
             }
-
-
-
-            fbotState;
 
 
             Reporter = botState.GetReporter();
@@ -80,6 +79,14 @@ namespace Niffler.Microservices
             SpikeManager = new SpikeManager(StateManager);
             StopLossManager = stopLossManager;
             FixedTrailingStop = fixedTrailingStop;
+        }
+
+
+        static private string GenerateStrategyId()
+        {
+            Random randomIdGenerator = new Random();
+            int id = randomIdGenerator.Next(0, 99999);
+            return id.ToString("00000");
         }
 
 

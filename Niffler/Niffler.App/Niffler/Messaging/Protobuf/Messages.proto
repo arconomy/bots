@@ -85,16 +85,14 @@ message State  {
 }
 
 message Service  {
-    enum Action {
-        DEACTIVATE = 0;
-        ACTIVATE = 1;
-        SHUTDOWN = 3;
-        SCALEUP = 4;
-        SCALEDOWN = 5;
-        RESET = 6;
-        NOTIFY = 7;
+    enum Command {
+        RESET = 0;
+        NOTIFY = 1;
+        SCALEUP = 2;
+        SCALEDOWN = 3;
+        SHUTDOWN = 4;
     }
-    Action action = 1;
+    Command command = 1;
     bool success = 2;
 }
 

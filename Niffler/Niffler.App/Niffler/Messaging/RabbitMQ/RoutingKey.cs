@@ -4,13 +4,13 @@ using System.Linq;
 
 namespace Niffler.Messaging.RabbitMQ
 {
-    //Allows consumers to listen for generic actions
+    //Allows consumers to listen for generic actions See https://create360.atlassian.net/wiki/spaces/TEAM/pages/80347143/AA1.0+Messaging+Design
     public enum Action
     {
         WILDCARD = 0,
-        UPDATESTATE = 1,    //StateManager listens for this
-        NOTIFY = 2,         //ReportingManager listens for this
-        TRADEOPERATION = 3  //Niffler cAlgo Client listens for this
+        NOTIFY = 1,            //ReportingManager listens for this
+        UPDATESTATE = 2,       //StateManager listens for this           
+        TRADEOPERATION = 3     //Niffler cAlgo Client listens for this
     }
 
     //Allows consumers to listen for generic Events
@@ -19,23 +19,25 @@ namespace Niffler.Messaging.RabbitMQ
         WILDCARD = 0,
         ONTICK = 1,             //Rules interested in Ticks listen for this
         ONPOSITIONOPENED = 2,   //Rules interested in a Position Opened event listen for this
-        ONPOSITIONCLOSED = 3    //Rules interested in a Position Closed event listen for this
+        ONPOSITIONCLOSED = 3,   //Rules interested in a Position Closed event listen for this
+        ONSHUTDOWN = 4,         //All Rules listen for this event
+        ONRESET = 5             //All Rules listen for this event
     }
 
-    //Allows consumers to listen for specific Entity (rule) notifications
-    public enum Entity
+    //Allows consumers to listen for specific Source/Target Entity (rulename) for notifications
+    public enum Source
     {
-        WILDCARD = 0,
+        WILDCARD = 0
     }
 
     public class RoutingKey
     {
-        public string Entity { get; }
+        public string Source;
         private string Action;
         private string Event;
-        private Dictionary<Entity, string> EntityLookup = new Dictionary<Entity, string>()
+        private Dictionary<Source, string> EntityLookup = new Dictionary<Source, string>()
         {
-            { RabbitMQ.Entity.WILDCARD,"*" }
+            { RabbitMQ.Source.WILDCARD,"*" }
         };
         private Dictionary<Action, string> ActionLookup = new Dictionary<Action, string>()
         {
@@ -43,36 +45,49 @@ namespace Niffler.Messaging.RabbitMQ
             { RabbitMQ.Action.UPDATESTATE,"UpdateState" },
             { RabbitMQ.Action.NOTIFY,"Notify" },
             { RabbitMQ.Action.TRADEOPERATION,"TradeOperation" }
-
         };
         private Dictionary<Event, string> EventLookup = new Dictionary<Event, string>()
         {
             { RabbitMQ.Event.WILDCARD,"*" },
             { RabbitMQ.Event.ONTICK,"OnTick" },
             { RabbitMQ.Event.ONPOSITIONOPENED,"OnPositionOpened" },
-            { RabbitMQ.Event.ONPOSITIONCLOSED,"OnPositionClosed" }
+            { RabbitMQ.Event.ONPOSITIONCLOSED,"OnPositionClosed" },
+            { RabbitMQ.Event.ONRESET,"OnReset" },
+            { RabbitMQ.Event.ONSHUTDOWN,"OnShutDown" }
+
         };
+
+        public string GetSource()
+        {
+            return Source;
+        }
 
         public RoutingKey (string routingKey)
         {
             string[] routingKeySplit = routingKey.Split('.');
 
-            Entity = routingKeySplit[0];
+            if (routingKeySplit.Length != 3)
+            {
+                System.Console.Out.Write("FAILED to create routing key: " + routingKey);
+                return;
+            }
+
+            Source = routingKeySplit[0];
             Action = routingKeySplit[1];
             Event = routingKeySplit[2];
         }
 
-            public RoutingKey(Entity entityEnum = RabbitMQ.Entity.WILDCARD, Action actionEnum = RabbitMQ.Action.WILDCARD, Event eventEnum = RabbitMQ.Event.WILDCARD)
+        public RoutingKey(Source source = RabbitMQ.Source.WILDCARD, Action actionEnum = RabbitMQ.Action.WILDCARD, Event eventEnum = RabbitMQ.Event.WILDCARD)
         {
-            SetEntity(entityEnum);
+            SetSource(source);
             SetAction(actionEnum);
             SetEvent(eventEnum);
         }
 
-        public RoutingKey(string entityName, Action actionEnum = RabbitMQ.Action.WILDCARD, Event eventEnum = RabbitMQ.Event.WILDCARD)
+        public RoutingKey(string SourceName, Action actionEnum = RabbitMQ.Action.WILDCARD, Event eventEnum = RabbitMQ.Event.WILDCARD)
         {
             //For Rules passing there nameof(class) name 
-            Entity = entityName;
+            Source = SourceName;
             SetAction(actionEnum);
             SetEvent(eventEnum);
         }
@@ -82,9 +97,9 @@ namespace Niffler.Messaging.RabbitMQ
             EventLookup.TryGetValue(eventEnum, out Event);
         }
 
-        public void SetEntity(Entity entityEnum)
+        public void SetSource(Source source)
         {
-            EntityLookup.TryGetValue(entityEnum, out Entity);
+            EntityLookup.TryGetValue(source, out Source);
         }
 
         public void SetAction(Action actionEnum)
@@ -94,17 +109,17 @@ namespace Niffler.Messaging.RabbitMQ
         
         public string GetRoutingKey()
         {
-            return Entity + "." + Action + "." + Event;
+            return Source + "." + Action + "." + Event;
         }
 
-        public static RoutingKey Create(Entity entityEnum = RabbitMQ.Entity.WILDCARD, Action actionEnum = RabbitMQ.Action.WILDCARD, Event eventEnum = RabbitMQ.Event.WILDCARD)
+        public static RoutingKey Create(Source source = RabbitMQ.Source.WILDCARD,Action actionEnum = RabbitMQ.Action.WILDCARD, Event eventEnum = RabbitMQ.Event.WILDCARD)
         {
-            return new RoutingKey(entityEnum, actionEnum, eventEnum);
+            return new RoutingKey(source, actionEnum, eventEnum);
         }
 
-        public static RoutingKey Create(string entityName, Action actionEnum = RabbitMQ.Action.WILDCARD, Event eventEnum = RabbitMQ.Event.WILDCARD)
+        public static RoutingKey Create(string source, Action actionEnum = RabbitMQ.Action.WILDCARD, Event eventEnum = RabbitMQ.Event.WILDCARD)
         {
-            return new RoutingKey(entityName, actionEnum, eventEnum);
+            return new RoutingKey(source,actionEnum, eventEnum);
         }
 
 

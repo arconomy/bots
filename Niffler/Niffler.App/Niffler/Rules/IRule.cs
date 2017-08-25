@@ -40,7 +40,7 @@ namespace Niffler.Rules
         {
             Service results = new Service
             {
-                Action = Service.Types.Action.Notify,
+                Command = Service.Types.Command.Notify,
                 Success = LogicExecutionSuccess
             };
 
@@ -49,40 +49,32 @@ namespace Niffler.Rules
 
         protected void ManageRule(Niffle message, RoutingKey routingKey)
         {
-            switch(message.Service.Action)
+            switch(message.Service.Command)
             {
-                case Service.Types.Action.Notify:
+                case Service.Types.Command.Notify:
                     {
                         OnServiceNotify(message, routingKey);
                         break;
                     }
-                case Service.Types.Action.Activate:
+                case Service.Types.Command.Scaleup:
                     {
-                        IsActive = true;
-                        break;
-                    }
-                case Service.Types.Action.Deactivate:
-                    {
-                        IsActive = false;
-                        break;
-                    }
-                case Service.Types.Action.Scaleup:
-                    {
+                        //Need to look at how this might work with the autoscaling code and if required..
                         InitAutoScale(QueueName);
                         break;
                     }
-                case Service.Types.Action.Scaledown:
+                case Service.Types.Command.Scaledown:
                     {
+                        //Need to look at how this might work with the autoscaling code.. 
                         break;
                     }
-                case Service.Types.Action.Shutdown:
-                    {
-                        Shutdown();
-                        break;
-                    }
-                case Service.Types.Action.Reset:
+                case Service.Types.Command.Reset:
                     {
                         Reset();
+                        break;
+                    }
+                case Service.Types.Command.Shutdown:
+                    {
+                        Shutdown();
                         break;
                     }
             }
@@ -116,6 +108,18 @@ namespace Niffler.Rules
             return false;
         }
 
+        protected override List<RoutingKey> GetListeningRoutingKeys()
+        {
+            List<RoutingKey> routingKeys = SetListeningRoutingKeys();
+            //Listen for any SHUTDOWN Action message on the exchange
+            routingKeys.Add(RoutingKey.Create(Source.WILDCARD, Messaging.RabbitMQ.Action.WILDCARD, Event.ONSHUTDOWN));
+
+            //Listen for any RESET Action message on the exchange
+            routingKeys.Add(RoutingKey.Create(Source.WILDCARD, Messaging.RabbitMQ.Action.WILDCARD, Event.ONRESET));
+
+            return routingKeys;
+        }
+
         public void Reset()
         {
             IsInitialised = Init();
@@ -123,6 +127,8 @@ namespace Niffler.Rules
         
         abstract protected string GetServiceName();
         abstract protected bool ExcuteRuleLogic(Niffle message);
+        abstract protected List<RoutingKey> SetListeningRoutingKeys();
         abstract protected void OnServiceNotify(Niffle message, RoutingKey routingKey);
+        abstract protected void OnStateUpdate(Niffle message, RoutingKey routingKey);
     }
 }
