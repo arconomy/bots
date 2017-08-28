@@ -6,11 +6,11 @@ namespace Niffler.Common.Trade
 {
     class PositionsManager
     { 
-        private State BotState { get; set; }
+        private StateData BotState { get; set; }
         private Robot Bot { get; set; }
-        private Reporter Reporter { get;  set; } 
+        private ReportManager Reporter { get;  set; } 
 
-        public PositionsManager(State s)
+        public PositionsManager(StateData s)
         {
             BotState = s;
             Bot = BotState.Bot;

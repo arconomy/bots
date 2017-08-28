@@ -49,11 +49,11 @@ namespace Niffler.Rules
         }
 
         //Create and initialise the Rules
-        public List<IRule> CreateRules(BotConfig botConfig)
+        public List<IRule> CreateRules(BotConfiguration botConfig)
         {
             List<IRule> createdRules = new List<IRule>();
 
-            foreach (RuleConfig ruleConfig in botConfig.Rules)
+            foreach (RuleConfiguration ruleConfig in botConfig.Rules)
             {
                 IRule rule = CreateRule(ruleConfig.Name, botConfig.Config);
 

@@ -79,9 +79,19 @@ message Positions {
 }
 
 message State  {
-    bool open = 1;
-    bool reducerisktime = 2;
-    bool terminatetime = 3;
+    
+    enum ValueType{
+    STRING = 0;
+    BOOL = 1;
+    DOUBLE = 2;
+    }
+
+    string strategyid = 1;
+    string key = 2;
+    ValueType valuetype = 3;
+    string stringvalue = 4;
+    bool boolvalue = 5;
+    double doublevalue = 6;
 }
 
 message Service  {

@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using Google.Protobuf.Collections;
+using Niffler.Messaging.Protobuf;
+using Niffler.Messaging.RabbitMQ;
 
 namespace Niffler.Rules
 {
@@ -48,6 +51,68 @@ namespace Niffler.Rules
         public override string GetPubSubTopicName()
         {
             return this.GetType().Name;
+        }
+
+        public bool IsRetraceBetweenLevel1AndLevel2()
+        {
+            return Level1 < RetraceFactor && RetraceFactor < Level2;
+        }
+
+        public bool IsRetraceBetweenLevel2AndLevel3()
+        {
+            return Level2 < RetraceFactor && RetraceFactor < Level3;
+        }
+
+        public bool IsRetraceGreaterThanLevel3()
+        {
+            return Level3 < RetraceFactor;
+        }
+
+        public bool IsRetraceLessThanLevel1()
+        {
+            return Level1 > RetraceFactor;
+        }
+
+        public void ReduceLevelsBy50Percent()
+        {
+            Level1 /= 2;
+            Level2 /= 2;
+            Level3 /= 2;
+        }
+
+        protected override string GetServiceName()
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override bool ExcuteRuleLogic(Niffle message)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override List<RoutingKey> SetListeningRoutingKeys()
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override void OnServiceNotify(Niffle message, RoutingKey routingKey)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override void OnStateUpdate(Niffle message, RoutingKey routingKey)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override object Clone()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override bool Init()
+        {
+            throw new NotImplementedException();
         }
     }
 }

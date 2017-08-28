@@ -22,10 +22,9 @@ namespace Niffler.Messaging.RabbitMQ
             Channel.ExchangeDeclare(exchange: ExchangeName, type: Exchange.GetExchangeType(ExchangeType.TOPIC));
         }
 
-        public void UpdateState(State state)
+        public void UpdateState(State state, string entityName)
         {
-            RoutingKey routingKey = new RoutingKey();
-            routingKey.SetAction(Action.UPDATESTATE);
+            RoutingKey routingKey = RoutingKey.Create(entityName, Action.UPDATESTATE, Event.WILDCARD);
 
             Niffle niffle = new Niffle
             {
@@ -39,7 +38,7 @@ namespace Niffler.Messaging.RabbitMQ
 
         public void ServiceNotify(Service service, string entityName)
         {
-            RoutingKey routingKey = new RoutingKey(entityName,Action.NOTIFY);
+            RoutingKey routingKey = RoutingKey.Create(entityName, Action.NOTIFY, Event.WILDCARD);
 
             Niffle niffle = new Niffle
             {
@@ -51,10 +50,9 @@ namespace Niffler.Messaging.RabbitMQ
             Channel.BasicPublish(exchange: ExchangeName, routingKey: routingKey.GetRoutingKey(), basicProperties: null, body: body.ToByteArray());
         }
 
-        public void TradeOperation(Trade trade)
+        public void TradeOperation(Trade trade, string entityName)
         {
-            RoutingKey routingKey = new RoutingKey();
-            routingKey.SetAction(Action.TRADEOPERATION);
+            RoutingKey routingKey = RoutingKey.Create(entityName, Action.TRADEOPERATION, Event.WILDCARD);
 
             Niffle niffle = new Niffle
             {

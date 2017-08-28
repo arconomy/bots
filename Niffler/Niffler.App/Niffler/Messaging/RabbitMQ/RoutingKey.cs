@@ -123,7 +123,7 @@ namespace Niffler.Messaging.RabbitMQ
         }
 
 
-        public List<RoutingKey> getRoutingKeyAsList()
+        public List<RoutingKey> ToList()
         {
             return new List<RoutingKey> { this };
         }

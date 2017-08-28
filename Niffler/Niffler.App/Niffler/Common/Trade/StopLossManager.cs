@@ -10,11 +10,11 @@ namespace Niffler.Common.Trade
         private double HardStopLossBufferPips { get; set; }
         private double ResetHardStopLossBufferPips { get; set; }
         private double LastOrderStopLossPips { get; set; }
-        private State BotState { get;  set; }
+        private StateData BotState { get;  set; }
         private Robot Bot { get; set; }
-        private Reporter Reporter { get; set; }
+        private ReportManager Reporter { get; set; }
 
-        public StopLossManager(State s, double hardStopLossBufferPips, double lastOrderStopLossPips)
+        public StopLossManager(StateData s, double hardStopLossBufferPips, double lastOrderStopLossPips)
         {
             BotState = s;
             Bot = BotState.Bot;

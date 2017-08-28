@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using Niffler.Common.Helpers;
 using System.Collections;
 using Niffler.Messaging.Protobuf;
+using Niffler.Common;
 
 namespace Niffler.Rules.TradingPeriods
 {
@@ -24,18 +25,18 @@ namespace Niffler.Rules.TradingPeriods
         private List<DateTime> OpenDates = new List<DateTime>();
         DateTime Now;
 
-        public OnOpenForTrading(IDictionary<string, string> botConfig, RuleConfig ruleConfig) : base(botConfig, ruleConfig) { }
+        public OnOpenForTrading(IDictionary<string, string> botConfig, RuleConfiguration ruleConfig) : base(botConfig, ruleConfig) { }
 
         public override bool Init()
         {
-            //At a minumum need SymbolCode & OpenTime
-            if(BotConfig.TryGetValue("Market", out SymbolCode)) return false;
+            //At a minumum need SymbolCode to determine TimeZone & OpenTime
+            if(BotConfig.TryGetValue(BotConfiguration.MARKET, out SymbolCode)) return false;
             if (SymbolCode == "" || SymbolCode == null) return false;
-            if (RuleConfig.Params.TryGetValue("OpenTime", out object openTime)) return false;
+            if (RuleConfig.Params.TryGetValue(RuleConfiguration.OPENTIME, out object openTime)) return false;
             if (TimeSpan.TryParse(openTime.ToString(), out OpenTime)) return false;
 
             //Configure which days of the week to trade
-            if (RuleConfig.Params.TryGetValue("OpenWeekDays", out object openWeekDays))
+            if (RuleConfig.Params.TryGetValue(RuleConfiguration.OPENWEEKDAYS, out object openWeekDays))
             {
                 if (openWeekDays is IEnumerable OpenWeekDaysArray)
                 {
@@ -71,7 +72,7 @@ namespace Niffler.Rules.TradingPeriods
             }
 
             //Configure specific dates to trade
-            if (RuleConfig.Params.TryGetValue("OpenDates", out object openDates))
+            if (RuleConfig.Params.TryGetValue(RuleConfiguration.OPENDATES, out object openDates))
             {
                 if (openDates is IEnumerable OpenDatesArray)
                 {
@@ -90,7 +91,7 @@ namespace Niffler.Rules.TradingPeriods
             return true;
         }
         
-        //Get the Opening price for the trading period
+        //Execute the rule logic
         override protected bool ExcuteRuleLogic(Niffle message)
         {
             if (IsTickMessageEmpty(message)) return false;
@@ -99,6 +100,8 @@ namespace Niffler.Rules.TradingPeriods
             {
                 if (IsOpenDate() && IsOpenWeekday() && IsOpenTime())
                 {
+                    PublishStateUpdate(StrategyID, StateData.ISOPENTIME, true);
+                    PublishStateUpdate(StateData.OPENTIME, message.Tick.Timestamp);
                     IsActive = false;
                     return true;
                 }
@@ -108,7 +111,14 @@ namespace Niffler.Rules.TradingPeriods
 
         override protected void OnServiceNotify(Niffle message, RoutingKey routingKey)
         {
-            //Not Listening for any other Service Notifcations.
+            //Not Listening for any specific Service Notifications.
+            throw new NotImplementedException();
+        }
+
+        protected override void OnStateUpdate(Niffle message, RoutingKey routingKey)
+        {
+            //Not Listening for any specific State Update Notifications.
+            throw new NotImplementedException();
         }
 
         private bool IsOpenTime()
@@ -144,11 +154,6 @@ namespace Niffler.Rules.TradingPeriods
             }
         }
 
-        protected override List<RoutingKey> GetListeningRoutingKeys()
-        {
-            return RoutingKey.Create(Source.WILDCARD, Messaging.RabbitMQ.Action.WILDCARD, Event.ONTICK).getRoutingKeyAsList();
-        }
-
         public override object Clone()
         {
             return new OnOpenForTrading(BotConfig, RuleConfig);
@@ -158,5 +163,11 @@ namespace Niffler.Rules.TradingPeriods
         {
             return nameof(OnOpenForTrading);
         }
+
+        protected override List<RoutingKey> SetListeningRoutingKeys()
+        {
+            return RoutingKey.Create(Source.WILDCARD, Messaging.RabbitMQ.Action.WILDCARD, Event.ONTICK).ToList();
+        }
+
     }
 }

@@ -179,12 +179,12 @@
     </Compile>
     <Compile Include="Microservices\QueueWatchMicroserviceContainer.Designer.cs" />
     <Compile Include="Managers\StateManager.cs" />
+    <Compile Include="Rules\OnPositionClosed\OnPositionClosedCalcRetrace.cs" />
     <Compile Include="Rules\TradingPeriods\OnCloseForTrading.cs" />
     <Compile Include="Rules\TradingPeriods\OnTerminateTime.cs" />
     <Compile Include="Rules\TradingPeriods\OnReduceRiskTime.cs" />
     <Compile Include="Rules\TradingPeriods\OnOpenForTrading.cs" />
     <Compile Include="Rules\TradingPeriods\OnCloseForTrading - old.cs" />
-    <Compile Include="Rules\ITickRule.cs" />
     <Compile Include="Rules\RuleFactory.cs" />
     <Compile Include="Strategy\StrategyConfig.cs" />
     <Compile Include="Strategy\OptionsExpiry\Entry.cs" />
@@ -196,12 +196,11 @@
     <Compile Include="Business\TradingHours.cs" />
     <Compile Include="Strategy\Client\Bot.cs" />
     <Compile Include="Program.cs" />
-    <Compile Include="Common\BackTest\Reporter.cs" />
+    <Compile Include="Managers\ReportManager.cs" />
     <Compile Include="Common\IResetState.cs" />
     <Compile Include="Common\Utils.cs" />
     <Compile Include="Common\Helpers\DateTimeZoneCalculator.cs" />
-    <Compile Include="Common\Market\Spike.cs" />
-    <Compile Include="Common\Market\SpikeManager.cs" />
+    <Compile Include="Rules\OnTick\OnTickCaptureSpike.cs" />
     <Compile Include="Common\Notifications.cs" />
     <Compile Include="Common\State.cs" />
     <Compile Include="Common\Trade\PositionsManager.cs" />

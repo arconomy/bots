@@ -11,7 +11,7 @@ using Niffler.Common;
 namespace Niffler.Microservices {
     public class AutoScaleManager : IConsumer {
 
-        private State State;
+        private StateData State;
 
         public AutoScaleManager(IDictionary<string, string> config, string queueName)
             : base(config, "topic", false, new string[] { queueName + ".AutoScale.*" })

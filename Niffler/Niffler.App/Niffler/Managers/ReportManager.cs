@@ -4,14 +4,14 @@ using cAlgo.API;
 using Niffler.Common.Market;
 using Niffler.Rules;
 
-namespace Niffler.Common.BackTest
+namespace Niffler.Managers
 {
-    class Reporter : IResetState
+    class ReportManager : IResetState
     {
 
-        private State BotState;
+        private StateData BotState;
         private Robot Bot;
-        private SpikeManager SpikeManager;
+        private OnTickCaptureSpike SpikeManager;
         private double ProfitTotal = 0;
         private double PipsTotal = 0;
         private List<string> TradeResults = new List<string>();
@@ -21,15 +21,15 @@ namespace Niffler.Common.BackTest
         private string ReportDirectory;
         private string ReportFile;
 
-        public Reporter(State s, SpikeManager spikeManager)
+        public ReportManager()
         {
-            BotState = s;
-            Bot = BotState.Bot;
-            SpikeManager = spikeManager;
-            BotName = Bot.GetType().Name;
-            ReportDirectory = "C:\\Users\\alist\\Desktop\\" + BotName;
-            ReportFile = "C:\\Users\\alist\\Desktop\\" + BotName + "\\" + BotName + "-" + BotState.GetMarketName() + "-" + BotState.BotId + "-" + Utils.GetTimeStamp(Bot,true) + ".csv";
-            Reset();
+            //BotState = s;
+            //Bot = BotState.Bot;
+            //SpikeManager = spikeManager;
+            //BotName = Bot.GetType().Name;
+            //ReportDirectory = "C:\\Users\\alist\\Desktop\\" + BotName;
+            //ReportFile = "C:\\Users\\alist\\Desktop\\" + BotName + "\\" + BotName + "-" + BotState.GetMarketName() + "-" + BotState.BotId + "-" + Utils.GetTimeStamp(Bot,true) + ".csv";
+            //Reset();
         }
 
         public void Reset()

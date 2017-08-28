@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using Google.Protobuf.Collections;
+using Niffler.Messaging.Protobuf;
+using Niffler.Messaging.RabbitMQ;
 
 namespace Niffler.Rules
 {
@@ -49,6 +52,41 @@ namespace Niffler.Rules
         public override string GetPubSubTopicName()
         {
             return this.GetType().Name;
+        }
+
+        protected override string GetServiceName()
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override bool ExcuteRuleLogic(Niffle message)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override List<RoutingKey> SetListeningRoutingKeys()
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override void OnServiceNotify(Niffle message, RoutingKey routingKey)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override void OnStateUpdate(Niffle message, RoutingKey routingKey)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override object Clone()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override bool Init()
+        {
+            throw new NotImplementedException();
         }
     }
 }

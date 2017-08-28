@@ -7,15 +7,18 @@ namespace Niffler.Rules
 {
     abstract public class IRule : IConsumer
     {
+        protected string StrategyId;
         protected bool IsInitialised;
         protected bool IsActive = true; //Default state is active
-        protected RuleConfig RuleConfig;
+        protected RuleConfiguration RuleConfig;
         protected Messaging.RabbitMQ.Publisher Publisher;
 
-        public IRule(IDictionary<string, string> botConfig, RuleConfig ruleConfig) : base(botConfig)
+        public IRule(IDictionary<string, string> botConfig, RuleConfiguration ruleConfig) : base(botConfig)
         {
+            BotConfig.TryGetValue(BotConfiguration.STRATEGYID, out StrategyId);
             this.RuleConfig = ruleConfig;
             Publisher = new Messaging.RabbitMQ.Publisher(Connection,ExchangeName);
+
             IsInitialised = Init();
         }
 
@@ -46,6 +49,46 @@ namespace Niffler.Rules
 
             Publisher.ServiceNotify(results, GetServiceName());
         }
+
+        //Publish State update message
+        protected void PublishStateUpdate(string StrategyId, string key, bool value)
+        {
+            State stateUpdate = new State()
+            {
+                Strategyid = StrategyId,
+                Valuetype = State.Types.ValueType.Bool,
+                Boolvalue = value
+            };
+
+            Publisher.UpdateState(stateUpdate, GetServiceName());
+        }
+
+        //Publish State update message
+        protected void PublishStateUpdate(string StrategyId,string key, string value)
+        {
+            State stateUpdate = new State()
+            {
+                Strategyid = StrategyId,
+                Valuetype = State.Types.ValueType.String,
+                Stringvalue = value
+            };
+
+            Publisher.UpdateState(stateUpdate, GetServiceName());
+        }
+
+        //Publish State update message
+        protected void PublishStateUpdate(string StrategyId, string key, double value)
+        {
+            State stateUpdate = new State()
+            {
+                Strategyid = StrategyId,
+                Valuetype = State.Types.ValueType.Double,
+                Doublevalue = value
+            };
+
+            Publisher.UpdateState(stateUpdate, GetServiceName());
+        }
+
 
         protected void ManageRule(Niffle message, RoutingKey routingKey)
         {
@@ -105,6 +148,13 @@ namespace Niffler.Rules
         {
             if (message.Type != Niffle.Types.Type.Positions) return true;
             if (message.Positions == null) return true;
+            return false;
+        }
+
+        protected bool IsStateMessageEmpty(Niffle message)
+        {
+            if (message.Type != Niffle.Types.Type.State) return true;
+            if (message.State == null) return true;
             return false;
         }
 

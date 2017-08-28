@@ -2,6 +2,9 @@
 using Google.Protobuf.Collections;
 using Niffler.Strategy;
 using Niffler.Common;
+using Niffler.Messaging.Protobuf;
+using Niffler.Messaging.RabbitMQ;
+using System.Collections.Generic;
 
 namespace Niffler.Rules
 {
@@ -15,7 +18,7 @@ namespace Niffler.Rules
         private TimeSpan ReduceRiskAfter; // TimeSpan after OpenTime to ReduceRisk
         private bool UseReduceRiskTime;
 
-        public override void Init(RuleConfig ruleConfig)
+        public override void Init(RuleConfiguration ruleConfig)
         {
             ruleConfig.Params.TryGetValue("OpenTime", out string openTime);
             Utils.ParseStringToTimeSpan(openTime, ref OpenTime);
@@ -65,6 +68,41 @@ namespace Niffler.Rules
         public override string GetPubSubTopicName()
         {
             return "OpenTimeCapturePrice";
+        }
+
+        protected override string GetServiceName()
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override bool ExcuteRuleLogic(Niffle message)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override List<RoutingKey> SetListeningRoutingKeys()
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override void OnServiceNotify(Niffle message, RoutingKey routingKey)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override void OnStateUpdate(Niffle message, RoutingKey routingKey)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override object Clone()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override bool Init()
+        {
+            throw new NotImplementedException();
         }
     }
 }

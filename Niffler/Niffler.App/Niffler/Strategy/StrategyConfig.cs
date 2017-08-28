@@ -9,21 +9,39 @@ using System.Threading.Tasks;
 namespace Niffler.Strategy
 {
 
-    public class StrategyConfig
+    public class StrategyConfiguration
     {
-        public List<BotConfig> BotConfig = new List<BotConfig>();
+        public List<BotConfiguration> BotConfig = new List<BotConfiguration>();
     }
 
-    public class BotConfig
+    public class BotConfiguration
     {
+        public static readonly string MARKET = "Market";
+        public static readonly string STRATEGYID = "StrategyId";
         public string Name { get; set; }
         public IDictionary<string,string> Config = new Dictionary<string,string>();
-        public List<RuleConfig> Rules = new List<RuleConfig>();
+        public List<RuleConfiguration> Rules = new List<RuleConfiguration>();
     }
 
-    public class RuleConfig
+    public class RuleConfiguration
     {
+        public static readonly string OPENTIME = "OpenTime";
+        public static readonly string OPENWEEKDAYS = "OpenWeekDays";
+        public static readonly string OPENDATES = "OpenDates";
+        public static readonly string CLOSETIME = "OpenDates";
+        public static readonly string CLOSEAFTEROPEN = "CloseAfterOpen";
+        public static readonly string MINSPIKEPIPS = "MinSpikePips";
+        
+
+
+
+
+
+
+
+
         public string Name { get; set; }
         public IDictionary<string, object> Params = new Dictionary<string, object>();
+
     }
 }

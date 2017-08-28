@@ -6,7 +6,7 @@ namespace Niffler.Rules
 {
     abstract class IPositionRule : IRule
     {
-        public IPositionRule(IDictionary<string, string> botConfig, RuleConfig ruleConfig) : base(botConfig, ruleConfig) { }
+        public IPositionRule(IDictionary<string, string> botConfig, RuleConfiguration ruleConfig) : base(botConfig, ruleConfig) { }
 
         public void Run(Position position)
         {

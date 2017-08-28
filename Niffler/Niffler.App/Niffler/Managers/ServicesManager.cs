@@ -12,6 +12,7 @@ using Niffler.Rules;
 using Niffler.Strategy;
 using RabbitMQ.Client;
 using Niffler.Messaging.RabbitMQ;
+using Niffler.Managers;
 
 namespace Niffler.Microservices
 {
@@ -20,11 +21,11 @@ namespace Niffler.Microservices
         public SellLimitOrdersTrader SellLimitOrdersTrader { get; }
         public BuyLimitOrdersTrader BuyLimitOrdersTrader { get; }
         public PositionsManager PositionsManager { get; }
-        public SpikeManager SpikeManager { get; }
+        public OnTickCaptureSpike SpikeManager { get; }
         public StopLossManager StopLossManager { get; }
         public FixedTrailingStop FixedTrailingStop { get; }
         public StateManager StateManager { get; }
-        private Reporter Reporter { get; set; }
+        private ReportManager Reporter { get; set; }
         private List<IRule> OnTickRules = new List<IRule>();
         private List<IPositionRule> OnPositionOpenedRules = new List<IPositionRule>();
         private List<IPositionRule> OnPositionClosedRules = new List<IPositionRule>();
@@ -39,22 +40,19 @@ namespace Niffler.Microservices
         private RulesFactory RulesFactory = new RulesFactory();
         private List<IRule> Rules;
 
-        private List<StateManager> StateManagers;
+        private List<IConsumer> Managers;
 
         public IConnection Connection;
 
-        public ServicesManager(IConnection connection, StrategyConfig strategyConfig)
+        public ServicesManager(IConnection connection, StrategyConfiguration strategyConfig)
         {
 
             this.Connection = connection;
 
-
-            //Create default microservices
-            SpikeManager = new SpikeManager();
-            Reporter = new Reporter();
+           
 
             //For each BotConfig Initialise a micro-service for each service required and listen for updates on appropriate queues
-            foreach (BotConfig botConfig in strategyConfig.BotConfig)
+            foreach (BotConfiguration botConfig in strategyConfig.BotConfig)
             {
                 // Need to refactor StateManager to manage a State object to store persistent state info
                 // All data used for rules is passed to the ruleService when intatiated. i.e. Open time etc.
@@ -63,20 +61,31 @@ namespace Niffler.Microservices
                 //Generate Strategy ID here and pass to the State and Rules
                 botConfig.Config.Add("StategyId", GenerateStrategyId());
 
-                //Create a State Manager per bot
+                //Create a State Manager per strategy
                 StateManager = new StateManager(botConfig.Config);
-                StateManager.Start();
-                StateManagers.Add(StateManager);
+                Managers.Add(StateManager);
+
+                //Create a Spike Manager per strategy
+                SpikeManager = new OnTickCaptureSpike();
+
+                //Create a Report Manager per strategy
+                Reporter = new ReportManager();
+
+                //Create the rule services per strategy
                 Rules = RulesFactory.CreateRules(botConfig);
 
             }
+
+
+
+
 
 
             Reporter = botState.GetReporter();
             SellLimitOrdersTrader = sellLimitOrdersTrader;
             BuyLimitOrdersTrader = buyLimitOrdersTrader;
             PositionsManager = new PositionsManager(StateManager);
-            SpikeManager = new SpikeManager(StateManager);
+            SpikeManager = new OnTickCaptureSpike(StateManager);
             StopLossManager = stopLossManager;
             FixedTrailingStop = fixedTrailingStop;
         }

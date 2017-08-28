@@ -14,14 +14,14 @@ namespace Niffler.App
 {
     class Program
     {
-        public static StrategyConfig LoadJson()
+        public static StrategyConfiguration LoadJson()
         {
-            StrategyConfig strategyConfig;
+            StrategyConfiguration strategyConfig;
 
             using (StreamReader r = new StreamReader("userParams.json"))
             {
                 string json = r.ReadToEnd();
-                strategyConfig = JsonConvert.DeserializeObject<StrategyConfig>(json);
+                strategyConfig = JsonConvert.DeserializeObject<StrategyConfiguration>(json);
             }
             return strategyConfig;
         }
@@ -31,7 +31,7 @@ namespace Niffler.App
 
 
             //Fetch StrategyConfig requried
-            StrategyConfig StrategyConfig = LoadJson();
+            StrategyConfiguration StrategyConfig = LoadJson();
 
             //Set up Micro-services Required
             ServicesManager ServicesManager = new ServicesManager(adapter.GetConnection(), StrategyConfig);

@@ -8,6 +8,7 @@ using RabbitMQ.Client.Events;
 using Niffler.Messaging.AMQP;
 using Niffler.Microservices;
 using Niffler.Messaging.Protobuf;
+using Niffler.Strategy;
 
 #endregion
 
@@ -35,7 +36,7 @@ namespace Niffler.Messaging.RabbitMQ {
         {
             this.BotConfig = botConfig;
             Channel = Adapter.GetConnection().CreateModel();
-            BotConfig.TryGetValue("Market", out ExchangeName);
+            BotConfig.TryGetValue(BotConfiguration.MARKET, out ExchangeName);
             this.ExchangeType = Exchange.GetExchangeType(RabbitMQ.ExchangeType.TOPIC);
             this.PrefetchCount = prefetchCount;
             this.AutoAck = autoAck;
