@@ -41,51 +41,36 @@ namespace Niffler.Microservices
         private List<IRule> Rules;
 
         private List<IConsumer> Managers;
-
         public IConnection Connection;
 
-        public ServicesManager(IConnection connection, StrategyConfiguration strategyConfig)
+        public ServicesManager(IConnection connection, AppConfiguration appConfig)
         {
 
             this.Connection = connection;
 
-           
-
             //For each BotConfig Initialise a micro-service for each service required and listen for updates on appropriate queues
-            foreach (BotConfiguration botConfig in strategyConfig.BotConfig)
+            foreach (StrategyConfiguration strategyConfig in appConfig.StrategyConfigList)
             {
                 // Need to refactor StateManager to manage a State object to store persistent state info
                 // All data used for rules is passed to the ruleService when intatiated. i.e. Open time etc.
                 // Once timing rules have fired the state will need to notified i.e. IsTrading = true.
 
                 //Generate Strategy ID here and pass to the State and Rules
-                botConfig.Config.Add("StategyId", GenerateStrategyId());
+                strategyConfig.Config.Add("StategyId", GenerateStrategyId());
 
                 //Create a State Manager per strategy
-                StateManager = new StateManager(botConfig.Config);
-                Managers.Add(StateManager);
-
-                //Create a Spike Manager per strategy
-                SpikeManager = new OnTickCaptureSpike();
+                Managers.Add(new StateManager(strategyConfig));
 
                 //Create a Report Manager per strategy
-                Reporter = new ReportManager();
+                Managers.Add(new ReportManager(strategyConfig));
 
                 //Create the rule services per strategy
-                Rules = RulesFactory.CreateRules(botConfig);
-
+                Rules = RulesFactory.CreateRules(strategyConfig);
             }
 
-
-
-
-
-
-            Reporter = botState.GetReporter();
             SellLimitOrdersTrader = sellLimitOrdersTrader;
             BuyLimitOrdersTrader = buyLimitOrdersTrader;
             PositionsManager = new PositionsManager(StateManager);
-            SpikeManager = new OnTickCaptureSpike(StateManager);
             StopLossManager = stopLossManager;
             FixedTrailingStop = fixedTrailingStop;
         }

@@ -1,34 +1,53 @@
 ﻿using System;
 using cAlgo.API;
-using System.Collections;
+using Niffler.Messaging.Protobuf;
 
 namespace Niffler.Common
 {
     class Utils
     {
-
-        private static DateTime GetDateTimeToUse(Robot bot)
+        private static DateTime GetDateTimeToUse(Tick tick)
         {
-            DateTime datetime = System.DateTime.Now;
-            if (bot.IsBacktesting)
-                datetime = bot.Server.Time;
+            DateTime datetime;
+            if (tick.Isbacktesting)
+            {
+                if (!DateTime.TryParse(tick.Timestamp, out datetime))
+                    datetime = new DateTime(TimeSpan.Zero.Milliseconds); //Set DateTime to default 00:00:00
+            }
+            else
+                datetime = System.DateTime.Now;
 
             return datetime;
         }
 
-        public static string GetTimeStamp(Robot bot, bool unformatted = false)
+        public static string GetTimeStamp(bool formatWithSeperators = false)
         {
-            DateTime datetime = GetDateTimeToUse(bot);
+            DateTime datetime = System.DateTime.Now;
 
-            if (unformatted)
-                return datetime.Year.ToString() + datetime.Month + datetime.Day + datetime.Hour + datetime.Minute + datetime.Second;
-            return datetime.Day + "-" + datetime.Month + "-" + datetime.Year.ToString() + " " + datetime.Hour + ":" + datetime.Minute + ":" + datetime.Second;
+            if (formatWithSeperators)
+                return FormatDateTimeWithSeparators(datetime);
+
+            return FormatDateTime(datetime);
         }
 
-        public static string GetDayOfWeek(Robot bot)
+        public static string GetTimeStamp(Tick tick, bool formatWithSeperators = false)
         {
-            DateTime datetime = GetDateTimeToUse(bot);
-            return datetime.DayOfWeek.ToString();
+            DateTime datetime = GetDateTimeToUse(tick);
+
+            if (formatWithSeperators)
+                return FormatDateTimeWithSeparators(datetime);
+
+            return FormatDateTime(datetime);
+        }
+
+        public static string FormatDateTime(DateTime datetime)
+        {
+            return datetime.Year.ToString() + datetime.Month + datetime.Day + datetime.Hour + datetime.Minute + datetime.Second;
+        }
+
+        public static string FormatDateTimeWithSeparators(DateTime datetime)
+        {
+            return datetime.Day + "-" + datetime.Month + "-" + datetime.Year.ToString() + " " + datetime.Hour + ":" + datetime.Minute + ":" + datetime.Second;
         }
 
         public static string GetUniqueID()

@@ -30,7 +30,7 @@ namespace Niffler.Rules.TradingPeriods
         public override bool Init()
         {
             //At a minumum need SymbolCode to determine TimeZone & OpenTime
-            if(BotConfig.TryGetValue(BotConfiguration.MARKET, out SymbolCode)) return false;
+            if(BotConfig.TryGetValue(StrategyConfiguration.MARKET, out SymbolCode)) return false;
             if (SymbolCode == "" || SymbolCode == null) return false;
             if (RuleConfig.Params.TryGetValue(RuleConfiguration.OPENTIME, out object openTime)) return false;
             if (TimeSpan.TryParse(openTime.ToString(), out OpenTime)) return false;

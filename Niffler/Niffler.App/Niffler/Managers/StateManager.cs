@@ -1,13 +1,8 @@
 ﻿#region Includes
-
-using System;
 using System.Collections.Generic;
 using Niffler.Messaging.RabbitMQ;
 using Niffler.Messaging.Protobuf;
-using RabbitMQ.Client;
-using Niffler.Common;
-using Niffler.Common.Market;
-
+using Niffler.Strategy;
 #endregion
 
 namespace Niffler.Managers {
@@ -15,16 +10,17 @@ namespace Niffler.Managers {
 
         private string StrategyId;
         private Dictionary<string, object> State;
+        private StrategyConfiguration StrategyConfig;
 
-
-        public StateManager(IDictionary<string, string> config) : base(config)
+        public StateManager(StrategyConfiguration strategyConfig) : base(strategyConfig.Config)
         {
-            config.TryGetValue("StrategyId", out string StrategyId);
+            StrategyConfig = strategyConfig;
+            StrategyConfig.Config.TryGetValue("StrategyId", out string StrategyId);
         }
 
         public override object Clone()
         {
-            return new StateManager(BotConfig);
+            return new StateManager(StrategyConfig);
         }
 
         public override bool Init()
@@ -65,7 +61,8 @@ namespace Niffler.Managers {
             
         protected override List<RoutingKey> GetListeningRoutingKeys()
         {
-            return RoutingKey.Create(Source.WILDCARD, Messaging.RabbitMQ.Action.UPDATESTATE, Event.WILDCARD).ToList(); ;
+            //Listen for any messages that update State
+            return RoutingKey.Create(Messaging.RabbitMQ.Action.UPDATESTATE).ToList();
         }
     }
 }

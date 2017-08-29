@@ -27,7 +27,7 @@ namespace Niffler.Rules.TradingPeriods
         public override bool Init()
         {
             //At a minumum need SymbolCode & CloseTime or CloseMinsFromOpen
-            if(BotConfig.TryGetValue(BotConfiguration.MARKET, out SymbolCode)) return false;
+            if(BotConfig.TryGetValue(StrategyConfiguration.MARKET, out SymbolCode)) return false;
             if (SymbolCode == "" || SymbolCode == null) return false;
 
             bool initSuccess = false;

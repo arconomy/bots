@@ -1,4 +1,5 @@
-﻿using Niffler.Strategy;
+﻿using Niffler.Rules.TradingPeriods;
+using Niffler.Strategy;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +13,9 @@ namespace Niffler.Rules
         private List<string> RuleNames;
 
         public RulesFactory()
-        { 
+        {
+            //Available Rules
+            RuleNames.Add(nameof(OnTickCaptureSpike));
             RuleNames.Add(nameof(OnOpenForTrading));
             RuleNames.Add(nameof(CloseTimeCancelPendingOrders));
             RuleNames.Add(nameof(CloseTimeNoPositionsOpenedReset));
@@ -49,7 +52,7 @@ namespace Niffler.Rules
         }
 
         //Create and initialise the Rules
-        public List<IRule> CreateRules(BotConfiguration botConfig)
+        public List<IRule> CreateRules(StrategyConfiguration botConfig)
         {
             List<IRule> createdRules = new List<IRule>();
 
@@ -67,6 +70,7 @@ namespace Niffler.Rules
                     Console.Write("FAILED to create Rule: " + ruleConfig.Name);
                 }
             }
+
             return createdRules;
         }
 

@@ -20,19 +20,32 @@ message Niffle {
         TICK = 0;
         POSITION = 1;
         POSITIONS = 2;
-        SERVICE = 3;
-        STATE = 4;
-        TRADE = 5;
-        TRADES = 6;
+        ORDER = 3;
+        ORDERS = 4;
+        SERVICE = 5;
+        STATE = 6;
+        TRADE = 7;
+        TRADES = 8;
+        ERROR = 9;
     }
-    Type type = 1;
-    Tick tick = 2;
-    Position position = 3;
-    Positions positions = 4;
-    Service service = 5;
-    State state = 6;
-    Trade trade = 7;
-    Trades trades = 8;
+    string strategyId = 1;
+    int64 timestamp = 2;
+    Type type = 3;
+    Tick tick = 4;
+    Position position = 5;
+    Positions positions = 6;
+    Order order = 7;
+    Orders orders = 8;
+    Service service = 9;
+    State state = 10;
+    Trade trade = 11;
+    Trades trades = 12;
+    Error error = 13;
+}
+
+message Error {
+  string code = 1;
+  string message = 2;
 }
 
 message Tick {
@@ -40,11 +53,12 @@ message Tick {
   double ask = 2;
   double bid = 3;
   int32 digits = 4;
-  double pipsize = 5;
-  double ticksize = 6;
+  double pipSize = 5;
+  double tickSize = 6;
   double spread = 7;
-  string timestamp = 8;
-  Positions positions = 9;
+  string timeStamp = 8;
+  bool isBackTesting = 9;
+  Positions positions = 10;
 }
     
 message Position {
@@ -58,25 +72,67 @@ message Position {
         NONE = 0;
         OPENED = 1;
         CLOSED = 2;
+        MODIFIED = 3;
     }
 
     string label = 1;
     int32 id = 2;
-    string symbolcode = 3;
-    TradeType tradetype = 4;
+    string symbolCode = 3;
+    TradeType tradeType = 4;
     double entryPrice = 5;
-    double stoplossprice = 6;
-    double takeprofitprice = 7;
-    string entrytime = 8;
-    double grossprofit = 9;
-    StateChange statechange = 10;
-    
+    double stopLossPrice = 6;
+    double takeProfitPrice = 7;
+    double pips = 8;
+    string entryTime = 9;
+    string closeTime = 10;
+    double closePrice = 11;
+    double grossProfit = 12;
+    StateChange stateChange = 13;
 }
 
 message Positions {
-    int32 count = 1;
+    int32 Count = 1;
     repeated Position position = 2;
 }
+
+message Order {
+
+    enum OrderType {
+        BUYLIMIT = 0;
+        BUYSTOP = 1;
+        BUYSTOPLIMIT = 2;
+        SELLLIMIT = 3;
+        SELLSTOP = 4;
+        SELLSTOPLIMIT = 5; 
+    }
+
+    enum StateChange {
+        NONE = 0;
+        PLACED = 1;
+        CANCELLED = 2;
+        MODIFIED = 3;
+    }
+
+    string label = 1;
+    int32 id = 2;
+    string symbolCode = 3;
+    OrderType orderType = 4;
+    int64 volume = 5;
+    double targetEntryPrice = 6;
+    double stopLossPrice = 7;
+    double stopLossPips = 8;
+    double takeProfitPrice = 9;
+    double takeProfitPips = 10;
+    string expiryTime = 11;
+    string entryTime = 12;
+    StateChange stateChange = 13;
+}
+
+message Orders {
+    int32 Count = 1;
+    repeated Order order = 2;
+}
+
 
 message State  {
     
@@ -86,12 +142,11 @@ message State  {
     DOUBLE = 2;
     }
 
-    string strategyid = 1;
-    string key = 2;
-    ValueType valuetype = 3;
-    string stringvalue = 4;
-    bool boolvalue = 5;
-    double doublevalue = 6;
+    string key = 1;
+    ValueType valuetype = 2;
+    string stringValue = 3;
+    bool boolValue = 4;
+    double doubleValue = 5;
 }
 
 message Service  {
@@ -102,6 +157,7 @@ message Service  {
         SCALEDOWN = 3;
         SHUTDOWN = 4;
     }
+
     Command command = 1;
     bool success = 2;
 }
@@ -109,22 +165,23 @@ message Service  {
 message Trade   {
 
     enum TradeType   {
-    BUY = 0;
-    SELL = 1;
-    BUYLIMITORDER = 3;
-    SELLLIMITORDER = 4;
-    BUYSTOPORDER = 5;
-    SELLSTOPORDER = 6;
-    MODIFYPOSITION = 7;
-    MODIFYORDER = 8;
+        BUY = 0;
+        SELL = 1;
+        BUYLIMITORDER = 3;
+        SELLLIMITORDER = 4;
+        BUYSTOPORDER = 5;
+        SELLSTOPORDER = 6;
+        MODIFYPOSITION = 7;
+        MODIFYORDER = 8;
     }
-    TradeType tradetype = 1;
+    TradeType tradeType = 1;
     string symbol = 2;
     int64 volume = 3;
-    double entryprice = 4;
+    double entryPrice = 4;
     string label = 5;
     double stopLossPips = 6;
     double takeProfitPips = 7;
+    string expiryTime = 8;
 }
 
 message Trades  {

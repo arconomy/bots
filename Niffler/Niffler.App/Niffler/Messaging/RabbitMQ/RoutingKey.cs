@@ -20,8 +20,13 @@ namespace Niffler.Messaging.RabbitMQ
         ONTICK = 1,             //Rules interested in Ticks listen for this
         ONPOSITIONOPENED = 2,   //Rules interested in a Position Opened event listen for this
         ONPOSITIONCLOSED = 3,   //Rules interested in a Position Closed event listen for this
-        ONSHUTDOWN = 4,         //All Rules listen for this event
-        ONRESET = 5             //All Rules listen for this event
+        ONPOSITIONMODIFIED = 4, //Rules interested in a Position Modified event listen for this
+        ONORDERPLACED = 5,      //Rules interested in a Order Placed event listen for this
+        ONORDERCANCELLED = 6,   //Rules interested in a Order Cancelled event listen for this
+        ONORDERMODIFIED = 7,    //Rules interested in a Order Modified event listen for this
+        ONSHUTDOWN = 8,         //All Rules listen for this event
+        ONRESET = 9,            //All Rules listen for this event
+        ONERROR = 10
     }
 
     //Allows consumers to listen for specific Source/Target Entity (rulename) for notifications
@@ -52,14 +57,40 @@ namespace Niffler.Messaging.RabbitMQ
             { RabbitMQ.Event.ONTICK,"OnTick" },
             { RabbitMQ.Event.ONPOSITIONOPENED,"OnPositionOpened" },
             { RabbitMQ.Event.ONPOSITIONCLOSED,"OnPositionClosed" },
+            { RabbitMQ.Event.ONPOSITIONCLOSED,"OnPositionModified" },
+            { RabbitMQ.Event.ONORDERPLACED,"OnOrderPlaced" },
+            { RabbitMQ.Event.ONORDERCANCELLED,"OnOrderCancelled" },
+            { RabbitMQ.Event.ONORDERMODIFIED,"OnOrderModified" },
             { RabbitMQ.Event.ONRESET,"OnReset" },
-            { RabbitMQ.Event.ONSHUTDOWN,"OnShutDown" }
+            { RabbitMQ.Event.ONSHUTDOWN,"OnShutDown" },
+            { RabbitMQ.Event.ONERROR,"OnError" }
+
 
         };
 
         public string GetSource()
         {
             return Source;
+        }
+
+        public string GetAction()
+        {
+            return Action;
+        }
+
+        public string GetEvent()
+        {
+            return Event;
+        }
+
+        public Event GetEventAsEnum()
+        {
+            return EventLookup.FirstOrDefault(_event => _event.Value == Event).Key;
+        }
+
+        public Action GetActionAsEnum()
+        {
+            return ActionLookup.FirstOrDefault(action => action.Value == Event).Key;
         }
 
         public RoutingKey (string routingKey)
@@ -110,6 +141,21 @@ namespace Niffler.Messaging.RabbitMQ
         public string GetRoutingKey()
         {
             return Source + "." + Action + "." + Event;
+        }
+
+        public static RoutingKey Create(Source source)
+        {
+            return new RoutingKey(source, RabbitMQ.Action.WILDCARD, RabbitMQ.Event.WILDCARD);
+        }
+
+        public static RoutingKey Create(Action actionEnum)
+        {
+            return new RoutingKey(RabbitMQ.Source.WILDCARD, actionEnum, RabbitMQ.Event.WILDCARD);
+        }
+
+        public static RoutingKey Create(Event eventEnum)
+        {
+            return new RoutingKey(RabbitMQ.Source.WILDCARD, RabbitMQ.Action.WILDCARD, eventEnum);
         }
 
         public static RoutingKey Create(Source source = RabbitMQ.Source.WILDCARD,Action actionEnum = RabbitMQ.Action.WILDCARD, Event eventEnum = RabbitMQ.Event.WILDCARD)

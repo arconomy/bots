@@ -36,7 +36,7 @@ namespace Niffler.Messaging.RabbitMQ {
         {
             this.BotConfig = botConfig;
             Channel = Adapter.GetConnection().CreateModel();
-            BotConfig.TryGetValue(BotConfiguration.MARKET, out ExchangeName);
+            BotConfig.TryGetValue(StrategyConfiguration.MARKET, out ExchangeName);
             this.ExchangeType = Exchange.GetExchangeType(RabbitMQ.ExchangeType.TOPIC);
             this.PrefetchCount = prefetchCount;
             this.AutoAck = autoAck;

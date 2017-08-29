@@ -9,12 +9,12 @@ using System.Threading.Tasks;
 namespace Niffler.Strategy
 {
 
-    public class StrategyConfiguration
+    public class AppConfiguration
     {
-        public List<BotConfiguration> BotConfig = new List<BotConfiguration>();
+        public List<StrategyConfiguration> StrategyConfigList = new List<StrategyConfiguration>();
     }
 
-    public class BotConfiguration
+    public class StrategyConfiguration
     {
         public static readonly string MARKET = "Market";
         public static readonly string STRATEGYID = "StrategyId";
@@ -32,14 +32,6 @@ namespace Niffler.Strategy
         public static readonly string CLOSEAFTEROPEN = "CloseAfterOpen";
         public static readonly string MINSPIKEPIPS = "MinSpikePips";
         
-
-
-
-
-
-
-
-
         public string Name { get; set; }
         public IDictionary<string, object> Params = new Dictionary<string, object>();
 

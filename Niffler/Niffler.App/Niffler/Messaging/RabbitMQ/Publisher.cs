@@ -1,4 +1,5 @@
 ﻿using Google.Protobuf;
+using Niffler.Common;
 using Niffler.Messaging.Protobuf;
 using RabbitMQ.Client;
 using System;
@@ -22,12 +23,13 @@ namespace Niffler.Messaging.RabbitMQ
             Channel.ExchangeDeclare(exchange: ExchangeName, type: Exchange.GetExchangeType(ExchangeType.TOPIC));
         }
 
-        public void UpdateState(State state, string entityName)
+        public void UpdateState(State state, string entityName, string strategyId)
         {
             RoutingKey routingKey = RoutingKey.Create(entityName, Action.UPDATESTATE, Event.WILDCARD);
 
             Niffle niffle = new Niffle
             {
+                Strategyid = strategyId,
                 Type = Niffle.Types.Type.State,
                 State = state
             };
@@ -36,12 +38,14 @@ namespace Niffler.Messaging.RabbitMQ
             Channel.BasicPublish(exchange: ExchangeName, routingKey: routingKey.GetRoutingKey(), basicProperties: null, body: body.ToByteArray());
         }
 
-        public void ServiceNotify(Service service, string entityName)
+        public void ServiceNotify(Service service, string entityName, string strategyId)
         {
             RoutingKey routingKey = RoutingKey.Create(entityName, Action.NOTIFY, Event.WILDCARD);
 
             Niffle niffle = new Niffle
             {
+                StrategyId = strategyId,
+                Timestamp = System.DateTime.Now.ToBinary(),
                 Type = Niffle.Types.Type.Service,
                 Service = service
             };

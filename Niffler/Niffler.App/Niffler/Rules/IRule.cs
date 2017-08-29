@@ -2,6 +2,7 @@
 using Niffler.Messaging.RabbitMQ;
 using System.Collections.Generic;
 using Niffler.Messaging.Protobuf;
+using Niffler.Common;
 
 namespace Niffler.Rules
 {
@@ -15,7 +16,7 @@ namespace Niffler.Rules
 
         public IRule(IDictionary<string, string> botConfig, RuleConfiguration ruleConfig) : base(botConfig)
         {
-            BotConfig.TryGetValue(BotConfiguration.STRATEGYID, out StrategyId);
+            BotConfig.TryGetValue(StrategyConfiguration.STRATEGYID, out StrategyId);
             this.RuleConfig = ruleConfig;
             Publisher = new Messaging.RabbitMQ.Publisher(Connection,ExchangeName);
 
@@ -24,7 +25,10 @@ namespace Niffler.Rules
 
         public override void MessageReceived(MessageReceivedEventArgs e)
         {
-            switch(e.Message.Type)
+            //Only interested in messages for this Strategy
+            if (e.Message.StrategyId != StrategyId) return;
+
+            switch (e.Message.Type)
             {
                 case Niffle.Types.Type.Service:
                     ManageRule(e.Message, new RoutingKey(e.EventArgs.RoutingKey));
@@ -41,13 +45,15 @@ namespace Niffler.Rules
         //Only publishing Success or Fail - look at more granualar reporting action taken
         protected void PublishResult(bool LogicExecutionSuccess)
         {
+            string timestamp = Utils.FormatDateTimeWithSeparators(System.DateTime.Now);
+
             Service results = new Service
             {
                 Command = Service.Types.Command.Notify,
                 Success = LogicExecutionSuccess
             };
 
-            Publisher.ServiceNotify(results, GetServiceName());
+            Publisher.ServiceNotify(results, GetServiceName(), StrategyId);
         }
 
         //Publish State update message
@@ -55,12 +61,11 @@ namespace Niffler.Rules
         {
             State stateUpdate = new State()
             {
-                Strategyid = StrategyId,
                 Valuetype = State.Types.ValueType.Bool,
-                Boolvalue = value
+                BoolValue = value
             };
 
-            Publisher.UpdateState(stateUpdate, GetServiceName());
+            Publisher.UpdateState(stateUpdate, GetServiceName(), StrategyId);
         }
 
         //Publish State update message
@@ -68,12 +73,11 @@ namespace Niffler.Rules
         {
             State stateUpdate = new State()
             {
-                Strategyid = StrategyId,
                 Valuetype = State.Types.ValueType.String,
-                Stringvalue = value
+                StringValue = value
             };
 
-            Publisher.UpdateState(stateUpdate, GetServiceName());
+            Publisher.UpdateState(stateUpdate, GetServiceName(), StrategyId);
         }
 
         //Publish State update message
@@ -81,12 +85,11 @@ namespace Niffler.Rules
         {
             State stateUpdate = new State()
             {
-                Strategyid = StrategyId,
                 Valuetype = State.Types.ValueType.Double,
-                Doublevalue = value
+                DoubleValue = value
             };
 
-            Publisher.UpdateState(stateUpdate, GetServiceName());
+            Publisher.UpdateState(stateUpdate, GetServiceName(), StrategyId);
         }
 
 

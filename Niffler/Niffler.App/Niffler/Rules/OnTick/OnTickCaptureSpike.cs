@@ -32,7 +32,7 @@ namespace Niffler.Rules
         //Spike Manager captures the Tick data for the duration of the strategy and tries to identify a profile for the trading data
         public OnTickCaptureSpike(IDictionary<string, string> botConfig, RuleConfiguration ruleConfig) : base(botConfig, ruleConfig)
         {
-            botConfig.TryGetValue(BotConfiguration.STRATEGYID, out string StrategyId);
+            botConfig.TryGetValue(StrategyConfiguration.STRATEGYID, out string StrategyId);
         }
 
         public override object Clone()
