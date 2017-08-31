@@ -1,17 +1,12 @@
 ﻿#region Includesusing Niffler.AMQPusing Niffler.Messaging.RabbitMQ;
 using Niffler.Messaging.RabbitMQ;
-using System;
-using System.Collections.Generic;
-
 #endregion
 
 namespace Niffler.Microservices {
     internal interface IService {
         bool Init();
-        void Start();
-        void Stop();
         void Shutdown();
         //Using inheritance not Event handlers
-        void MessageReceived(MessageReceivedEventArgs e);
+        void OnMessageReceived(object sender, MessageReceivedEventArgs e);
     }
 }

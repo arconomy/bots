@@ -1,7 +1,6 @@
 ﻿using System;
 using cAlgo.API;
 using cAlgo.API.Indicators;
-using Niffler.Common.BackTest;
 
 namespace Niffler.Common.Trade
 {

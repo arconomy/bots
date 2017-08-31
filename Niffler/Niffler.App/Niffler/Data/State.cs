@@ -1,6 +1,6 @@
-﻿namespace Niffler.Common
+﻿namespace Niffler.Data
 {
-    class StateData
+    class State
     {
         //Static strings used for state update messages
         public static readonly string ISOPENTIME = "IsOpenTime";

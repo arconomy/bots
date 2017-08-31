@@ -6,7 +6,6 @@ using Niffler.Common.Helpers;
 using System.Collections;
 using Niffler.Messaging.Protobuf;
 using Niffler.Common;
-using Niffler.Data;
 
 namespace Niffler.Rules.TradingPeriods
 {
@@ -26,13 +25,13 @@ namespace Niffler.Rules.TradingPeriods
         private List<DateTime> OpenDates = new List<DateTime>();
         DateTime Now;
 
-        public OnOpenForTrading(StrategyConfiguration strategyConfig, RuleConfiguration ruleConfig) : base(strategyConfig, ruleConfig) { }
+        public OnOpenForTrading(IDictionary<string, string> botConfig, RuleConfiguration ruleConfig) : base(botConfig, ruleConfig) { }
 
         public override bool Init()
         {
             //At a minumum need SymbolCode to determine TimeZone & OpenTime
-            if(StrategyConfig.Config.TryGetValue(StrategyConfiguration.EXCHANGE, out SymbolCode)) return false;
-            if (String.IsNullOrEmpty(SymbolCode)) return false;
+            if(StrategyConfig.TryGetValue(StrategyConfiguration.MARKET, out SymbolCode)) return false;
+            if (SymbolCode == "" || SymbolCode == null) return false;
             if (RuleConfig.Params.TryGetValue(RuleConfiguration.OPENTIME, out object openTime)) return false;
             if (TimeSpan.TryParse(openTime.ToString(), out OpenTime)) return false;
 
@@ -97,12 +96,12 @@ namespace Niffler.Rules.TradingPeriods
         {
             if (IsTickMessageEmpty(message)) return false;
 
-            if(DateTime.TryParse(message.Tick.TimeStamp, out Now))
+            if(DateTime.TryParse(message.Tick.Timestamp, out Now))
             {
                 if (IsOpenDate() && IsOpenWeekday() && IsOpenTime())
                 {
-                    PublishStateUpdate(Data.State.ISOPENTIME, true);
-                    PublishStateUpdate(Data.State.OPENTIME, message.Tick.TimeStamp);
+                    PublishStateUpdate(StrategyID, StateData.ISOPENTIME, true);
+                    PublishStateUpdate(StateData.OPENTIME, message.Tick.Timestamp);
                     IsActive = false;
                     return true;
                 }
@@ -165,12 +164,9 @@ namespace Niffler.Rules.TradingPeriods
             return RoutingKey.Create(Source.WILDCARD, Messaging.RabbitMQ.Action.WILDCARD, Event.ONTICK).ToList();
         }
 
-        public override void Reset()
+        public override object Clone(IDictionary<string, string> strategyConfig, RuleConfiguration ruleConfig)
         {
-            //Better to have the Date Store just listen for resets and archive data for the whole StrategyId
-            PublishStateUpdate(Data.State.ISOPENTIME, false);
-            PublishStateUpdate(Data.State.OPENTIME, null);
-            IsActive = true;
+            return new OnOpenForTrading(strategyConfig, ruleConfig);
         }
     }
 }

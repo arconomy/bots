@@ -1,4 +1,4 @@
-﻿namespace Niffler
+﻿namespace Niffler.Data
 {
     class Constants
     {

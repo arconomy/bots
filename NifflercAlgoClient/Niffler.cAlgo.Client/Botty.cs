@@ -89,10 +89,7 @@ namespace NifflerClient
         private void CreateConsumers()
         {
             // Define and run consumers to listen for trade msgs
-            Task OpenPositionsConsumer = Task.Run(() => ConsumeMessages("OpenPositions.*"));
-            Task PlaceBuyLimitTradesConsumer = Task.Run(() => ConsumeMessages("PlaceBuyLimitTrades.*"));
-            Task ModifyPositionsConsumer = Task.Run(() => ConsumeMessages("ModifyPositions.*"));
-            Task CloseAllPositionsConsumer = Task.Run(() => ConsumeMessages("CloseAllPositions.*"));
+            Task OpenPositionsConsumer = Task.Run(() => ConsumeMessages("TradeOperation.*"));
         }
 
 

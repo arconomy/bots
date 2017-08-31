@@ -5,8 +5,8 @@ using Niffler.Messaging.Protobuf;
 using Niffler.Strategy;
 #endregion
 
-namespace Niffler.Managers {
-    public class StateManager : IConsumer {
+namespace Niffler.Services{
+    public class StateManager : Consumer {
 
         private string StrategyId;
         private Dictionary<string, object> State;
@@ -15,7 +15,7 @@ namespace Niffler.Managers {
         public StateManager(StrategyConfiguration strategyConfig) : base(strategyConfig.Config)
         {
             StrategyConfig = strategyConfig;
-            StrategyConfig.Config.TryGetValue("StrategyId", out string StrategyId);
+            StrategyConfig.Config.TryGetValue(StrategyConfiguration.STRATEGYID, out StrategyId);
         }
 
         public override object Clone()
@@ -39,13 +39,13 @@ namespace Niffler.Managers {
             switch (e.Message.State.Valuetype)
             {
                 case Messaging.Protobuf.State.Types.ValueType.Bool:
-                    value = e.Message.State.Boolvalue;
+                    value = e.Message.State.BoolValue;
                     break;
                 case Messaging.Protobuf.State.Types.ValueType.String:
-                    value = e.Message.State.Stringvalue;
+                    value = e.Message.State.StringValue;
                     break;
                 case Messaging.Protobuf.State.Types.ValueType.Double:
-                    value = e.Message.State.Doublevalue;
+                    value = e.Message.State.DoubleValue;
                     break;
             }
 

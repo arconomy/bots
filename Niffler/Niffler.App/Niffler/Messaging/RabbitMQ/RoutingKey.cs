@@ -8,9 +8,11 @@ namespace Niffler.Messaging.RabbitMQ
     public enum Action
     {
         WILDCARD = 0,
-        NOTIFY = 1,            //ReportingManager listens for this
-        UPDATESTATE = 2,       //StateManager listens for this           
-        TRADEOPERATION = 3     //Niffler cAlgo Client listens for this
+        NOTIFY = 1,          //ReportingManager listens for this
+        UPDATESTATE = 2,     //StateManager listens for this           
+        TRADEOPERATION = 3,  //Niffler cAlgo Client listens for this
+        SHUTDOWN = 4,        //All Rules listen for this event
+        RESET = 5            //All Rules listen for this event
     }
 
     //Allows consumers to listen for generic Events
@@ -24,15 +26,14 @@ namespace Niffler.Messaging.RabbitMQ
         ONORDERPLACED = 5,      //Rules interested in a Order Placed event listen for this
         ONORDERCANCELLED = 6,   //Rules interested in a Order Cancelled event listen for this
         ONORDERMODIFIED = 7,    //Rules interested in a Order Modified event listen for this
-        ONSHUTDOWN = 8,         //All Rules listen for this event
-        ONRESET = 9,            //All Rules listen for this event
         ONERROR = 10
     }
 
     //Allows consumers to listen for specific Source/Target Entity (rulename) for notifications
     public enum Source
     {
-        WILDCARD = 0
+        WILDCARD = 0,
+        SERVICEMANAGER = 1,
     }
 
     public class RoutingKey
@@ -42,14 +43,18 @@ namespace Niffler.Messaging.RabbitMQ
         private string Event;
         private Dictionary<Source, string> EntityLookup = new Dictionary<Source, string>()
         {
-            { RabbitMQ.Source.WILDCARD,"*" }
+            { RabbitMQ.Source.WILDCARD,"*" },
+            { RabbitMQ.Source.SERVICEMANAGER,"ServiceManager" }
         };
         private Dictionary<Action, string> ActionLookup = new Dictionary<Action, string>()
         {
             { RabbitMQ.Action.WILDCARD,"*" },
             { RabbitMQ.Action.UPDATESTATE,"UpdateState" },
             { RabbitMQ.Action.NOTIFY,"Notify" },
-            { RabbitMQ.Action.TRADEOPERATION,"TradeOperation" }
+            { RabbitMQ.Action.TRADEOPERATION,"TradeOperation" },
+            { RabbitMQ.Action.RESET,"Reset" },
+            { RabbitMQ.Action.SHUTDOWN,"ShutDown" },
+
         };
         private Dictionary<Event, string> EventLookup = new Dictionary<Event, string>()
         {
@@ -61,8 +66,6 @@ namespace Niffler.Messaging.RabbitMQ
             { RabbitMQ.Event.ONORDERPLACED,"OnOrderPlaced" },
             { RabbitMQ.Event.ONORDERCANCELLED,"OnOrderCancelled" },
             { RabbitMQ.Event.ONORDERMODIFIED,"OnOrderModified" },
-            { RabbitMQ.Event.ONRESET,"OnReset" },
-            { RabbitMQ.Event.ONSHUTDOWN,"OnShutDown" },
             { RabbitMQ.Event.ONERROR,"OnError" }
 
 

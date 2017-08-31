@@ -55,6 +55,63 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Legacy\Business\Accounts.cs" />
+    <Compile Include="Legacy\Business\KeyLevels.cs" />
+    <Compile Include="Legacy\Business\Positions.cs" />
+    <Compile Include="Legacy\Business\TradingHours.cs" />
+    <Compile Include="Legacy\Indicators\KeyLevels\Bot.cs" />
+    <Compile Include="Legacy\Model\Account.cs" />
+    <Compile Include="Legacy\Model\Convert.cs" />
+    <Compile Include="Legacy\Model\KeyLevel.cs" />
+    <Compile Include="Legacy\Model\Position.cs" />
+    <Compile Include="Legacy\Model\TradingHour.cs" />
+    <Compile Include="Legacy\Rules\CloseTime\CloseTimeCancelPendingOrders.cs" />
+    <Compile Include="Legacy\Rules\CloseTime\CloseTimeNoPositionsOpenedReset.cs" />
+    <Compile Include="Legacy\Rules\CloseTime\CloseTimeNoPositionsRemainOpenReset.cs" />
+    <Compile Include="Legacy\Rules\CloseTime\CloseTimeSetBotState.cs" />
+    <Compile Include="Legacy\Rules\CloseTime\CloseTimeSetHardSLToLastPositionEntryWithBuffer - Copy.cs" />
+    <Compile Include="Legacy\Rules\IPositionRule.cs" />
+    <Compile Include="Legacy\Rules\IRule.cs" />
+    <Compile Include="Legacy\Rules\OnPositionClosed\OnPositionClosedCalcRetrace.cs" />
+    <Compile Include="Legacy\Rules\OnPositionClosed\OnPositionClosedInProfitCaptureProfitPositionInfo.cs" />
+    <Compile Include="Legacy\Rules\OnPositionClosed\OnPositionClosedInProfitSetBreakEvenWithBufferIfActive.cs" />
+    <Compile Include="Legacy\Rules\OnPositionClosed\OnPositionClosedLastEntryPositionStopLossTriggeredCloseAll.cs" />
+    <Compile Include="Legacy\Rules\OnPositionClosed\OnPositionClosedReportTrade.cs" />
+    <Compile Include="Legacy\Rules\OnPositionOpened\OnPositionOpenedCaptureLastPositionInfo.cs" />
+    <Compile Include="Legacy\Rules\OnTick\OnTickBreakEvenSLActiveSetLastProfitPositionEntry.cs" />
+    <Compile Include="Legacy\Rules\OnTick\OnTickCaptureSpike.cs" />
+    <Compile Include="Legacy\Rules\OnTick\OnTickChaseFixedTrailingSL.cs" />
+    <Compile Include="Legacy\Rules\OpenTime\OpenTimeCapturePrice.cs" />
+    <Compile Include="Legacy\Rules\OpenTime\OpenTimeCaptureSpike.cs" />
+    <Compile Include="Legacy\Rules\OpenTime\OpenTimePlaceLimitOrders.cs" />
+    <Compile Include="Legacy\Rules\OpenTime\OpenTimeSetBotState.cs" />
+    <Compile Include="Legacy\Rules\OpenTime\OpenTimeUseBollingerBand.cs" />
+    <Compile Include="Legacy\Rules\ReduceRiskTime\ReduceRiskTimeReduceRetraceLevels.cs" />
+    <Compile Include="Legacy\Rules\ReduceRiskTime\ReduceRiskTimeSetBotState.cs" />
+    <Compile Include="Legacy\Rules\ReduceRiskTime\ReduceRiskTimeSetHardSLToLastProfitPositionCloseWithBuffer.cs" />
+    <Compile Include="Legacy\Rules\ReduceRiskTime\ReduceRiskTimeSetTrailingStop.cs" />
+    <Compile Include="Legacy\Rules\RetraceLevel1\RetracedLevel1To2SetBreakEvenSLActive.cs" />
+    <Compile Include="Legacy\Rules\RetraceLevel1\RetracedLevel1To2SetHardSLToLastProfitPositionEntryWithBuffer.cs" />
+    <Compile Include="Legacy\Rules\RetraceLevel2\RetracedLevel2To3SetFixedTrailingStop.cs" />
+    <Compile Include="Legacy\Rules\RetraceLevel2\RetracedLevel2To3SetHardSLToLastProfitPositionEntry.cs" />
+    <Compile Include="Legacy\Rules\RetraceLevel3\RetracedLevel3PlusReduceHardSLBuffer.cs" />
+    <Compile Include="Legacy\Rules\RetraceLevel3\RetracedLevel3PlusSetHardSLToLastProfitPositionCloseWithBuffer.cs" />
+    <Compile Include="Legacy\Rules\RuleFactory.cs" />
+    <Compile Include="Legacy\Rules\TerminateTime\TerminateTimeCloseAllPositionsReset.cs" />
+    <Compile Include="Legacy\Rules\TerminateTime\TerminateTimeSetBotState.cs" />
+    <Compile Include="Legacy\Rules\TradingPeriods\EndTrading.cs" />
+    <Compile Include="Legacy\Rules\TradingPeriods\OnCloseForTrading - old.cs" />
+    <Compile Include="Legacy\Rules\TradingPeriods\OnCloseForTrading.cs" />
+    <Compile Include="Legacy\Rules\TradingPeriods\OnOpenForTrading.cs" />
+    <Compile Include="Legacy\Rules\TradingPeriods\OnReduceRiskTime.cs" />
+    <Compile Include="Legacy\Rules\TradingPeriods\OnTerminateTime.cs" />
+    <Compile Include="Legacy\Rules\TradingPeriods\StartTrading.cs" />
+    <Compile Include="Legacy\Strategy\Client\Bot.cs" />
+    <Compile Include="Legacy\Strategy\OptionsExpiry\Entry.cs" />
+    <Compile Include="Legacy\Strategy\RandomWalk\Bot.cs" />
+    <Compile Include="Legacy\Strategy\Shadow\Entry.cs" />
+    <Compile Include="Legacy\Strategy\StrategyConfig.cs" />
+    <Compile Include="Legacy\Strategy\Swordfish\Teddy.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -63,14 +120,15 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Niffler.App\Niffler\Niffler.App.csproj">
+    <ProjectReference Include="..\..\Niffler.App\Niffler\Niffler.Core.csproj">
       <Project>{652e984a-9b0e-4b42-8251-ece5677862e6}</Project>
-      <Name>Niffler.App</Name>
+      <Name>Niffler.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Niffler.Website\Niffler.Website\Niffler.Website.csproj">
       <Project>{7e179e47-b5de-45eb-bf05-6823a1e05d3d}</Project>
       <Name>Niffler.Website</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

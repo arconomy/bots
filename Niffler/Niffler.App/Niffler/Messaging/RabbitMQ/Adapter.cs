@@ -24,18 +24,18 @@ namespace Niffler.Messaging.RabbitMQ {
 
         static Adapter() { }
 
-        public void ConsumeAsync(IConsumer consumer)
+        public void ConsumeAsync(Consumer consumer)
         {
             if (!IsConnected) Connect();
 
-            var thread = new Thread(o => consumer.Start(this));
+            var thread = new Thread(o => consumer.Start());
             thread.Start();
 
             while (!thread.IsAlive)
                 Thread.Sleep(1);
         }
 
-        public void StopConsumingAsync(IConsumer consumer)
+        public void StopConsumingAsync(Consumer consumer)
         {
             consumer.Stop();
         }
@@ -73,6 +73,7 @@ namespace Niffler.Messaging.RabbitMQ {
 
             //if (!string.IsNullOrEmpty(virtualHost)) connectionFactory.VirtualHost = virtualHost;
             //_connection = connectionFactory.CreateConnection();
+            //"localhost", "nifflermq", 15672, "niffler", "niffler", 50);
 
             var factory = new ConnectionFactory() { HostName = "localhost", VirtualHost = "nifflermq", UserName = "niffler", Password = "niffler" };
             Connection = factory.CreateConnection();

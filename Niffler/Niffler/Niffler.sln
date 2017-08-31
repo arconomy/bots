@@ -14,7 +14,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Niffler.Website", "..\Niffl
 		{652E984A-9B0E-4B42-8251-ECE5677862E6} = {652E984A-9B0E-4B42-8251-ECE5677862E6}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Niffler.App", "..\Niffler.App\Niffler\Niffler.App.csproj", "{652E984A-9B0E-4B42-8251-ECE5677862E6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Niffler.Core", "..\Niffler.App\Niffler\Niffler.Core.csproj", "{652E984A-9B0E-4B42-8251-ECE5677862E6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Niffler.Console", "ClassLibrary1\Niffler.Console.csproj", "{F35325A4-9962-40B3-BF02-F534EAA5EE28}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -34,6 +36,10 @@ Global
 		{652E984A-9B0E-4B42-8251-ECE5677862E6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{652E984A-9B0E-4B42-8251-ECE5677862E6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{652E984A-9B0E-4B42-8251-ECE5677862E6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F35325A4-9962-40B3-BF02-F534EAA5EE28}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F35325A4-9962-40B3-BF02-F534EAA5EE28}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F35325A4-9962-40B3-BF02-F534EAA5EE28}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F35325A4-9962-40B3-BF02-F534EAA5EE28}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -17,6 +17,7 @@ namespace Niffler.Strategy
     public class StrategyConfiguration
     {
         public static readonly string EXCHANGE = "Exchange";
+        public static readonly string AUTOSCALEX = "AutoScaleX";
         public static readonly string STRATEGYID = "StrategyId";
         public static readonly string QUEUENAME = "QueueName";
         public string Name { get; set; }

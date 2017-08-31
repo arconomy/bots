@@ -3,52 +3,27 @@ using Niffler.Messaging.RabbitMQ;
 using System.Collections.Generic;
 using Niffler.Messaging.Protobuf;
 using Niffler.Common;
-using System;
-using Niffler.Microservices;
-using Niffler.RabbitMQ;
 
 namespace Niffler.Rules
 {
-    abstract public class IRule : IService
+    abstract public class IRule : Consumer
     {
         protected string StrategyId;
-        protected Adapter Adapter;
-        protected string ExchangeName;
-        protected StrategyConfiguration StrategyConfig;
-        protected RuleConfiguration RuleConfig;
-       
-        protected Publisher Publisher;
-        protected Consumer RuleConsumer;
-        protected Consumer AutoScaleConsumer;
-        protected ConsumerAutoScaleManager ConsumerAutoScaleManager;
-
         protected bool IsInitialised;
         protected bool IsActive = true; //Default state is active
+        protected RuleConfiguration RuleConfig;
+        protected Messaging.RabbitMQ.Publisher Publisher;
 
-        public IRule(StrategyConfiguration strategyConfig, RuleConfiguration ruleConfig)
+        public IRule(StrategyConfiguration strategyConfig, RuleConfiguration ruleConfig) : base(strategyConfig)
         {
-            this.StrategyConfig = strategyConfig;
-            this.RuleConfig = ruleConfig;
-
             StrategyConfig.Config.TryGetValue(StrategyConfiguration.STRATEGYID, out StrategyId);
-            StrategyConfig.Config.TryGetValue(StrategyConfiguration.EXCHANGE, out ExchangeName);
+            this.RuleConfig = ruleConfig;
+            Publisher = new Messaging.RabbitMQ.Publisher(Connection,ExchangeName);
+
+            IsInitialised = Init();
         }
 
-        public void Init(Adapter adapter)
-        {
-            Adapter = adapter;
-            Publisher = new Messaging.RabbitMQ.Publisher(Adapter.GetConnection(), ExchangeName);
-            RuleConsumer = new Consumer(Adapter, ExchangeName, GetListeningRoutingKeys());
-            RuleConsumer.Init();
-            RuleConsumer.MessageReceived += OnMessageReceived;
-
-            adapter.ConsumeAsync(RuleConsumer);
-
-            ConsumerAutoScaleManager = new ConsumerAutoScaleManager(RuleConsumer);
-            ConsumerAutoScaleManager.Init();
-        }
-
-        public void OnMessageReceived(Object o, MessageReceivedEventArgs e)
+        public override void MessageReceived(MessageReceivedEventArgs e)
         {
             //Only interested in messages for this Strategy
             if (e.Message.StrategyId != StrategyId) return;
@@ -67,25 +42,6 @@ namespace Niffler.Rules
             };
         }
 
-        protected void ManageRule(Niffle message, RoutingKey routingKey)
-        {
-            switch (message.Service.Command)
-            {
-                case Service.Types.Command.Notify:
-                    {
-                        OnServiceNotify(message, routingKey);
-                        break;
-                    }
-                case Service.Types.Command.Reset:
-                    {
-                        Reset();
-                        break;
-                    }
-            }
-        }
-
-       
-
         //Only publishing Success or Fail - look at more granualar reporting action taken
         protected void PublishResult(bool LogicExecutionSuccess)
         {
@@ -101,7 +57,7 @@ namespace Niffler.Rules
         }
 
         //Publish State update message
-        protected void PublishStateUpdate(string key, bool value)
+        protected void PublishStateUpdate(string StrategyId, string key, bool value)
         {
             State stateUpdate = new State()
             {
@@ -113,7 +69,7 @@ namespace Niffler.Rules
         }
 
         //Publish State update message
-        protected void PublishStateUpdate(string key, string value)
+        protected void PublishStateUpdate(string StrategyId,string key, string value)
         {
             State stateUpdate = new State()
             {
@@ -125,7 +81,7 @@ namespace Niffler.Rules
         }
 
         //Publish State update message
-        protected void PublishStateUpdate(string key, double value)
+        protected void PublishStateUpdate(string StrategyId, string key, double value)
         {
             State stateUpdate = new State()
             {
@@ -134,6 +90,29 @@ namespace Niffler.Rules
             };
 
             Publisher.UpdateState(stateUpdate, GetServiceName(), StrategyId);
+        }
+
+
+        protected void ManageRule(Niffle message, RoutingKey routingKey)
+        {
+            switch(message.Service.Command)
+            {
+                case Service.Types.Command.Notify:
+                    {
+                        OnServiceNotify(message, routingKey);
+                        break;
+                    }
+                case Service.Types.Command.Reset:
+                    {
+                        Reset();
+                        break;
+                    }
+                case Service.Types.Command.Shutdown:
+                    {
+                        Shutdown();
+                        break;
+                    }
+            }
         }
 
         protected bool IsTickMessageEmpty(Niffle message)
@@ -171,7 +150,7 @@ namespace Niffler.Rules
             return false;
         }
 
-        protected List<RoutingKey> GetListeningRoutingKeys()
+        protected override List<RoutingKey> GetListeningRoutingKeys()
         {
             //Set Rule specific routingKeys
             List<RoutingKey> routingKeys = SetListeningRoutingKeys();
@@ -185,17 +164,23 @@ namespace Niffler.Rules
             return routingKeys;
         }
 
-        public abstract bool Init();
-        public abstract void Reset();
+        public void Reset()
+        {
+            IsInitialised = Init();
+        }
+
+        public override object Clone(StrategyConfiguration strategyConfig,
+                       int timeout = 10, ushort prefetchCount = 1, bool autoAck = true,
+                                   IDictionary<string, object> queueArgs = null)
+        {
+            return Clone(strategyConfig, RuleConfig);
+        }
+
+        abstract public object Clone(StrategyConfiguration strategyConfig, RuleConfiguration ruleConfig);
         abstract protected string GetServiceName();
         abstract protected bool ExcuteRuleLogic(Niffle message);
         abstract protected List<RoutingKey> SetListeningRoutingKeys();
         abstract protected void OnServiceNotify(Niffle message, RoutingKey routingKey);
         abstract protected void OnStateUpdate(Niffle message, RoutingKey routingKey);
-
-        public void Shutdown()
-        {
-            ConsumerAutoScaleManager.Shutdown();
-        }
     }
 }

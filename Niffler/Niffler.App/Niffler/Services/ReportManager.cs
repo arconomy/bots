@@ -5,14 +5,13 @@ using Niffler.Messaging.RabbitMQ;
 using Niffler.Strategy;
 using Niffler.Common;
 
-namespace Niffler.Managers
+namespace Niffler.Services
 {
-    class ReportManager : IConsumer
+    class ReportManager : Consumer
     {
         string StrategyName;
         string StrategyId;
         string Market;
-        private StrategyConfiguration StrategyConfig;
 
         private double ProfitTotal;
         private double PipsTotal;
@@ -34,6 +33,7 @@ namespace Niffler.Managers
 
         public override object Clone()
         {
+
             return new ReportManager(StrategyConfig);
         }
 
@@ -227,7 +227,7 @@ namespace Niffler.Managers
 
         public void ReportError(string source, Messaging.Protobuf.Error error, string timestamp)
         {
-            ErrorCount++
+            ErrorCount++;
             StrategyExecutionReport.Add(timestamp + "," + source + "," + "*" + "," + "OnError" + "," + error.Message);
         }
 

@@ -37,7 +37,7 @@ namespace Niffler.Rules
 
         public override object Clone()
         {
-            return new OnTickCaptureSpike(BotConfig,RuleConfig);
+            return new OnTickCaptureSpike(StrategyConfig,RuleConfig);
         }
 
         public override bool Init()

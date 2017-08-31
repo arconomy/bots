@@ -10,6 +10,7 @@ namespace Niffler.Messaging.RabbitMQ
 
     public class Exchange
     {
+        public static readonly string AUTOSCALEX = "AutoScaleX";
         public static string GetExchangeType(ExchangeType exchangeType)
         {
             switch (exchangeType)

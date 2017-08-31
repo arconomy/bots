@@ -1,14 +1,9 @@
-﻿using Niffler.Common;
-using Niffler.Common.Market;
-using Niffler.Common.Trade;
-using Niffler.Messaging.RabbitMQ;
-using Niffler.Rules;
-using RabbitMQ.Client;
+﻿
 using Newtonsoft.Json;
 using System.IO;
-using System.Collections.Generic;
 using Niffler.Strategy;
-using Niffler.Microservices;
+using Niffler.Services;
+using Niffler.Messaging.RabbitMQ;
 
 namespace Niffler.App
 {
@@ -28,13 +23,11 @@ namespace Niffler.App
 
         public static void Main()
         {
-
-
             //Fetch StrategyConfig requried
             AppConfiguration StrategyConfig = LoadJson();
 
             //Set up Micro-services Required
-            ServicesManager ServicesManager = new ServicesManager(adapter.GetConnection(), StrategyConfig);
+            ServicesManager ServicesManager = new ServicesManager(StrategyConfig);
         }
     }
 
@@ -42,10 +35,7 @@ namespace Niffler.App
 }
 
 
-////Set up Messaging..
-//var adapter = Adapter.Instance;
-//    adapter.Init("localhost", "nifflermq", 15672, "niffler", "niffler", 50);
-//    adapter.Connect();
+
 
 //    var lifeCycleEventsConsumer = ConsumerFactory.CreateConsumer((IConnection) adapter.GetConnection(), "FTSE100X", "topic", "LifeCyleEventsQ",new string[]{"OnStart.*","OnStop.*"}, 10);
 //    adapter.ConsumeAsync(lifeCycleEventsConsumer);

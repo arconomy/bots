@@ -75,21 +75,22 @@ namespace Niffler.Messaging.Protobuf {
             "Zmxlci5NZXNzYWdpbmcuUHJvdG9idWYuU3RhdGUuVmFsdWVUeXBlEhMKC3N0",
             "cmluZ1ZhbHVlGAMgASgJEhEKCWJvb2xWYWx1ZRgEIAEoCBITCgtkb3VibGVW",
             "YWx1ZRgFIAEoASItCglWYWx1ZVR5cGUSCgoGU1RSSU5HEAASCAoEQk9PTBAB",
-            "EgoKBkRPVUJMRRACIqQBCgdTZXJ2aWNlEjwKB2NvbW1hbmQYASABKA4yKy5O",
+            "EgoKBkRPVUJMRRACIrcBCgdTZXJ2aWNlEjwKB2NvbW1hbmQYASABKA4yKy5O",
             "aWZmbGVyLk1lc3NhZ2luZy5Qcm90b2J1Zi5TZXJ2aWNlLkNvbW1hbmQSDwoH",
-            "c3VjY2VzcxgCIAEoCCJKCgdDb21tYW5kEgkKBVJFU0VUEAASCgoGTk9USUZZ",
-            "EAESCwoHU0NBTEVVUBACEg0KCVNDQUxFRE9XThADEgwKCFNIVVRET1dOEAQi",
-            "3gIKBVRyYWRlEj4KCXRyYWRlVHlwZRgBIAEoDjIrLk5pZmZsZXIuTWVzc2Fn",
-            "aW5nLlByb3RvYnVmLlRyYWRlLlRyYWRlVHlwZRIOCgZzeW1ib2wYAiABKAkS",
-            "DgoGdm9sdW1lGAMgASgDEhIKCmVudHJ5UHJpY2UYBCABKAESDQoFbGFiZWwY",
-            "BSABKAkSFAoMc3RvcExvc3NQaXBzGAYgASgBEhYKDnRha2VQcm9maXRQaXBz",
-            "GAcgASgBEhIKCmV4cGlyeVRpbWUYCCABKAkijwEKCVRyYWRlVHlwZRIHCgNC",
-            "VVkQABIICgRTRUxMEAESEQoNQlVZTElNSVRPUkRFUhADEhIKDlNFTExMSU1J",
-            "VE9SREVSEAQSEAoMQlVZU1RPUE9SREVSEAUSEQoNU0VMTFNUT1BPUkRFUhAG",
-            "EhIKDk1PRElGWVBPU0lUSU9OEAcSDwoLTU9ESUZZT1JERVIQCCI6CgZUcmFk",
-            "ZXMSMAoFdHJhZGUYASADKAsyIS5OaWZmbGVyLk1lc3NhZ2luZy5Qcm90b2J1",
-            "Zi5UcmFkZUIdqgIaTmlmZmxlci5NZXNzYWdpbmcuUHJvdG9idWZiBnByb3Rv",
-            "Mw=="));
+            "c3VjY2VzcxgCIAEoCBIRCglxdWV1ZU5hbWUYAyABKAkiSgoHQ29tbWFuZBIJ",
+            "CgVSRVNFVBAAEgoKBk5PVElGWRABEgsKB1NDQUxFVVAQAhINCglTQ0FMRURP",
+            "V04QAxIMCghTSFVURE9XThAEIoIDCgVUcmFkZRI+Cgl0cmFkZVR5cGUYASAB",
+            "KA4yKy5OaWZmbGVyLk1lc3NhZ2luZy5Qcm90b2J1Zi5UcmFkZS5UcmFkZVR5",
+            "cGUSDgoGc3ltYm9sGAIgASgJEg4KBnZvbHVtZRgDIAEoAxISCgplbnRyeVBy",
+            "aWNlGAQgASgBEg0KBWxhYmVsGAUgASgJEhQKDHN0b3BMb3NzUGlwcxgGIAEo",
+            "ARIWCg50YWtlUHJvZml0UGlwcxgHIAEoARISCgpleHBpcnlUaW1lGAggASgJ",
+            "IrMBCglUcmFkZVR5cGUSBwoDQlVZEAASCAoEU0VMTBABEhEKDUJVWUxJTUlU",
+            "T1JERVIQAxISCg5TRUxMTElNSVRPUkRFUhAEEhAKDEJVWVNUT1BPUkRFUhAF",
+            "EhEKDVNFTExTVE9QT1JERVIQBhISCg5NT0RJRllQT1NJVElPThAHEg8KC01P",
+            "RElGWU9SREVSEAgSEQoNQ0xPU0VQT1NJVElPThAJEg8KC0NBTkNFTE9SREVS",
+            "EAoiOgoGVHJhZGVzEjAKBXRyYWRlGAEgAygLMiEuTmlmZmxlci5NZXNzYWdp",
+            "bmcuUHJvdG9idWYuVHJhZGVCHaoCGk5pZmZsZXIuTWVzc2FnaW5nLlByb3Rv",
+            "YnVmYgZwcm90bzM="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(null, new pbr::GeneratedClrTypeInfo[] {
@@ -101,7 +102,7 @@ namespace Niffler.Messaging.Protobuf {
             new pbr::GeneratedClrTypeInfo(typeof(global::Niffler.Messaging.Protobuf.Order), global::Niffler.Messaging.Protobuf.Order.Parser, new[]{ "Label", "Id", "SymbolCode", "OrderType", "Volume", "TargetEntryPrice", "StopLossPrice", "StopLossPips", "TakeProfitPrice", "TakeProfitPips", "ExpiryTime", "EntryTime", "StateChange" }, null, new[]{ typeof(global::Niffler.Messaging.Protobuf.Order.Types.OrderType), typeof(global::Niffler.Messaging.Protobuf.Order.Types.StateChange) }, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Niffler.Messaging.Protobuf.Orders), global::Niffler.Messaging.Protobuf.Orders.Parser, new[]{ "Count", "Order" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Niffler.Messaging.Protobuf.State), global::Niffler.Messaging.Protobuf.State.Parser, new[]{ "Key", "Valuetype", "StringValue", "BoolValue", "DoubleValue" }, null, new[]{ typeof(global::Niffler.Messaging.Protobuf.State.Types.ValueType) }, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Niffler.Messaging.Protobuf.Service), global::Niffler.Messaging.Protobuf.Service.Parser, new[]{ "Command", "Success" }, null, new[]{ typeof(global::Niffler.Messaging.Protobuf.Service.Types.Command) }, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Niffler.Messaging.Protobuf.Service), global::Niffler.Messaging.Protobuf.Service.Parser, new[]{ "Command", "Success", "QueueName" }, null, new[]{ typeof(global::Niffler.Messaging.Protobuf.Service.Types.Command) }, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Niffler.Messaging.Protobuf.Trade), global::Niffler.Messaging.Protobuf.Trade.Parser, new[]{ "TradeType", "Symbol", "Volume", "EntryPrice", "Label", "StopLossPips", "TakeProfitPips", "ExpiryTime" }, null, new[]{ typeof(global::Niffler.Messaging.Protobuf.Trade.Types.TradeType) }, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Niffler.Messaging.Protobuf.Trades), global::Niffler.Messaging.Protobuf.Trades.Parser, new[]{ "Trade" }, null, null, null)
           }));
@@ -2653,6 +2654,7 @@ namespace Niffler.Messaging.Protobuf {
     public Service(Service other) : this() {
       command_ = other.command_;
       success_ = other.success_;
+      queueName_ = other.queueName_;
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -2682,6 +2684,17 @@ namespace Niffler.Messaging.Protobuf {
       }
     }
 
+    /// <summary>Field number for the "queueName" field.</summary>
+    public const int QueueNameFieldNumber = 3;
+    private string queueName_ = "";
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public string QueueName {
+      get { return queueName_; }
+      set {
+        queueName_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override bool Equals(object other) {
       return Equals(other as Service);
@@ -2697,6 +2710,7 @@ namespace Niffler.Messaging.Protobuf {
       }
       if (Command != other.Command) return false;
       if (Success != other.Success) return false;
+      if (QueueName != other.QueueName) return false;
       return true;
     }
 
@@ -2705,6 +2719,7 @@ namespace Niffler.Messaging.Protobuf {
       int hash = 1;
       if (Command != 0) hash ^= Command.GetHashCode();
       if (Success != false) hash ^= Success.GetHashCode();
+      if (QueueName.Length != 0) hash ^= QueueName.GetHashCode();
       return hash;
     }
 
@@ -2723,6 +2738,10 @@ namespace Niffler.Messaging.Protobuf {
         output.WriteRawTag(16);
         output.WriteBool(Success);
       }
+      if (QueueName.Length != 0) {
+        output.WriteRawTag(26);
+        output.WriteString(QueueName);
+      }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -2733,6 +2752,9 @@ namespace Niffler.Messaging.Protobuf {
       }
       if (Success != false) {
         size += 1 + 1;
+      }
+      if (QueueName.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(QueueName);
       }
       return size;
     }
@@ -2747,6 +2769,9 @@ namespace Niffler.Messaging.Protobuf {
       }
       if (other.Success != false) {
         Success = other.Success;
+      }
+      if (other.QueueName.Length != 0) {
+        QueueName = other.QueueName;
       }
     }
 
@@ -2764,6 +2789,10 @@ namespace Niffler.Messaging.Protobuf {
           }
           case 16: {
             Success = input.ReadBool();
+            break;
+          }
+          case 26: {
+            QueueName = input.ReadString();
             break;
           }
         }
@@ -3111,6 +3140,8 @@ namespace Niffler.Messaging.Protobuf {
         [pbr::OriginalName("SELLSTOPORDER")] Sellstoporder = 6,
         [pbr::OriginalName("MODIFYPOSITION")] Modifyposition = 7,
         [pbr::OriginalName("MODIFYORDER")] Modifyorder = 8,
+        [pbr::OriginalName("CLOSEPOSITION")] Closeposition = 9,
+        [pbr::OriginalName("CANCELORDER")] Cancelorder = 10,
       }
 
     }

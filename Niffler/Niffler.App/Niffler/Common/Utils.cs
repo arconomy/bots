@@ -9,9 +9,9 @@ namespace Niffler.Common
         private static DateTime GetDateTimeToUse(Tick tick)
         {
             DateTime datetime;
-            if (tick.Isbacktesting)
+            if (tick.IsBackTesting)
             {
-                if (!DateTime.TryParse(tick.Timestamp, out datetime))
+                if (!DateTime.TryParse(tick.TimeStamp, out datetime))
                     datetime = new DateTime(TimeSpan.Zero.Milliseconds); //Set DateTime to default 00:00:00
             }
             else

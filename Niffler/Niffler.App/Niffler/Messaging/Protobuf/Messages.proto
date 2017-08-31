@@ -160,6 +160,7 @@ message Service  {
 
     Command command = 1;
     bool success = 2;
+	string queueName = 3;
 }
 
 message Trade   {
@@ -173,6 +174,9 @@ message Trade   {
         SELLSTOPORDER = 6;
         MODIFYPOSITION = 7;
         MODIFYORDER = 8;
+		CLOSEPOSITION = 9;
+		CANCELORDER = 10;
+
     }
     TradeType tradeType = 1;
     string symbol = 2;

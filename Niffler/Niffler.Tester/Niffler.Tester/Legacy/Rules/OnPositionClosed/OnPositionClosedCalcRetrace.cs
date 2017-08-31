@@ -39,7 +39,7 @@ namespace Niffler.Rules
 
         public override object Clone()
         {
-            return new OnPositionClosedCalcRetrace(BotConfig,RuleConfig);
+            return new OnPositionClosedCalcRetrace(StrategyConfig,RuleConfig);
         }
 
         public override bool Init()

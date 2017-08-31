@@ -2,21 +2,17 @@
 using System.Linq;
 using Niffler.Common;
 using Niffler.Common.Trade;
-using Niffler.Common.Market;
 using Niffler.Common.TrailingStop;
 using cAlgo.API;
-using Niffler.Common.BackTest;
-using Niffler.Messaging;
 using System;
 using Niffler.Rules;
 using Niffler.Strategy;
 using RabbitMQ.Client;
 using Niffler.Messaging.RabbitMQ;
-using Niffler.Managers;
 
-namespace Niffler.Microservices
+namespace Niffler.Services
 {
-    class ServicesManager : IResetState
+    public class ServicesManager : IResetState
     {
         public SellLimitOrdersTrader SellLimitOrdersTrader { get; }
         public BuyLimitOrdersTrader BuyLimitOrdersTrader { get; }
@@ -32,21 +28,25 @@ namespace Niffler.Microservices
         private List<IRule> OnTimerRules = new List<IRule>();
         private List<IRule> OnBarRules = new List<IRule>();
 
-        private StopLossManager StopLossManager;
-        private TimeInfo SwfMarketInfo;
-        private SellLimitOrdersTrader SellLimitOrdersTrader;
-        private BuyLimitOrdersTrader BuyLimitOrdersTrader;
-
         private RulesFactory RulesFactory = new RulesFactory();
         private List<IRule> Rules;
 
-        private List<IConsumer> Managers;
+        private List<Consumer> Managers;
         public IConnection Connection;
 
-        public ServicesManager(IConnection connection, AppConfiguration appConfig)
+        public ServicesManager(AppConfiguration appConfig)
         {
 
-            this.Connection = connection;
+            ////Set up Adapter to manage single connection for all consumers.
+            var adapter = Adapter.Instance;
+            adapter.Init();
+            adapter.Connect();
+            Connection = adapter.GetConnection();
+
+
+            //TO DO: ServiceManager also needs to have a consumer and publisher to manage services through messaging
+
+
 
             //For each BotConfig Initialise a micro-service for each service required and listen for updates on appropriate queues
             foreach (StrategyConfiguration strategyConfig in appConfig.StrategyConfigList)
@@ -65,16 +65,14 @@ namespace Niffler.Microservices
                 Managers.Add(new ReportManager(strategyConfig));
 
                 //Create the rule services per strategy
-                Rules = RulesFactory.CreateRules(strategyConfig);
+                Rules = (RulesFactory.CreateRules(strategyConfig));
             }
 
-            SellLimitOrdersTrader = sellLimitOrdersTrader;
-            BuyLimitOrdersTrader = buyLimitOrdersTrader;
-            PositionsManager = new PositionsManager(StateManager);
-            StopLossManager = stopLossManager;
-            FixedTrailingStop = fixedTrailingStop;
-        }
+            //TO DO: Set up QueueWatchers to autoscale consumers. Autoscale message is a Service Message with a routingkey = QueueName on the AutoScaleX exchange.
 
+
+
+        }
 
         static private string GenerateStrategyId()
         {
