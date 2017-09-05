@@ -62,7 +62,7 @@ namespace Niffler.Messaging.RabbitMQ
             { RabbitMQ.Event.ONTICK,"OnTick" },
             { RabbitMQ.Event.ONPOSITIONOPENED,"OnPositionOpened" },
             { RabbitMQ.Event.ONPOSITIONCLOSED,"OnPositionClosed" },
-            { RabbitMQ.Event.ONPOSITIONCLOSED,"OnPositionModified" },
+            { RabbitMQ.Event.ONPOSITIONMODIFIED,"OnPositionModified" },
             { RabbitMQ.Event.ONORDERPLACED,"OnOrderPlaced" },
             { RabbitMQ.Event.ONORDERCANCELLED,"OnOrderCancelled" },
             { RabbitMQ.Event.ONORDERMODIFIED,"OnOrderModified" },

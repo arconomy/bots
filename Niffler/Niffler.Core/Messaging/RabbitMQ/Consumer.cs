@@ -73,7 +73,6 @@ namespace Niffler.Messaging.RabbitMQ
  
         public void Start() {
             
-
             StopConsuming = false;
             try
             {

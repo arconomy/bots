@@ -21,7 +21,6 @@ namespace Niffler.Rules.TradingPeriods
         private bool OpenSaturday;
         private bool OpenSunday;
         private List<DateTime> OpenDates = new List<DateTime>();
-        DateTime Now;
 
         public OnOpenForTrading(StrategyConfiguration strategyConfig, RuleConfiguration ruleConfig) : base(strategyConfig, ruleConfig) { }
 
@@ -93,15 +92,14 @@ namespace Niffler.Rules.TradingPeriods
         {
             if (IsTickMessageEmpty(message)) return false;
 
-            if(DateTime.TryParse(message.Tick.TimeStamp, out Now))
+            DateTime now = DateTime.FromBinary(message.Tick.TimeStamp);
+
+            if (IsOpenDate(now) && IsOpenWeekday(now) && IsOpenTime(now))
             {
-                if (IsOpenDate() && IsOpenWeekday() && IsOpenTime())
-                {
-                    PublishStateUpdate(Data.State.ISOPENTIME, true);
-                    PublishStateUpdate(Data.State.OPENTIME, message.Tick.TimeStamp);
-                    IsActive = false;
-                    return true;
-                }
+                PublishStateUpdate(Data.State.ISOPENTIME, true);
+                PublishStateUpdate(Data.State.OPENTIME, message.Tick.TimeStamp);
+                IsActive = false;
+                return true;
             }
             return false;
         }
@@ -118,19 +116,19 @@ namespace Niffler.Rules.TradingPeriods
             throw new NotImplementedException();
         }
 
-        private bool IsOpenTime()
+        private bool IsOpenTime(DateTime now)
         {
-            return DateTimeZoneCalc.IsTimeAfter(Now,OpenTime);
+            return DateTimeZoneCalc.IsTimeAfter(now, OpenTime);
         }
 
-        private bool IsOpenDate()
+        private bool IsOpenDate(DateTime now)
         {
-            return OpenDates.Exists(date => date.Date == Now.Date);
+            return OpenDates.Exists(date => date.Date == now.Date);
         }
         
-        private bool IsOpenWeekday()
+        private bool IsOpenWeekday(DateTime now)
         {
-            switch (Now.DayOfWeek)
+            switch (now.DayOfWeek)
             {
                 case DayOfWeek.Monday:
                     return OpenMonday;

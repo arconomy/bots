@@ -17,7 +17,7 @@ namespace Niffler.Messaging.RabbitMQ
             Channel = connection.CreateModel();
             this.ExchangeName = exchangeName;
             MessageProperties = messageProperties;
-            Channel.ExchangeDeclare(exchange: ExchangeName, type: Exchange.GetExchangeType(ExchangeType.TOPIC),durable: true,autoDelete: false, arguments: queueArgs);
+            Channel.ExchangeDeclare(exchange: ExchangeName, type: Exchange.GetExchangeType(ExchangeType.TOPIC),durable: false,autoDelete: false, arguments: queueArgs);
 
         }
 
@@ -41,7 +41,7 @@ namespace Niffler.Messaging.RabbitMQ
             Niffle niffle = new Niffle
             {
                 StrategyId = strategyId,
-                Timestamp = System.DateTime.Now.ToBinary(),
+                TimeStamp = System.DateTime.Now.ToBinary(),
                 Type = Niffle.Types.Type.Service,
                 Service = service
             };
@@ -56,6 +56,48 @@ namespace Niffler.Messaging.RabbitMQ
             {
                 Type = Niffle.Types.Type.Trade,
                 Trade = trade
+            };
+            Publish(routingKey, niffle);
+        }
+
+        public void TickEvent(Tick tick, Positions positions, Orders orders)
+        {
+            RoutingKey routingKey = RoutingKey.Create(Event.ONTICK);
+
+            Niffle niffle = new Niffle
+            {
+                Type = Niffle.Types.Type.Tick,
+                Tick = tick,
+                Positions = positions,
+                Orders = orders
+            };
+            Publish(routingKey, niffle);
+        }
+
+        public void PositionClosedEvent(Position position,Positions positions, Orders orders)
+        {
+            RoutingKey routingKey = RoutingKey.Create(Event.ONPOSITIONCLOSED);
+
+            Niffle niffle = new Niffle
+            {
+                Type = Niffle.Types.Type.Position,
+                Position = position,
+                Positions = positions,
+                Orders = orders
+            };
+            Publish(routingKey, niffle);
+        }
+
+        public void PositionOpenedEvent(Position position, Positions positions, Orders orders)
+        {
+            RoutingKey routingKey = RoutingKey.Create(Event.ONPOSITIONOPENED);
+
+            Niffle niffle = new Niffle
+            {
+                Type = Niffle.Types.Type.Position,
+                Position = position,
+                Positions = positions,
+                Orders = orders
             };
             Publish(routingKey, niffle);
         }

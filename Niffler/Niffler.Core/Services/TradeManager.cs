@@ -2,13 +2,15 @@
 using System.Collections.Generic;
 using Niffler.Messaging.Protobuf;
 using Niffler.Messaging.RabbitMQ;
+using Niffler.Common;
 using cAlgo.API.Internals;
 
 namespace Niffler.Services
 {
     public class TradeManager : IScalableConsumerService
     {
-        public delegate void ExecuteMarketOrder_cAlgo(Trade trade);
+        public delegate void ExecuteBuyMarketOrder_cAlgo(Trade trade);
+        public delegate void ExecuteSellMarketOrder_cAlgo(Trade trade);
         public delegate void PlaceBuyLimitOrder_cAlgo(Trade trade);
         public delegate void PlaceBuyStopOrder_cAlgo(Trade trade);
         public delegate void PlaceSellLimitOrder_cAlgo(Trade trade);
@@ -18,7 +20,8 @@ namespace Niffler.Services
         public delegate void ClosePosition_cAlgo(Trade trade);
         public delegate void CancelOrder_cAlgo(Trade trade);
 
-        public ExecuteMarketOrder_cAlgo ExecuteMarketOrder { get; set; }
+        public ExecuteBuyMarketOrder_cAlgo ExecuteBuyMarketOrder { get; set; }
+        public ExecuteSellMarketOrder_cAlgo ExecuteSellMarketOrder { get; set; }
         public PlaceBuyLimitOrder_cAlgo PlaceBuyLimitOrder { get; set; }
         public PlaceBuyStopOrder_cAlgo PlaceBuyStopOrder { get; set; }
         public PlaceSellLimitOrder_cAlgo PlaceSellLimitOrder { get; set; }
@@ -28,15 +31,6 @@ namespace Niffler.Services
         public CancelOrder_cAlgo CancelOrder { get; set; }
         public ModifyOrder_cAlgo ModifyOrder { get; set; }
 
-        //private StopLossManager StopLossManager;
-        //private SellLimitOrdersTrader SellLimitOrdersTrader;
-        //private BuyLimitOrdersTrader BuyLimitOrdersTrader;
-        //SellLimitOrdersTrader = sellLimitOrdersTrader;
-        //BuyLimitOrdersTrader = buyLimitOrdersTrader;
-        //PositionsManager = new PositionsManager(StateManager);
-        //StopLossManager = stopLossManager;
-        //FixedTrailingStop = fixedTrailingStop;
-
         public TradeManager(String exchangeName)
         {
             ExchangeName = exchangeName;
@@ -44,12 +38,15 @@ namespace Niffler.Services
 
         public override void Init()
         {
-            throw new NotImplementedException();
+           // throw new NotImplementedException();
         }
 
-        //Publish State update message
-        protected void PublishOnTickEvent(Symbol symbol, string timeStamp, bool isBackTesting = false)
+        public void PublishOnTickEvent(Symbol symbol, cAlgo.API.Positions _positions, cAlgo.API.PendingOrders _orders, DateTime timeStamp, bool isBackTesting = false)
         {
+
+            Utils.ParseOpenPositions(_positions, out Positions positions);
+            Utils.ParsePendingOrders(_orders, out Orders orders);
+                
             Tick tick = new Tick()
             {
               Code = symbol.Code,
@@ -59,33 +56,32 @@ namespace Niffler.Services
               PipSize = symbol.PipSize,
               TickSize = symbol.TickSize,
               Spread = symbol.TickSize,
-              TimeStamp = timeStamp,
+              TimeStamp = timeStamp.ToBinary(),
               IsBackTesting = isBackTesting,
-              //Positions = 
             };
 
-            //Publisher.TradeEvent();
+            Publisher.TickEvent(tick, positions, orders);
         }
 
-        protected void PublishOnPositionOpened(cAlgo.API.Position _postion, cAlgo.API.Positions _positions)
+        public void PublishOnPositionOpened(cAlgo.API.Position _postion, cAlgo.API.Positions _positions, cAlgo.API.PendingOrders _orders, bool isBackTesting = false)
         {
-            //Create position
-
-            //Create the positions object
-
-            //Messaging.Protobuf.Positions positions = new Messaging.Protobuf.Positions()
-            //{
-            //    Count = _positions.Count,
-            //    Position =  
+            Utils.ParseOpenPositions(_positions, out Positions positions,_postion.Label);
+            Utils.ParsePendingOrders(_orders, out Orders orders);
+            Utils.ParseOpenPosition(_postion, out Position position);
+            Publisher.PositionOpenedEvent(position,positions, orders);
         }
 
-        protected void PublishOnPositionClosed(cAlgo.API.Position _postion, cAlgo.API.Positions _positions)
+        public void PublishOnPositionClosed(cAlgo.API.Position _postion, double closePrice, cAlgo.API.Positions _positions, cAlgo.API.PendingOrders _orders, DateTime closeTime, bool isBackTesting = false)
         {
+            Utils.ParseOpenPositions(_positions, out Positions positions);
+            Utils.ParsePendingOrders(_orders, out Orders orders);
+            Utils.ParseClosedPosition(_postion, closePrice, closeTime, out Position position);
+            Publisher.PositionClosedEvent(position, positions, orders);
         }
 
         protected override void OnMessageReceived(object sender, MessageReceivedEventArgs e)
         {
-            DateTime niffleTimeStamp = DateTime.FromBinary(e.Message.Timestamp);
+            DateTime niffleTimeStamp = DateTime.FromBinary(e.Message.TimeStamp);
             RoutingKey routingKey = new RoutingKey(e.EventArgs.RoutingKey);
             string action = routingKey.GetAction();
             string _event = routingKey.GetEvent();
@@ -111,43 +107,42 @@ namespace Niffler.Services
                     {
                         ExecuteTradeOperation(trade);
                     }
-                }
-                   
+                } 
             }
         }
 
         protected void ExecuteTradeOperation(Trade trade)
         {
-            switch (trade.TradeType)
+            switch (trade.TradeAction)
             {
-                case Trade.Types.TradeType.Buy:
-                    ExecuteMarketOrder(trade);
+                case Trade.Types.TradeAction.Buy:
+                    ExecuteBuyMarketOrder(trade);
                     break;
-                case Trade.Types.TradeType.Buylimitorder:
+                case Trade.Types.TradeAction.Buylimitorder:
                     PlaceBuyLimitOrder(trade);
                     break;
-                case Trade.Types.TradeType.Buystoporder:
+                case Trade.Types.TradeAction.Buystoporder:
                     PlaceBuyStopOrder(trade);
                     break;
-                case Trade.Types.TradeType.Sell:
-                    ExecuteMarketOrder(trade);
+                case Trade.Types.TradeAction.Sell:
+                    ExecuteSellMarketOrder(trade);
                     break;
-                case Trade.Types.TradeType.Selllimitorder:
+                case Trade.Types.TradeAction.Selllimitorder:
                     PlaceSellLimitOrder(trade);
                     break;
-                case Trade.Types.TradeType.Sellstoporder:
+                case Trade.Types.TradeAction.Sellstoporder:
                     PlaceSellStopOrder(trade);
                     break;
-                case Trade.Types.TradeType.Modifyposition:
+                case Trade.Types.TradeAction.Modifyposition:
                     ModifyPosition(trade);
                     break;
-                case Trade.Types.TradeType.Modifyorder:
+                case Trade.Types.TradeAction.Modifyorder:
                     ModifyOrder(trade);
                     break;
-                case Trade.Types.TradeType.Closeposition:
+                case Trade.Types.TradeAction.Closeposition:
                     ClosePosition(trade);
                     break;
-                case Trade.Types.TradeType.Cancelorder:
+                case Trade.Types.TradeAction.Cancelorder:
                     CancelOrder(trade);
                     break;
             }

@@ -45,7 +45,7 @@ namespace Niffler.Services
         protected override void OnMessageReceived(object sender, MessageReceivedEventArgs e)
         {
             if (!IsInitialised) return;
-            DateTime niffleTimeStamp = DateTime.FromBinary(e.Message.Timestamp);
+            DateTime niffleTimeStamp = DateTime.FromBinary(e.Message.TimeStamp);
             RoutingKey routingKey = new RoutingKey(e.EventArgs.RoutingKey);
             string source = routingKey.GetSource();
             string action = routingKey.GetAction();
@@ -63,78 +63,70 @@ namespace Niffler.Services
                 }
             }
 
-            //Positions messages will be for Position Opened, Closed or Modified.
-            if (e.Message.Type == Niffle.Types.Type.Positions)
+            //Position message will be for Position Opened or Closed
+            if (e.Message.Type == Niffle.Types.Type.Position)
             {
-                if (e.Message.Positions != null)
+                if (e.Message.Position != null)
                 {
-                    Messaging.Protobuf.Positions positions = e.Message.Positions;
-                    for (int count = 0; count < positions.Count; count++)
-                    {
                         if (routingKey.GetEventAsEnum() == Event.ONPOSITIONCLOSED)
                         {
-                            if (positions.Position[count].StateChange == Messaging.Protobuf.Position.Types.StateChange.Closed)
+                            if (e.Message.Position.StateChange == Messaging.Protobuf.Position.Types.StateChange.Closed)
                             {
-                                ReportPositionClosed(positions.Position[count]);
+                                ReportPositionClosed(e.Message.Position);
                             }
                         }
 
                         if (routingKey.GetEventAsEnum() == Event.ONPOSITIONOPENED)
                         {
-                            if (positions.Position[count].StateChange == Messaging.Protobuf.Position.Types.StateChange.Opened)
+                            if (e.Message.Position.StateChange == Messaging.Protobuf.Position.Types.StateChange.Opened)
                             {
-                                ReportPositionOpened(positions.Position[count]);
+                                ReportPositionOpened(e.Message.Position);
                             }
                         }
 
                         if (routingKey.GetEventAsEnum() == Event.ONPOSITIONMODIFIED)
                         {
-                            if (positions.Position[count].StateChange == Messaging.Protobuf.Position.Types.StateChange.Modified)
+                            if (e.Message.Position.StateChange == Messaging.Protobuf.Position.Types.StateChange.Modified)
                             {
-                                ReportPositionModified(positions.Position[count], Utils.FormatDateTimeWithSeparators(niffleTimeStamp));
+                                ReportPositionModified(e.Message.Position, Utils.FormatDateTimeWithSeparators(niffleTimeStamp));
                             }
                         }
-                    }
                 }
             }
 
             //Orders messages will be for Orders Placed, Cancelled or Modified
-            if (e.Message.Type == Niffle.Types.Type.Orders)
+            if (e.Message.Type == Niffle.Types.Type.Order)
             {
-                if (e.Message.Orders != null)
+                if (e.Message.Order != null)
                 {
-                    Messaging.Protobuf.Orders orders = e.Message.Orders;
-                    for (int count = 0; count < orders.Count; count++)
+                    if (routingKey.GetEventAsEnum() == Event.ONORDERPLACED)
                     {
-                        if (routingKey.GetEventAsEnum() == Event.ONORDERPLACED)
+                        if (e.Message.Order.StateChange == Messaging.Protobuf.Order.Types.StateChange.Placed)
                         {
-                            if (orders.Order[count].StateChange == Messaging.Protobuf.Order.Types.StateChange.Placed)
-                            {
-                                ReportOrderPlaced(orders.Order[count]);
-                            }
+                            ReportOrderPlaced(e.Message.Order);
                         }
+                    }
 
-                        if (routingKey.GetEventAsEnum() == Event.ONORDERCANCELLED)
+                    if (routingKey.GetEventAsEnum() == Event.ONORDERCANCELLED)
+                    {
+                        if (e.Message.Order.StateChange == Messaging.Protobuf.Order.Types.StateChange.Cancelled)
                         {
-                            if (orders.Order[count].StateChange == Messaging.Protobuf.Order.Types.StateChange.Cancelled)
-                            {
-                                ReportOrderCancelled(orders.Order[count], Utils.FormatDateTimeWithSeparators(niffleTimeStamp));
-                            }
+                            ReportOrderCancelled(e.Message.Order, Utils.FormatDateTimeWithSeparators(niffleTimeStamp));
                         }
+                    }
 
-                        if (routingKey.GetEventAsEnum() == Event.ONORDERMODIFIED)
+                    if (routingKey.GetEventAsEnum() == Event.ONORDERMODIFIED)
+                    {
+                        if (e.Message.Order.StateChange == Messaging.Protobuf.Order.Types.StateChange.Modified)
                         {
-                            if (orders.Order[count].StateChange == Messaging.Protobuf.Order.Types.StateChange.Modified)
-                            {
-                                ReportOrderModified(orders.Order[count], Utils.FormatDateTimeWithSeparators(niffleTimeStamp));
-                            }
+                            ReportOrderModified(e.Message.Order, Utils.FormatDateTimeWithSeparators(niffleTimeStamp));
                         }
                     }
                 }
             }
 
             //Error messages
-            if (e.Message.Type == Niffle.Types.Type.Orders)
+            if (e.Message.Type == Niffle.Types.Type.Error)
             {
                 if (e.Message.Error != null)
                 {

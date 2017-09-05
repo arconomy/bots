@@ -49,12 +49,6 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TraderService.cs" />
-    <Compile Include="Trade\BuyLimitOrdersTrader.cs" />
-    <Compile Include="Trade\OrdersManager.cs" />
-    <Compile Include="Trade\PositionsManager.cs" />
-    <Compile Include="Trade\SellLimitOrdersTrader.cs" />
-    <Compile Include="Trade\StopLossManager.cs" />
-    <Compile Include="Trade\TradeData.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Niffler.Core\Niffler.Core.csproj">

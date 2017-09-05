@@ -15,7 +15,6 @@ namespace Niffler.Rules
         private TimeSpan TerminateTime; // Terminate Bot activity after this time
         private TimeSpan TerminateAfterOpen; // TimeSpan after OpenTime to ReduceRisk Terminate Bot activity
         private DateTimeZoneCalculator DateTimeZoneCalc;
-        DateTime Now;
 
         public OnTerminateTime(StrategyConfiguration strategyConfig, RuleConfiguration ruleConfig) : base(strategyConfig, ruleConfig) { }
 
@@ -51,21 +50,19 @@ namespace Niffler.Rules
         {
             if (IsTickMessageEmpty(message)) return false;
 
-            if (DateTime.TryParse(message.Tick.TimeStamp, out Now))
-            {
-                //First Tick recieved will be the first after OpenForTrading has service has notified this service - therefore use this Tick time as OpenTime
-                //The OpenTime may be updated by receiving an update to state data
-                if (TerminateAfterOpen > TimeSpan.Zero)
-                {
-                    SetTerminateTime(Now);
-                }
+            DateTime Now = DateTime.FromBinary(message.Tick.TimeStamp);
 
-                if (DateTimeZoneCalc.IsTimeAfter(Now, TerminateTime))
-                {
-                    PublishStateUpdate(Data.State.ISTERMINATETIME, true);
-                    IsActive = false;
-                    return true;
-                }
+            //First Tick recieved will be the first after OpenForTrading has service has notified this service - therefore use this Tick time as OpenTime
+            if (TerminateAfterOpen > TimeSpan.Zero)
+            {
+                SetTerminateTime(Now);
+            }
+
+            if (DateTimeZoneCalc.IsTimeAfter(Now, TerminateTime))
+            {
+                PublishStateUpdate(Data.State.ISTERMINATETIME, true);
+                IsActive = false;
+                return true;
             }
             return false;
         }

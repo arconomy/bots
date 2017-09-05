@@ -128,17 +128,10 @@ namespace Niffler.Rules
             return false;
         }
 
-        protected bool IsOnPositionsMessageEmpty(Niffle message)
-        {
-            if (message.Type != Niffle.Types.Type.Positions) return true;
-            if (message.Positions == null) return true;
-            return false;
-        }
-
         protected bool IsServiceMessageEmpty(Niffle message)
         {
-            if (message.Type != Niffle.Types.Type.Positions) return true;
-            if (message.Positions == null) return true;
+            if (message.Type != Niffle.Types.Type.Service) return true;
+            if (message.Service == null) return true;
             return false;
         }
 

@@ -14,7 +14,6 @@ namespace Niffler.Rules.TradingPeriods
         private string SymbolCode;
         private TimeSpan CloseTime;
         private TimeSpan CloseAfterOpen;
-        DateTime Now;
 
         public OnCloseForTrading(StrategyConfiguration StrategyConfig, RuleConfiguration ruleConfig) : base(StrategyConfig, ruleConfig) { }
 
@@ -49,21 +48,19 @@ namespace Niffler.Rules.TradingPeriods
         {
             if (IsTickMessageEmpty(message)) return false;
 
-            if(DateTime.TryParse(message.Tick.TimeStamp, out Now))
-            {
-                //First Tick recieved will be the first after OpenForTrading has service has notified this service - therefore use this Tick time as OpenTime
-                //The OpenTime may be updated by receiving an update to state data
-                if (CloseAfterOpen > TimeSpan.Zero)
-                {
-                    SetCloseTime(Now);
-                }
+            DateTime Now = DateTime.FromBinary(message.Tick.TimeStamp);
 
-                if (DateTimeZoneCalc.IsTimeAfter(Now, CloseTime))
-                {
-                    PublishStateUpdate(Data.State.ISOPENTIME, false);
-                    IsActive = false;
-                    return true;
-                }
+            //First Tick recieved after service is activated will be the first tick after OpenForTrading has sent notified this service - therefore use this Tick time as OpenTime
+            if (CloseAfterOpen > TimeSpan.Zero)
+            {
+                SetCloseTime(Now);
+            }
+
+            if (DateTimeZoneCalc.IsTimeAfter(Now, CloseTime))
+            {
+                PublishStateUpdate(Data.State.ISOPENTIME, false);
+                IsActive = false;
+                return true;
             }
             return false;
         }

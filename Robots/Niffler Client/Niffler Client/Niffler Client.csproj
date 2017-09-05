@@ -35,14 +35,6 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.Diagnostics.Tracing.EventSource, Version=1.1.28.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.Diagnostics.Tracing.EventSource.Redist.1.1.28\lib\net46\Microsoft.Diagnostics.Tracing.EventSource.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="RabbitMQ.Client, Version=5.0.0.0, Culture=neutral, PublicKeyToken=89e7d7c5feba84ce, processorArchitecture=MSIL">
-      <HintPath>..\packages\RabbitMQ.Client.5.0.1\lib\net451\RabbitMQ.Client.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -54,8 +46,17 @@
       <HintPath>..\..\..\..\API\cAlgo.API.dll</HintPath>
     </Reference>
     <Reference Include="System.Configuration" />
-    <Reference Include="NifflercAlgoClient">
-      <HintPath>..\..\..\NifflercAlgoClient\Niffler.cAlgo.Client\bin\Debug\NifflercAlgoClient.dll</HintPath>
+    <Reference Include="Niffler.cAlgo">
+      <HintPath>..\..\..\Niffler\Niffler.cAlgo\bin\Debug\Niffler.cAlgo.dll</HintPath>
+    </Reference>
+    <Reference Include="RabbitMQ.Client">
+      <HintPath>..\..\..\Niffler\Niffler.cAlgo\bin\Debug\RabbitMQ.Client.dll</HintPath>
+    </Reference>
+    <Reference Include="Google.Protobuf">
+      <HintPath>..\..\..\Niffler\Niffler.cAlgo\bin\Debug\Google.Protobuf.dll</HintPath>
+    </Reference>
+    <Reference Include="Niffler.Core">
+      <HintPath>..\..\..\Niffler\Niffler.cAlgo\bin\Debug\Niffler.Core.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

@@ -15,7 +15,6 @@ namespace Niffler.Rules
         private TimeSpan ReduceRiskTime; // ReduceRisk time for Bot to manage trades (not necessarily same as the actual market close)    
         private TimeSpan ReduceRiskAfterOpen; // TimeSpan after OpenTime to ReduceRisk
         private DateTimeZoneCalculator DateTimeZoneCalc;
-        DateTime Now;
 
         public OnReduceRiskTime(StrategyConfiguration strategyConfig, RuleConfiguration ruleConfig) : base(strategyConfig, ruleConfig) { }
 
@@ -51,21 +50,19 @@ namespace Niffler.Rules
         {
             if (IsTickMessageEmpty(message)) return false;
 
-            if (DateTime.TryParse(message.Tick.TimeStamp, out Now))
-            {
-                //First Tick recieved will be the first after OpenForTrading has service has notified this service - therefore use this Tick time as OpenTime
-                //The OpenTime may be updated by receiving an update to state data
-                if (ReduceRiskAfterOpen > TimeSpan.Zero)
-                {
-                    SetReduceRiskTime(Now);
-                }
+            DateTime Now = DateTime.FromBinary(message.Tick.TimeStamp);
 
-                if (DateTimeZoneCalc.IsTimeAfter(Now, ReduceRiskTime))
-                {
-                    PublishStateUpdate(Data.State.ISREDUCERISKTIME, true);
-                    IsActive = false;
-                    return true;
-                }
+            //First Tick recieved will be the first after OpenForTrading has service has notified this service - therefore use this Tick time as OpenTime
+            if (ReduceRiskAfterOpen > TimeSpan.Zero)
+            {
+                SetReduceRiskTime(Now);
+            }
+
+            if (DateTimeZoneCalc.IsTimeAfter(Now, ReduceRiskTime))
+            {
+                PublishStateUpdate(Data.State.ISREDUCERISKTIME, true);
+                IsActive = false;
+                return true;
             }
             return false;
         }
