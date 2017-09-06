@@ -8,17 +8,26 @@ namespace Niffler.Messaging.RabbitMQ
     public class Publisher
    {
 
-        private IModel Channel;
+        private IModel Model;
         private string ExchangeName;
         private IBasicProperties MessageProperties;
 
         public Publisher(IConnection connection, string exchangeName, IBasicProperties messageProperties = null, IDictionary<string, object> queueArgs = null)
         {
-            Channel = connection.CreateModel();
+            Model = connection.CreateModel();
             this.ExchangeName = exchangeName;
             MessageProperties = messageProperties;
-            Channel.ExchangeDeclare(exchange: ExchangeName, type: Exchange.GetExchangeType(ExchangeType.TOPIC),durable: false,autoDelete: false, arguments: queueArgs);
+            Model.ExchangeDeclare(exchange: ExchangeName, type: Exchange.GetExchangeType(ExchangeType.TOPIC),durable: false,autoDelete: false, arguments: queueArgs);
 
+        }
+
+        public void Stop()
+        {
+            if(Model.IsOpen)
+            {
+                Model.Close();
+                Model.Dispose();
+            }
         }
 
         public void UpdateState(State state, string entityName, string strategyId)
@@ -104,8 +113,8 @@ namespace Niffler.Messaging.RabbitMQ
 
         private void Publish(RoutingKey routingKey,Niffle niffle)
         {
-            Channel.BasicPublish(exchange: ExchangeName, routingKey: routingKey.GetRoutingKey(),
-                basicProperties: RabbitMQProperties.CreateDefaultProperties(Channel), body: niffle.ToByteArray());
+            Model.BasicPublish(exchange: ExchangeName, routingKey: routingKey.GetRoutingKey(),
+                basicProperties: RabbitMQProperties.CreateDefaultProperties(Model), body: niffle.ToByteArray());
         }
     }
 }

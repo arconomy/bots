@@ -49,7 +49,7 @@ namespace Niffler.Services
 
         public override void ShutDown()
         {
-            ShutDownConsumers();
+            ShutDownService();
             Rules.ForEach(rule => rule.ShutDown());
             Services.ForEach(service => service.ShutDown());
         }

@@ -22,13 +22,12 @@ namespace Niffler.Messaging.RabbitMQ
             Adapter = adapter;
             Publisher = new Messaging.RabbitMQ.Publisher(Adapter.GetConnection(), ExchangeName);
             Consumer = new Consumer(Adapter, ExchangeName, GetListeningRoutingKeys());
-            Consumer.Init();
             Consumer.MessageReceived += OnMessageReceived;
 
             adapter.ConsumeAsync(Consumer);
 
-            ConsumerAutoScaleManager = new ConsumerAutoScaleManager(Consumer);
-            ConsumerAutoScaleManager.Init();
+           ConsumerAutoScaleManager = new ConsumerAutoScaleManager(Consumer);
+           ConsumerAutoScaleManager.Init();
         }
 
         private List<RoutingKey> GetListeningRoutingKeys()
@@ -46,9 +45,16 @@ namespace Niffler.Messaging.RabbitMQ
         }
        
         //Cannot guarantee OnMessageReceived() to SHUTDOWN is for this consumer therefore leave to derived class to implement ShutDown() method
-        protected void ShutDownConsumers()
+        protected void ShutDownService()
         {
-            ConsumerAutoScaleManager.ShutDown();
+            if(ConsumerAutoScaleManager!= null)
+            {
+                ConsumerAutoScaleManager.ShutDown();
+            }
+            if (Publisher != null)
+            {
+                Publisher.Stop();
+            }
         }
 
         public abstract void Init();

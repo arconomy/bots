@@ -26,7 +26,6 @@ namespace Niffler.RabbitMQ
         public void Init()
         {
             AutoScaleConsumer = new Consumer(Adapter, Exchange.AUTOSCALEX, RoutingKey.Create(ScalableConsumer.GetQueueName()).ToList());
-            AutoScaleConsumer.Init();
             AutoScaleConsumer.MessageReceived += OnMessageReceived;
             Adapter.ConsumeAsync(AutoScaleConsumer);
         }
@@ -62,7 +61,6 @@ namespace Niffler.RabbitMQ
         public void ScaleUp()
         {
             Consumer newConsumer = (Consumer) ScalableConsumer.Clone();
-            newConsumer.Init();
             Adapter.ConsumeAsync(newConsumer);
             ScalableConsumers.Add(newConsumer);
         }
@@ -87,6 +85,7 @@ namespace Niffler.RabbitMQ
                 }
                 ScalableConsumers.Clear();
             }
+            AutoScaleConsumer.Stop();
         }
     }
 }

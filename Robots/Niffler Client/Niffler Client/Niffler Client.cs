@@ -11,6 +11,5 @@ namespace cAlgo
     [Robot(TimeZone = TimeZones.UTC, AccessRights = AccessRights.FullAccess)]
     public class NifflerClient : Niffler.cAlgoClient.TraderService
     {
-
     }
 }

@@ -74,7 +74,7 @@ namespace Niffler.Services
 
         public override void ShutDown()
         {
-            ShutDownConsumers();
+            ShutDownService();
         }
     }
 }

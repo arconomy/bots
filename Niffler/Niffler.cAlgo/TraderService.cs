@@ -20,7 +20,6 @@ namespace Niffler.cAlgoClient
             Adapter.Connect();
 
             TradeManager = new TradeManager(MarketSeries.SymbolCode);
-            TradeManager.Init();
             TradeManager.Run(Adapter);
            
             Positions.Opened += OnPositionOpened;

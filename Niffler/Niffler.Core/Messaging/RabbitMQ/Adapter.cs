@@ -3,6 +3,7 @@
 using RabbitMQ.Client;
 using System;
 using System.Threading;
+using System.Threading.Tasks;
 
 #endregion
 
@@ -24,12 +25,7 @@ namespace Niffler.Messaging.RabbitMQ
         public void ConsumeAsync(Consumer consumer)
         {
             if (!IsConnected) Connect();
-
-            var thread = new Thread(o => consumer.Start());
-            thread.Start();
-
-            while (!thread.IsAlive)
-                Thread.Sleep(1);
+            consumer.Start();
         }
 
         public void StopConsumingAsync(Consumer consumer)
@@ -72,7 +68,13 @@ namespace Niffler.Messaging.RabbitMQ
             //_connection = connectionFactory.CreateConnection();
             //"localhost", "nifflermq", 15672, "niffler", "niffler", 50);
 
-            var factory = new ConnectionFactory() { HostName = "localhost", VirtualHost = "nifflermq", UserName = "niffler", Password = "niffler" };
+            var factory = new ConnectionFactory()
+                {   HostName = "localhost",
+                    VirtualHost = "nifflermq",
+                    UserName = "niffler",
+                    Password = "niffler",
+                    UseBackgroundThreadsForIO = false
+                };
             Connection = factory.CreateConnection();
         }
 

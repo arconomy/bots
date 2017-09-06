@@ -38,7 +38,7 @@ namespace Niffler.Services
 
         public override void Init()
         {
-           // throw new NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public void PublishOnTickEvent(Symbol symbol, cAlgo.API.Positions _positions, cAlgo.API.PendingOrders _orders, DateTime timeStamp, bool isBackTesting = false)
@@ -156,7 +156,7 @@ namespace Niffler.Services
 
         public override void ShutDown()
         {
-            ShutDownConsumers();
+            ShutDownService();
         }
 
         public override void Reset()

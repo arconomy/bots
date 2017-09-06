@@ -144,7 +144,7 @@ namespace Niffler.Rules
 
         public override void ShutDown()
         {
-            ShutDownConsumers();
+            ShutDownService();
         }
 
         public override abstract void Init();
