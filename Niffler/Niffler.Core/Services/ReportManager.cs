@@ -34,8 +34,12 @@ namespace Niffler.Services
 
         public override void Init()
         {
-            if (!StrategyConfig.Config.TryGetValue(StrategyConfiguration.STRATEGYID, out StrategyId)) IsInitialised = false;
-            if (!StrategyConfig.Config.TryGetValue(StrategyConfiguration.EXCHANGE, out ExchangeName)) IsInitialised = false;
+            StrategyId = StrategyConfig.Config.StrategyId;
+            if (String.IsNullOrEmpty(StrategyId)) IsInitialised = false;
+
+            ExchangeName = StrategyConfig.Config.Exchange;
+            if (String.IsNullOrEmpty(ExchangeName)) IsInitialised = false;
+
             ReportDirectory = "C:\\Users\\alist\\Desktop\\" + StrategyName;
             ReportFile = "C:\\Users\\alist\\Desktop\\" + StrategyName + "\\" + StrategyName + "-" + Market + "-" + StrategyId + "-" + Utils.GetTimeStamp(true) + ".csv";
 

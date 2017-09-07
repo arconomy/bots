@@ -7,83 +7,41 @@ namespace Niffler.Rules
 {
     public class RulesFactory
     {
-        private List<string> RuleNames;
-
-        public RulesFactory()
-        {
-            //Available Rules
-            RuleNames.Add(nameof(OnOpenForTrading));
-            RuleNames.Add(nameof(OnCloseForTrading));
-
-
-            //RuleNames.Add(nameof(OnTickCaptureSpike));
-            //RuleNames.Add(nameof(CloseTimeCancelPendingOrders));
-            //RuleNames.Add(nameof(CloseTimeNoPositionsOpenedReset));
-            //RuleNames.Add(nameof(CloseTimeNoPositionsRemainOpenReset));
-            //RuleNames.Add(nameof(CloseTimeSetBotState));
-            //RuleNames.Add(nameof(CloseTimeSetHardSLToLastPositionEntryWithBuffer));
-            //RuleNames.Add(nameof(OnPositionClosedInProfitCaptureProfitPositionInfo));
-            //RuleNames.Add(nameof(OnPositionClosedInProfitSetBreakEvenWithBufferIfActive));
-            //RuleNames.Add(nameof(OnPositionClosedLastEntryPositionStopLossTriggeredCloseAll));
-            //RuleNames.Add(nameof(OnPositionClosedReportTrade));
-            //RuleNames.Add(nameof(OnPositionOpenedCaptureLastPositionInfo));
-            //RuleNames.Add(nameof(OnTickBreakEvenSLActiveSetLastProfitPositionEntry));
-            //RuleNames.Add(nameof(OnTickChaseFixedTrailingSL));
-            //RuleNames.Add(nameof(OpenTimeCapturePrice));
-            //RuleNames.Add(nameof(OpenTimeCaptureSpike));
-            //RuleNames.Add(nameof(OpenTimePlaceLimitOrders));
-            //RuleNames.Add(nameof(OpenTimeSetBotState));
-            //RuleNames.Add(nameof(OpenTimeUseBollingerBand));
-            //RuleNames.Add(nameof(ReduceRiskTimeReduceRetraceLevels));
-            //RuleNames.Add(nameof(ReduceRiskTimeSetBotState));
-            //RuleNames.Add(nameof(ReduceRiskTimeSetHardSLToLastProfitPositionCloseWithBuffer));
-            //RuleNames.Add(nameof(ReduceRiskTimeSetTrailingStop));
-            //RuleNames.Add(nameof(RetracedLevel3PlusReduceHardSLBuffer));
-            //RuleNames.Add(nameof(RetracedLevel1To2SetBreakEvenSLActive));
-            //RuleNames.Add(nameof(RetracedLevel1To2SetHardSLToLastProfitPositionEntryWithBuffer));
-            //RuleNames.Add(nameof(RetracedLevel2To3SetFixedTrailingStop));
-            //RuleNames.Add(nameof(RetracedLevel2To3SetHardSLToLastProfitPositionEntry));
-            //RuleNames.Add(nameof(RetracedLevel3PlusReduceHardSLBuffer));
-            //RuleNames.Add(nameof(RetracedLevel3PlusSetHardSLToLastProfitPositionCloseWithBuffer));
-            //RuleNames.Add(nameof(StartTrading));
-            //RuleNames.Add(nameof(EndTrading));
-            //RuleNames.Add(nameof(TerminateTimeCloseAllPositionsReset));
-            //RuleNames.Add(nameof(TerminateTimeSetBotState));
-        }
-
         //Create and initialise the Rules
-        public List<IRule> CreateAndInitRules(StrategyConfiguration botConfig)
+        public List<IRule> CreateAndInitRules(StrategyConfiguration strategyConfig)
         {
             List<IRule> createdRules = new List<IRule>();
 
-            foreach (RuleConfiguration ruleConfig in botConfig.Rules)
+            foreach (RuleConfiguration ruleConfig in strategyConfig.Rules)
             {
-                IRule rule = CreateRule(ruleConfig.Name, botConfig.Config);
+                IRule rule = CreateRule(strategyConfig,ruleConfig.Name, ruleConfig);
 
                 if(rule !=null)
                 {
                     rule.Init();
                     createdRules.Add(rule);
+                    Console.WriteLine("CREATED Rule: " + ruleConfig.Name);
                 }
                 else
                 {
-                    Console.Write("FAILED to create Rule: " + ruleConfig.Name);
+                    Console.WriteLine("FAILED to create Rule: " + ruleConfig.Name);
                 }
             }
 
             return createdRules;
         }
 
-        private IRule CreateRule(string ruleName, IDictionary<string,string> botConfig)
+        private IRule CreateRule(StrategyConfiguration strategyConfig, string ruleName, RuleConfiguration ruleConfig)
         {
-            if(RuleNames.Contains(ruleName))
+            if(RuleConfiguration.RuleNames.ContainsKey(ruleName))
             {
-                return (IRule) Activator.CreateInstance(Type.GetType(ruleName),new Object[] {botConfig});
-            }
-            else
-            {
+                if(RuleConfiguration.RuleNames.TryGetValue(ruleName, out Type ruleType))
+                {
+                    return (IRule)Activator.CreateInstance(ruleType, new Object[] {strategyConfig,ruleConfig});
+                }
                 return null;
             }
+            return null;
         }
     }
 }

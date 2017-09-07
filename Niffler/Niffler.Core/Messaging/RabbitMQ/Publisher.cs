@@ -1,4 +1,5 @@
 ﻿using Google.Protobuf;
+using Niffler.Common;
 using Niffler.Messaging.Protobuf;
 using RabbitMQ.Client;
 using System.Collections.Generic;
@@ -75,6 +76,7 @@ namespace Niffler.Messaging.RabbitMQ
 
             Niffle niffle = new Niffle
             {
+                IsStrategyIdRequired = false,
                 Type = Niffle.Types.Type.Tick,
                 Tick = tick,
                 Positions = positions,
@@ -86,9 +88,12 @@ namespace Niffler.Messaging.RabbitMQ
         public void PositionClosedEvent(Position position,Positions positions, Orders orders)
         {
             RoutingKey routingKey = RoutingKey.Create(Event.ONPOSITIONCLOSED);
+            string strategyId = Utils.GetStrategyId(position.Label);
 
             Niffle niffle = new Niffle
             {
+                IsStrategyIdRequired = true,
+                StrategyId = strategyId,
                 Type = Niffle.Types.Type.Position,
                 Position = position,
                 Positions = positions,
@@ -100,9 +105,12 @@ namespace Niffler.Messaging.RabbitMQ
         public void PositionOpenedEvent(Position position, Positions positions, Orders orders)
         {
             RoutingKey routingKey = RoutingKey.Create(Event.ONPOSITIONOPENED);
+            string strategyId = Utils.GetStrategyId(position.Label);
 
             Niffle niffle = new Niffle
             {
+                IsStrategyIdRequired = true,
+                StrategyId = strategyId,
                 Type = Niffle.Types.Type.Position,
                 Position = position,
                 Positions = positions,

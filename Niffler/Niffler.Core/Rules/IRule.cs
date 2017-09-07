@@ -19,14 +19,20 @@ namespace Niffler.Rules
             this.StrategyConfig = strategyConfig;
             this.RuleConfig = ruleConfig;
 
-            if (!StrategyConfig.Config.TryGetValue(StrategyConfiguration.STRATEGYID, out StrategyId)) IsInitialised = false;
-            if (!StrategyConfig.Config.TryGetValue(StrategyConfiguration.EXCHANGE, out ExchangeName)) IsInitialised = false;
+            StrategyId = StrategyConfig.Config.StrategyId;
+            if (String.IsNullOrEmpty(StrategyId)) IsInitialised = false;
+
+            ExchangeName = StrategyConfig.Config.Exchange;
+            if (String.IsNullOrEmpty(ExchangeName)) IsInitialised = false;
         }
 
         protected override void OnMessageReceived(Object o, MessageReceivedEventArgs e)
         {
-            //Only interested in messages for this Strategy
-            if (e.Message.StrategyId != StrategyId) return;
+            //Check if msg is Strategy specific
+            if (e.Message.IsStrategyIdRequired)
+            {
+                if (e.Message.StrategyId != StrategyId) return;
+            }
 
             switch (e.Message.Type)
             {
@@ -35,8 +41,8 @@ namespace Niffler.Rules
                     break;
                 default:
                     {
-                    if (!IsInitialised && !IsActive) return;
-                    PublishResult(ExcuteRuleLogic(e.Message));
+                    if (IsInitialised && IsActive)
+                            PublishResult(ExcuteRuleLogic(e.Message));
                     break;
                     }
             };
@@ -83,6 +89,7 @@ namespace Niffler.Rules
         {
             State stateUpdate = new State()
             {
+                Key = key,
                 ValueType = State.Types.ValueType.Bool,
                 BoolValue = value
             };
@@ -95,6 +102,7 @@ namespace Niffler.Rules
         {
             State stateUpdate = new State()
             {
+                Key = key,
                 ValueType = State.Types.ValueType.String,
                 StringValue = value
             };
@@ -107,6 +115,7 @@ namespace Niffler.Rules
         {
             State stateUpdate = new State()
             {
+                Key = key,
                 ValueType = State.Types.ValueType.Double,
                 DoubleValue = value
             };
@@ -116,9 +125,9 @@ namespace Niffler.Rules
 
         protected bool IsTickMessageEmpty(Niffle message)
         {
-            if (message.Type != Niffle.Types.Type.Tick) return false;
-            if (message.Tick == null) return false;
-            return true;
+            if (message.Type != Niffle.Types.Type.Tick) return true;
+            if (message.Tick == null) return true;
+            return false;
         }
 
         protected bool IsOnPositionMessageEmpty(Niffle message)

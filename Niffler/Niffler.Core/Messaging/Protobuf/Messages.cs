@@ -23,77 +23,78 @@ namespace Niffler.Messaging.Protobuf {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
             "Cg5NZXNzYWdlcy5wcm90bxIaTmlmZmxlci5NZXNzYWdpbmcuUHJvdG9idWYi",
-            "0wUKBk5pZmZsZRISCgpzdHJhdGVneUlkGAEgASgJEhEKCXRpbWVTdGFtcBgC",
-            "IAEoAxI1CgR0eXBlGAMgASgOMicuTmlmZmxlci5NZXNzYWdpbmcuUHJvdG9i",
-            "dWYuTmlmZmxlLlR5cGUSLgoEdGljaxgEIAEoCzIgLk5pZmZsZXIuTWVzc2Fn",
-            "aW5nLlByb3RvYnVmLlRpY2sSNgoIcG9zaXRpb24YBSABKAsyJC5OaWZmbGVy",
-            "Lk1lc3NhZ2luZy5Qcm90b2J1Zi5Qb3NpdGlvbhI4Cglwb3NpdGlvbnMYBiAB",
-            "KAsyJS5OaWZmbGVyLk1lc3NhZ2luZy5Qcm90b2J1Zi5Qb3NpdGlvbnMSMAoF",
-            "b3JkZXIYByABKAsyIS5OaWZmbGVyLk1lc3NhZ2luZy5Qcm90b2J1Zi5PcmRl",
-            "chIyCgZvcmRlcnMYCCABKAsyIi5OaWZmbGVyLk1lc3NhZ2luZy5Qcm90b2J1",
-            "Zi5PcmRlcnMSNAoHc2VydmljZRgJIAEoCzIjLk5pZmZsZXIuTWVzc2FnaW5n",
-            "LlByb3RvYnVmLlNlcnZpY2USMAoFc3RhdGUYCiABKAsyIS5OaWZmbGVyLk1l",
-            "c3NhZ2luZy5Qcm90b2J1Zi5TdGF0ZRIwCgV0cmFkZRgLIAEoCzIhLk5pZmZs",
-            "ZXIuTWVzc2FnaW5nLlByb3RvYnVmLlRyYWRlEjIKBnRyYWRlcxgMIAEoCzIi",
-            "Lk5pZmZsZXIuTWVzc2FnaW5nLlByb3RvYnVmLlRyYWRlcxIwCgVlcnJvchgN",
-            "IAEoCzIhLk5pZmZsZXIuTWVzc2FnaW5nLlByb3RvYnVmLkVycm9yImMKBFR5",
-            "cGUSCAoEVElDSxAAEgwKCFBPU0lUSU9OEAESCQoFT1JERVIQAhILCgdTRVJW",
-            "SUNFEAMSCQoFU1RBVEUQBBIJCgVUUkFERRAFEgoKBlRSQURFUxAGEgkKBUVS",
-            "Uk9SEAciJgoFRXJyb3ISDAoEY29kZRgBIAEoCRIPCgdtZXNzYWdlGAIgASgJ",
-            "IpsBCgRUaWNrEgwKBGNvZGUYASABKAkSCwoDYXNrGAIgASgBEgsKA2JpZBgD",
-            "IAEoARIOCgZkaWdpdHMYBCABKAUSDwoHcGlwU2l6ZRgFIAEoARIQCgh0aWNr",
-            "U2l6ZRgGIAEoARIOCgZzcHJlYWQYByABKAESEQoJdGltZVN0YW1wGAggASgD",
-            "EhUKDWlzQmFja1Rlc3RpbmcYCSABKAgi0wMKCFBvc2l0aW9uEg0KBWxhYmVs",
-            "GAEgASgJEgoKAmlkGAIgASgFEhIKCnN5bWJvbENvZGUYAyABKAkSQQoJdHJh",
-            "ZGVUeXBlGAQgASgOMi4uTmlmZmxlci5NZXNzYWdpbmcuUHJvdG9idWYuUG9z",
-            "aXRpb24uVHJhZGVUeXBlEg4KBnZvbHVtZRgFIAEoAxISCgplbnRyeVByaWNl",
-            "GAYgASgBEhUKDXN0b3BMb3NzUHJpY2UYByABKAESFwoPdGFrZVByb2ZpdFBy",
-            "aWNlGAggASgBEgwKBHBpcHMYCSABKAESEQoJZW50cnlUaW1lGAogASgDEhEK",
-            "CWNsb3NlVGltZRgLIAEoAxISCgpjbG9zZVByaWNlGAwgASgBEhMKC2dyb3Nz",
-            "UHJvZml0GA0gASgBEkUKC3N0YXRlQ2hhbmdlGA4gASgOMjAuTmlmZmxlci5N",
-            "ZXNzYWdpbmcuUHJvdG9idWYuUG9zaXRpb24uU3RhdGVDaGFuZ2UiHgoJVHJh",
-            "ZGVUeXBlEgcKA0JVWRAAEggKBFNFTEwQASI9CgtTdGF0ZUNoYW5nZRIICgRO",
-            "T05FEAASCgoGT1BFTkVEEAESCgoGQ0xPU0VEEAISDAoITU9ESUZJRUQQAyJS",
-            "CglQb3NpdGlvbnMSDQoFQ291bnQYASABKAUSNgoIcG9zaXRpb24YAiADKAsy",
-            "JC5OaWZmbGVyLk1lc3NhZ2luZy5Qcm90b2J1Zi5Qb3NpdGlvbiK8BAoFT3Jk",
-            "ZXISDQoFbGFiZWwYASABKAkSCgoCaWQYAiABKAUSEgoKc3ltYm9sQ29kZRgD",
-            "IAEoCRI+CglvcmRlclR5cGUYBCABKA4yKy5OaWZmbGVyLk1lc3NhZ2luZy5Q",
-            "cm90b2J1Zi5PcmRlci5PcmRlclR5cGUSPgoJdHJhZGVUeXBlGAUgASgOMisu",
-            "TmlmZmxlci5NZXNzYWdpbmcuUHJvdG9idWYuT3JkZXIuVHJhZGVUeXBlEg4K",
-            "BnZvbHVtZRgGIAEoAxIYChB0YXJnZXRFbnRyeVByaWNlGAcgASgBEhUKDXN0",
-            "b3BMb3NzUHJpY2UYCCABKAESFAoMc3RvcExvc3NQaXBzGAkgASgBEhcKD3Rh",
-            "a2VQcm9maXRQcmljZRgKIAEoARIWCg50YWtlUHJvZml0UGlwcxgLIAEoARIS",
-            "CgpleHBpcnlUaW1lGAwgASgDEhEKCWVudHJ5VGltZRgNIAEoAxJCCgtzdGF0",
-            "ZUNoYW5nZRgOIAEoDjItLk5pZmZsZXIuTWVzc2FnaW5nLlByb3RvYnVmLk9y",
-            "ZGVyLlN0YXRlQ2hhbmdlIi8KCU9yZGVyVHlwZRIJCgVMSU1JVBAAEggKBFNU",
-            "T1AQARINCglTVE9QTElNSVQQAiIeCglUcmFkZVR5cGUSBwoDQlVZEAASCAoE",
-            "U0VMTBABIkAKC1N0YXRlQ2hhbmdlEggKBE5PTkUQABIKCgZQTEFDRUQQARIN",
-            "CglDQU5DRUxMRUQQAhIMCghNT0RJRklFRBADIkkKBk9yZGVycxINCgVDb3Vu",
-            "dBgBIAEoBRIwCgVvcmRlchgCIAMoCzIhLk5pZmZsZXIuTWVzc2FnaW5nLlBy",
-            "b3RvYnVmLk9yZGVyIsABCgVTdGF0ZRILCgNrZXkYASABKAkSPgoJdmFsdWVU",
-            "eXBlGAIgASgOMisuTmlmZmxlci5NZXNzYWdpbmcuUHJvdG9idWYuU3RhdGUu",
-            "VmFsdWVUeXBlEhMKC3N0cmluZ1ZhbHVlGAMgASgJEhEKCWJvb2xWYWx1ZRgE",
-            "IAEoCBITCgtkb3VibGVWYWx1ZRgFIAEoASItCglWYWx1ZVR5cGUSCgoGU1RS",
-            "SU5HEAASCAoEQk9PTBABEgoKBkRPVUJMRRACIrcBCgdTZXJ2aWNlEjwKB2Nv",
-            "bW1hbmQYASABKA4yKy5OaWZmbGVyLk1lc3NhZ2luZy5Qcm90b2J1Zi5TZXJ2",
-            "aWNlLkNvbW1hbmQSDwoHc3VjY2VzcxgCIAEoCBIRCglxdWV1ZU5hbWUYAyAB",
-            "KAkiSgoHQ29tbWFuZBIJCgVSRVNFVBAAEgoKBk5PVElGWRABEgsKB1NDQUxF",
-            "VVAQAhINCglTQ0FMRURPV04QAxIMCghTSFVURE9XThAEIu0CCgVUcmFkZRJC",
-            "Cgt0cmFkZUFjdGlvbhgBIAEoDjItLk5pZmZsZXIuTWVzc2FnaW5nLlByb3Rv",
-            "YnVmLlRyYWRlLlRyYWRlQWN0aW9uEjAKBW9yZGVyGAIgASgLMiEuTmlmZmxl",
-            "ci5NZXNzYWdpbmcuUHJvdG9idWYuT3JkZXISNgoIcG9zaXRpb24YAyABKAsy",
-            "JC5OaWZmbGVyLk1lc3NhZ2luZy5Qcm90b2J1Zi5Qb3NpdGlvbiK1AQoLVHJh",
-            "ZGVBY3Rpb24SBwoDQlVZEAASCAoEU0VMTBABEhEKDUJVWUxJTUlUT1JERVIQ",
-            "AxISCg5TRUxMTElNSVRPUkRFUhAEEhAKDEJVWVNUT1BPUkRFUhAFEhEKDVNF",
-            "TExTVE9QT1JERVIQBhISCg5NT0RJRllQT1NJVElPThAHEg8KC01PRElGWU9S",
-            "REVSEAgSEQoNQ0xPU0VQT1NJVElPThAJEg8KC0NBTkNFTE9SREVSEAoiOgoG",
-            "VHJhZGVzEjAKBXRyYWRlGAEgAygLMiEuTmlmZmxlci5NZXNzYWdpbmcuUHJv",
-            "dG9idWYuVHJhZGVCHaoCGk5pZmZsZXIuTWVzc2FnaW5nLlByb3RvYnVmYgZw",
-            "cm90bzM="));
+            "8QUKBk5pZmZsZRIcChRpc1N0cmF0ZWd5SWRSZXF1aXJlZBgBIAEoCBISCgpz",
+            "dHJhdGVneUlkGAIgASgJEhEKCXRpbWVTdGFtcBgDIAEoAxI1CgR0eXBlGAQg",
+            "ASgOMicuTmlmZmxlci5NZXNzYWdpbmcuUHJvdG9idWYuTmlmZmxlLlR5cGUS",
+            "LgoEdGljaxgFIAEoCzIgLk5pZmZsZXIuTWVzc2FnaW5nLlByb3RvYnVmLlRp",
+            "Y2sSNgoIcG9zaXRpb24YBiABKAsyJC5OaWZmbGVyLk1lc3NhZ2luZy5Qcm90",
+            "b2J1Zi5Qb3NpdGlvbhI4Cglwb3NpdGlvbnMYByABKAsyJS5OaWZmbGVyLk1l",
+            "c3NhZ2luZy5Qcm90b2J1Zi5Qb3NpdGlvbnMSMAoFb3JkZXIYCCABKAsyIS5O",
+            "aWZmbGVyLk1lc3NhZ2luZy5Qcm90b2J1Zi5PcmRlchIyCgZvcmRlcnMYCSAB",
+            "KAsyIi5OaWZmbGVyLk1lc3NhZ2luZy5Qcm90b2J1Zi5PcmRlcnMSNAoHc2Vy",
+            "dmljZRgKIAEoCzIjLk5pZmZsZXIuTWVzc2FnaW5nLlByb3RvYnVmLlNlcnZp",
+            "Y2USMAoFc3RhdGUYCyABKAsyIS5OaWZmbGVyLk1lc3NhZ2luZy5Qcm90b2J1",
+            "Zi5TdGF0ZRIwCgV0cmFkZRgMIAEoCzIhLk5pZmZsZXIuTWVzc2FnaW5nLlBy",
+            "b3RvYnVmLlRyYWRlEjIKBnRyYWRlcxgNIAEoCzIiLk5pZmZsZXIuTWVzc2Fn",
+            "aW5nLlByb3RvYnVmLlRyYWRlcxIwCgVlcnJvchgOIAEoCzIhLk5pZmZsZXIu",
+            "TWVzc2FnaW5nLlByb3RvYnVmLkVycm9yImMKBFR5cGUSCAoEVElDSxAAEgwK",
+            "CFBPU0lUSU9OEAESCQoFT1JERVIQAhILCgdTRVJWSUNFEAMSCQoFU1RBVEUQ",
+            "BBIJCgVUUkFERRAFEgoKBlRSQURFUxAGEgkKBUVSUk9SEAciJgoFRXJyb3IS",
+            "DAoEY29kZRgBIAEoCRIPCgdtZXNzYWdlGAIgASgJIpsBCgRUaWNrEgwKBGNv",
+            "ZGUYASABKAkSCwoDYXNrGAIgASgBEgsKA2JpZBgDIAEoARIOCgZkaWdpdHMY",
+            "BCABKAUSDwoHcGlwU2l6ZRgFIAEoARIQCgh0aWNrU2l6ZRgGIAEoARIOCgZz",
+            "cHJlYWQYByABKAESEQoJdGltZVN0YW1wGAggASgDEhUKDWlzQmFja1Rlc3Rp",
+            "bmcYCSABKAgi0wMKCFBvc2l0aW9uEg0KBWxhYmVsGAEgASgJEgoKAmlkGAIg",
+            "ASgFEhIKCnN5bWJvbENvZGUYAyABKAkSQQoJdHJhZGVUeXBlGAQgASgOMi4u",
+            "TmlmZmxlci5NZXNzYWdpbmcuUHJvdG9idWYuUG9zaXRpb24uVHJhZGVUeXBl",
+            "Eg4KBnZvbHVtZRgFIAEoAxISCgplbnRyeVByaWNlGAYgASgBEhUKDXN0b3BM",
+            "b3NzUHJpY2UYByABKAESFwoPdGFrZVByb2ZpdFByaWNlGAggASgBEgwKBHBp",
+            "cHMYCSABKAESEQoJZW50cnlUaW1lGAogASgDEhEKCWNsb3NlVGltZRgLIAEo",
+            "AxISCgpjbG9zZVByaWNlGAwgASgBEhMKC2dyb3NzUHJvZml0GA0gASgBEkUK",
+            "C3N0YXRlQ2hhbmdlGA4gASgOMjAuTmlmZmxlci5NZXNzYWdpbmcuUHJvdG9i",
+            "dWYuUG9zaXRpb24uU3RhdGVDaGFuZ2UiHgoJVHJhZGVUeXBlEgcKA0JVWRAA",
+            "EggKBFNFTEwQASI9CgtTdGF0ZUNoYW5nZRIICgROT05FEAASCgoGT1BFTkVE",
+            "EAESCgoGQ0xPU0VEEAISDAoITU9ESUZJRUQQAyJSCglQb3NpdGlvbnMSDQoF",
+            "Q291bnQYASABKAUSNgoIcG9zaXRpb24YAiADKAsyJC5OaWZmbGVyLk1lc3Nh",
+            "Z2luZy5Qcm90b2J1Zi5Qb3NpdGlvbiK8BAoFT3JkZXISDQoFbGFiZWwYASAB",
+            "KAkSCgoCaWQYAiABKAUSEgoKc3ltYm9sQ29kZRgDIAEoCRI+CglvcmRlclR5",
+            "cGUYBCABKA4yKy5OaWZmbGVyLk1lc3NhZ2luZy5Qcm90b2J1Zi5PcmRlci5P",
+            "cmRlclR5cGUSPgoJdHJhZGVUeXBlGAUgASgOMisuTmlmZmxlci5NZXNzYWdp",
+            "bmcuUHJvdG9idWYuT3JkZXIuVHJhZGVUeXBlEg4KBnZvbHVtZRgGIAEoAxIY",
+            "ChB0YXJnZXRFbnRyeVByaWNlGAcgASgBEhUKDXN0b3BMb3NzUHJpY2UYCCAB",
+            "KAESFAoMc3RvcExvc3NQaXBzGAkgASgBEhcKD3Rha2VQcm9maXRQcmljZRgK",
+            "IAEoARIWCg50YWtlUHJvZml0UGlwcxgLIAEoARISCgpleHBpcnlUaW1lGAwg",
+            "ASgDEhEKCWVudHJ5VGltZRgNIAEoAxJCCgtzdGF0ZUNoYW5nZRgOIAEoDjIt",
+            "Lk5pZmZsZXIuTWVzc2FnaW5nLlByb3RvYnVmLk9yZGVyLlN0YXRlQ2hhbmdl",
+            "Ii8KCU9yZGVyVHlwZRIJCgVMSU1JVBAAEggKBFNUT1AQARINCglTVE9QTElN",
+            "SVQQAiIeCglUcmFkZVR5cGUSBwoDQlVZEAASCAoEU0VMTBABIkAKC1N0YXRl",
+            "Q2hhbmdlEggKBE5PTkUQABIKCgZQTEFDRUQQARINCglDQU5DRUxMRUQQAhIM",
+            "CghNT0RJRklFRBADIkkKBk9yZGVycxINCgVDb3VudBgBIAEoBRIwCgVvcmRl",
+            "chgCIAMoCzIhLk5pZmZsZXIuTWVzc2FnaW5nLlByb3RvYnVmLk9yZGVyIs4B",
+            "CgVTdGF0ZRILCgNrZXkYASABKAkSPgoJdmFsdWVUeXBlGAIgASgOMisuTmlm",
+            "Zmxlci5NZXNzYWdpbmcuUHJvdG9idWYuU3RhdGUuVmFsdWVUeXBlEhMKC3N0",
+            "cmluZ1ZhbHVlGAMgASgJEhEKCWJvb2xWYWx1ZRgEIAEoCBITCgtkb3VibGVW",
+            "YWx1ZRgFIAEoASI7CglWYWx1ZVR5cGUSCgoGU1RSSU5HEAASCAoEQk9PTBAB",
+            "EgoKBkRPVUJMRRACEgwKCERBVEVUSU1FEAMitwEKB1NlcnZpY2USPAoHY29t",
+            "bWFuZBgBIAEoDjIrLk5pZmZsZXIuTWVzc2FnaW5nLlByb3RvYnVmLlNlcnZp",
+            "Y2UuQ29tbWFuZBIPCgdzdWNjZXNzGAIgASgIEhEKCXF1ZXVlTmFtZRgDIAEo",
+            "CSJKCgdDb21tYW5kEgkKBVJFU0VUEAASCgoGTk9USUZZEAESCwoHU0NBTEVV",
+            "UBACEg0KCVNDQUxFRE9XThADEgwKCFNIVVRET1dOEAQi7QIKBVRyYWRlEkIK",
+            "C3RyYWRlQWN0aW9uGAEgASgOMi0uTmlmZmxlci5NZXNzYWdpbmcuUHJvdG9i",
+            "dWYuVHJhZGUuVHJhZGVBY3Rpb24SMAoFb3JkZXIYAiABKAsyIS5OaWZmbGVy",
+            "Lk1lc3NhZ2luZy5Qcm90b2J1Zi5PcmRlchI2Cghwb3NpdGlvbhgDIAEoCzIk",
+            "Lk5pZmZsZXIuTWVzc2FnaW5nLlByb3RvYnVmLlBvc2l0aW9uIrUBCgtUcmFk",
+            "ZUFjdGlvbhIHCgNCVVkQABIICgRTRUxMEAESEQoNQlVZTElNSVRPUkRFUhAD",
+            "EhIKDlNFTExMSU1JVE9SREVSEAQSEAoMQlVZU1RPUE9SREVSEAUSEQoNU0VM",
+            "TFNUT1BPUkRFUhAGEhIKDk1PRElGWVBPU0lUSU9OEAcSDwoLTU9ESUZZT1JE",
+            "RVIQCBIRCg1DTE9TRVBPU0lUSU9OEAkSDwoLQ0FOQ0VMT1JERVIQCiI6CgZU",
+            "cmFkZXMSMAoFdHJhZGUYASADKAsyIS5OaWZmbGVyLk1lc3NhZ2luZy5Qcm90",
+            "b2J1Zi5UcmFkZUIdqgIaTmlmZmxlci5NZXNzYWdpbmcuUHJvdG9idWZiBnBy",
+            "b3RvMw=="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::Niffler.Messaging.Protobuf.Niffle), global::Niffler.Messaging.Protobuf.Niffle.Parser, new[]{ "StrategyId", "TimeStamp", "Type", "Tick", "Position", "Positions", "Order", "Orders", "Service", "State", "Trade", "Trades", "Error" }, null, new[]{ typeof(global::Niffler.Messaging.Protobuf.Niffle.Types.Type) }, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Niffler.Messaging.Protobuf.Niffle), global::Niffler.Messaging.Protobuf.Niffle.Parser, new[]{ "IsStrategyIdRequired", "StrategyId", "TimeStamp", "Type", "Tick", "Position", "Positions", "Order", "Orders", "Service", "State", "Trade", "Trades", "Error" }, null, new[]{ typeof(global::Niffler.Messaging.Protobuf.Niffle.Types.Type) }, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Niffler.Messaging.Protobuf.Error), global::Niffler.Messaging.Protobuf.Error.Parser, new[]{ "Code", "Message" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Niffler.Messaging.Protobuf.Tick), global::Niffler.Messaging.Protobuf.Tick.Parser, new[]{ "Code", "Ask", "Bid", "Digits", "PipSize", "TickSize", "Spread", "TimeStamp", "IsBackTesting" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Niffler.Messaging.Protobuf.Position), global::Niffler.Messaging.Protobuf.Position.Parser, new[]{ "Label", "Id", "SymbolCode", "TradeType", "Volume", "EntryPrice", "StopLossPrice", "TakeProfitPrice", "Pips", "EntryTime", "CloseTime", "ClosePrice", "GrossProfit", "StateChange" }, null, new[]{ typeof(global::Niffler.Messaging.Protobuf.Position.Types.TradeType), typeof(global::Niffler.Messaging.Protobuf.Position.Types.StateChange) }, null),
@@ -134,6 +135,7 @@ namespace Niffler.Messaging.Protobuf {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public Niffle(Niffle other) : this() {
+      isStrategyIdRequired_ = other.isStrategyIdRequired_;
       strategyId_ = other.strategyId_;
       timeStamp_ = other.timeStamp_;
       type_ = other.type_;
@@ -154,8 +156,19 @@ namespace Niffler.Messaging.Protobuf {
       return new Niffle(this);
     }
 
+    /// <summary>Field number for the "isStrategyIdRequired" field.</summary>
+    public const int IsStrategyIdRequiredFieldNumber = 1;
+    private bool isStrategyIdRequired_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool IsStrategyIdRequired {
+      get { return isStrategyIdRequired_; }
+      set {
+        isStrategyIdRequired_ = value;
+      }
+    }
+
     /// <summary>Field number for the "strategyId" field.</summary>
-    public const int StrategyIdFieldNumber = 1;
+    public const int StrategyIdFieldNumber = 2;
     private string strategyId_ = "";
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public string StrategyId {
@@ -166,7 +179,7 @@ namespace Niffler.Messaging.Protobuf {
     }
 
     /// <summary>Field number for the "timeStamp" field.</summary>
-    public const int TimeStampFieldNumber = 2;
+    public const int TimeStampFieldNumber = 3;
     private long timeStamp_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public long TimeStamp {
@@ -177,7 +190,7 @@ namespace Niffler.Messaging.Protobuf {
     }
 
     /// <summary>Field number for the "type" field.</summary>
-    public const int TypeFieldNumber = 3;
+    public const int TypeFieldNumber = 4;
     private global::Niffler.Messaging.Protobuf.Niffle.Types.Type type_ = 0;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public global::Niffler.Messaging.Protobuf.Niffle.Types.Type Type {
@@ -188,7 +201,7 @@ namespace Niffler.Messaging.Protobuf {
     }
 
     /// <summary>Field number for the "tick" field.</summary>
-    public const int TickFieldNumber = 4;
+    public const int TickFieldNumber = 5;
     private global::Niffler.Messaging.Protobuf.Tick tick_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public global::Niffler.Messaging.Protobuf.Tick Tick {
@@ -199,7 +212,7 @@ namespace Niffler.Messaging.Protobuf {
     }
 
     /// <summary>Field number for the "position" field.</summary>
-    public const int PositionFieldNumber = 5;
+    public const int PositionFieldNumber = 6;
     private global::Niffler.Messaging.Protobuf.Position position_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public global::Niffler.Messaging.Protobuf.Position Position {
@@ -210,7 +223,7 @@ namespace Niffler.Messaging.Protobuf {
     }
 
     /// <summary>Field number for the "positions" field.</summary>
-    public const int PositionsFieldNumber = 6;
+    public const int PositionsFieldNumber = 7;
     private global::Niffler.Messaging.Protobuf.Positions positions_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public global::Niffler.Messaging.Protobuf.Positions Positions {
@@ -221,7 +234,7 @@ namespace Niffler.Messaging.Protobuf {
     }
 
     /// <summary>Field number for the "order" field.</summary>
-    public const int OrderFieldNumber = 7;
+    public const int OrderFieldNumber = 8;
     private global::Niffler.Messaging.Protobuf.Order order_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public global::Niffler.Messaging.Protobuf.Order Order {
@@ -232,7 +245,7 @@ namespace Niffler.Messaging.Protobuf {
     }
 
     /// <summary>Field number for the "orders" field.</summary>
-    public const int OrdersFieldNumber = 8;
+    public const int OrdersFieldNumber = 9;
     private global::Niffler.Messaging.Protobuf.Orders orders_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public global::Niffler.Messaging.Protobuf.Orders Orders {
@@ -243,7 +256,7 @@ namespace Niffler.Messaging.Protobuf {
     }
 
     /// <summary>Field number for the "service" field.</summary>
-    public const int ServiceFieldNumber = 9;
+    public const int ServiceFieldNumber = 10;
     private global::Niffler.Messaging.Protobuf.Service service_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public global::Niffler.Messaging.Protobuf.Service Service {
@@ -254,7 +267,7 @@ namespace Niffler.Messaging.Protobuf {
     }
 
     /// <summary>Field number for the "state" field.</summary>
-    public const int StateFieldNumber = 10;
+    public const int StateFieldNumber = 11;
     private global::Niffler.Messaging.Protobuf.State state_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public global::Niffler.Messaging.Protobuf.State State {
@@ -265,7 +278,7 @@ namespace Niffler.Messaging.Protobuf {
     }
 
     /// <summary>Field number for the "trade" field.</summary>
-    public const int TradeFieldNumber = 11;
+    public const int TradeFieldNumber = 12;
     private global::Niffler.Messaging.Protobuf.Trade trade_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public global::Niffler.Messaging.Protobuf.Trade Trade {
@@ -276,7 +289,7 @@ namespace Niffler.Messaging.Protobuf {
     }
 
     /// <summary>Field number for the "trades" field.</summary>
-    public const int TradesFieldNumber = 12;
+    public const int TradesFieldNumber = 13;
     private global::Niffler.Messaging.Protobuf.Trades trades_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public global::Niffler.Messaging.Protobuf.Trades Trades {
@@ -287,7 +300,7 @@ namespace Niffler.Messaging.Protobuf {
     }
 
     /// <summary>Field number for the "error" field.</summary>
-    public const int ErrorFieldNumber = 13;
+    public const int ErrorFieldNumber = 14;
     private global::Niffler.Messaging.Protobuf.Error error_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public global::Niffler.Messaging.Protobuf.Error Error {
@@ -310,6 +323,7 @@ namespace Niffler.Messaging.Protobuf {
       if (ReferenceEquals(other, this)) {
         return true;
       }
+      if (IsStrategyIdRequired != other.IsStrategyIdRequired) return false;
       if (StrategyId != other.StrategyId) return false;
       if (TimeStamp != other.TimeStamp) return false;
       if (Type != other.Type) return false;
@@ -329,6 +343,7 @@ namespace Niffler.Messaging.Protobuf {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override int GetHashCode() {
       int hash = 1;
+      if (IsStrategyIdRequired != false) hash ^= IsStrategyIdRequired.GetHashCode();
       if (StrategyId.Length != 0) hash ^= StrategyId.GetHashCode();
       if (TimeStamp != 0L) hash ^= TimeStamp.GetHashCode();
       if (Type != 0) hash ^= Type.GetHashCode();
@@ -352,56 +367,60 @@ namespace Niffler.Messaging.Protobuf {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void WriteTo(pb::CodedOutputStream output) {
+      if (IsStrategyIdRequired != false) {
+        output.WriteRawTag(8);
+        output.WriteBool(IsStrategyIdRequired);
+      }
       if (StrategyId.Length != 0) {
-        output.WriteRawTag(10);
+        output.WriteRawTag(18);
         output.WriteString(StrategyId);
       }
       if (TimeStamp != 0L) {
-        output.WriteRawTag(16);
+        output.WriteRawTag(24);
         output.WriteInt64(TimeStamp);
       }
       if (Type != 0) {
-        output.WriteRawTag(24);
+        output.WriteRawTag(32);
         output.WriteEnum((int) Type);
       }
       if (tick_ != null) {
-        output.WriteRawTag(34);
+        output.WriteRawTag(42);
         output.WriteMessage(Tick);
       }
       if (position_ != null) {
-        output.WriteRawTag(42);
+        output.WriteRawTag(50);
         output.WriteMessage(Position);
       }
       if (positions_ != null) {
-        output.WriteRawTag(50);
+        output.WriteRawTag(58);
         output.WriteMessage(Positions);
       }
       if (order_ != null) {
-        output.WriteRawTag(58);
+        output.WriteRawTag(66);
         output.WriteMessage(Order);
       }
       if (orders_ != null) {
-        output.WriteRawTag(66);
+        output.WriteRawTag(74);
         output.WriteMessage(Orders);
       }
       if (service_ != null) {
-        output.WriteRawTag(74);
+        output.WriteRawTag(82);
         output.WriteMessage(Service);
       }
       if (state_ != null) {
-        output.WriteRawTag(82);
+        output.WriteRawTag(90);
         output.WriteMessage(State);
       }
       if (trade_ != null) {
-        output.WriteRawTag(90);
+        output.WriteRawTag(98);
         output.WriteMessage(Trade);
       }
       if (trades_ != null) {
-        output.WriteRawTag(98);
+        output.WriteRawTag(106);
         output.WriteMessage(Trades);
       }
       if (error_ != null) {
-        output.WriteRawTag(106);
+        output.WriteRawTag(114);
         output.WriteMessage(Error);
       }
     }
@@ -409,6 +428,9 @@ namespace Niffler.Messaging.Protobuf {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public int CalculateSize() {
       int size = 0;
+      if (IsStrategyIdRequired != false) {
+        size += 1 + 1;
+      }
       if (StrategyId.Length != 0) {
         size += 1 + pb::CodedOutputStream.ComputeStringSize(StrategyId);
       }
@@ -455,6 +477,9 @@ namespace Niffler.Messaging.Protobuf {
     public void MergeFrom(Niffle other) {
       if (other == null) {
         return;
+      }
+      if (other.IsStrategyIdRequired != false) {
+        IsStrategyIdRequired = other.IsStrategyIdRequired;
       }
       if (other.StrategyId.Length != 0) {
         StrategyId = other.StrategyId;
@@ -535,82 +560,86 @@ namespace Niffler.Messaging.Protobuf {
           default:
             input.SkipLastField();
             break;
-          case 10: {
+          case 8: {
+            IsStrategyIdRequired = input.ReadBool();
+            break;
+          }
+          case 18: {
             StrategyId = input.ReadString();
             break;
           }
-          case 16: {
+          case 24: {
             TimeStamp = input.ReadInt64();
             break;
           }
-          case 24: {
+          case 32: {
             type_ = (global::Niffler.Messaging.Protobuf.Niffle.Types.Type) input.ReadEnum();
             break;
           }
-          case 34: {
+          case 42: {
             if (tick_ == null) {
               tick_ = new global::Niffler.Messaging.Protobuf.Tick();
             }
             input.ReadMessage(tick_);
             break;
           }
-          case 42: {
+          case 50: {
             if (position_ == null) {
               position_ = new global::Niffler.Messaging.Protobuf.Position();
             }
             input.ReadMessage(position_);
             break;
           }
-          case 50: {
+          case 58: {
             if (positions_ == null) {
               positions_ = new global::Niffler.Messaging.Protobuf.Positions();
             }
             input.ReadMessage(positions_);
             break;
           }
-          case 58: {
+          case 66: {
             if (order_ == null) {
               order_ = new global::Niffler.Messaging.Protobuf.Order();
             }
             input.ReadMessage(order_);
             break;
           }
-          case 66: {
+          case 74: {
             if (orders_ == null) {
               orders_ = new global::Niffler.Messaging.Protobuf.Orders();
             }
             input.ReadMessage(orders_);
             break;
           }
-          case 74: {
+          case 82: {
             if (service_ == null) {
               service_ = new global::Niffler.Messaging.Protobuf.Service();
             }
             input.ReadMessage(service_);
             break;
           }
-          case 82: {
+          case 90: {
             if (state_ == null) {
               state_ = new global::Niffler.Messaging.Protobuf.State();
             }
             input.ReadMessage(state_);
             break;
           }
-          case 90: {
+          case 98: {
             if (trade_ == null) {
               trade_ = new global::Niffler.Messaging.Protobuf.Trade();
             }
             input.ReadMessage(trade_);
             break;
           }
-          case 98: {
+          case 106: {
             if (trades_ == null) {
               trades_ = new global::Niffler.Messaging.Protobuf.Trades();
             }
             input.ReadMessage(trades_);
             break;
           }
-          case 106: {
+          case 114: {
             if (error_ == null) {
               error_ = new global::Niffler.Messaging.Protobuf.Error();
             }
@@ -2642,6 +2671,7 @@ namespace Niffler.Messaging.Protobuf {
         [pbr::OriginalName("STRING")] String = 0,
         [pbr::OriginalName("BOOL")] Bool = 1,
         [pbr::OriginalName("DOUBLE")] Double = 2,
+        [pbr::OriginalName("DATETIME")] Datetime = 3,
       }
 
     }

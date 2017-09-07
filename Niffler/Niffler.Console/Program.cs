@@ -7,13 +7,13 @@ namespace Niffler.App
 {
     class Program
     {
-        public static AppConfiguration LoadJson()
+        public static JsonAppConfig LoadJson()
         {
-            AppConfiguration appConfig;
+            JsonAppConfig appConfig;
 
             using (StreamReader file = File.OpenText(@"userParams.json"))
             {
-                appConfig = JsonConvert.DeserializeObject<AppConfiguration>(file.ToString());
+                appConfig = JsonConvert.DeserializeObject<JsonAppConfig>(file.ReadToEnd());
             }
 
             return appConfig;
@@ -22,10 +22,11 @@ namespace Niffler.App
         public static void Main()
         {
             //Fetch StrategyConfig requried
-            AppConfiguration StrategyConfig = LoadJson();
+            JsonAppConfig appConfig = LoadJson();
 
             //Set up Micro-services Required
-            ServicesManager ServicesManager = new ServicesManager(StrategyConfig);
+            ServicesManager ServicesManager = new ServicesManager(appConfig);
+            ServicesManager.Init();
         }
     }
 }

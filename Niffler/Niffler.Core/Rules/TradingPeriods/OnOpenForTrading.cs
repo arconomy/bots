@@ -27,10 +27,10 @@ namespace Niffler.Rules.TradingPeriods
         public override void Init()
         {
             //At a minumum need SymbolCode to determine TimeZone & OpenTime
-            if(StrategyConfig.Config.TryGetValue(StrategyConfiguration.EXCHANGE, out SymbolCode)) IsInitialised = false; ;
-            if (String.IsNullOrEmpty(SymbolCode)) IsInitialised = false; ;
-            if (RuleConfig.Params.TryGetValue(RuleConfiguration.OPENTIME, out object openTime)) IsInitialised = false; ;
-            if (TimeSpan.TryParse(openTime.ToString(), out OpenTime)) IsInitialised = false; ;
+            SymbolCode = StrategyConfig.Config.Exchange;
+            if (String.IsNullOrEmpty(SymbolCode)) IsInitialised = false;
+            if (!RuleConfig.Params.TryGetValue(RuleConfiguration.OPENTIME, out object openTime)) IsInitialised = false; ;
+            if (!TimeSpan.TryParse(openTime.ToString(), out OpenTime)) IsInitialised = false;
 
             //Configure which days of the week to trade
             if (RuleConfig.Params.TryGetValue(RuleConfiguration.OPENWEEKDAYS, out object openWeekDays))

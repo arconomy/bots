@@ -43,7 +43,6 @@ namespace Niffler.Services
 
         public void PublishOnTickEvent(Symbol symbol, cAlgo.API.Positions _positions, cAlgo.API.PendingOrders _orders, DateTime timeStamp, bool isBackTesting = false)
         {
-
             Utils.ParseOpenPositions(_positions, out Positions positions);
             Utils.ParsePendingOrders(_orders, out Orders orders);
                 
@@ -85,6 +84,9 @@ namespace Niffler.Services
             RoutingKey routingKey = new RoutingKey(e.EventArgs.RoutingKey);
             string action = routingKey.GetAction();
             string _event = routingKey.GetEvent();
+
+            //Check for init messages
+
 
             //Check it is a trade operation
             if (routingKey.GetActionAsEnum() != Messaging.RabbitMQ.Action.TRADEOPERATION) return;

@@ -94,7 +94,6 @@ namespace Niffler.Messaging.RabbitMQ
                     }
 
                 });
-                Console.WriteLine(" [x] Received '{0}':'{1}'", routingKey);
             }
         }
 

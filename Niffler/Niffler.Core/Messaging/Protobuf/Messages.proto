@@ -26,19 +26,20 @@ message Niffle {
 		TRADES = 6;
         ERROR = 7;
     }
-    string strategyId = 1;
-    int64 timeStamp = 2;
-    Type type = 3;
-    Tick tick = 4;
-    Position position = 5;
-    Positions positions = 6;
-    Order order = 7;
-    Orders orders = 8;
-    Service service = 9;
-    State state = 10;
-    Trade trade = 11;
-    Trades trades = 12;
-    Error error = 13;
+	bool isStrategyIdRequired = 1;
+    string strategyId = 2;
+    int64 timeStamp = 3;
+    Type type = 4;
+    Tick tick = 5;
+    Position position = 6;
+    Positions positions = 7;
+    Order order = 8;
+    Orders orders = 9;
+    Service service = 10;
+    State state = 11;
+    Trade trade = 12;
+    Trades trades = 13;
+    Error error = 14;
 }
 
 message Error {
@@ -141,6 +142,7 @@ message State  {
     STRING = 0;
     BOOL = 1;
     DOUBLE = 2;
+	DATETIME = 3;
     }
 
     string key = 1;

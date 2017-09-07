@@ -7,7 +7,7 @@ using Niffler.Services;
 using Niffler.Core.Strategy;
 using Niffler.Common;
 
-namespace Niffler.Rules
+namespace Niffler.Rules.TradingPeriods
 {
     class OnTerminateTime : IRule
     {
@@ -22,8 +22,8 @@ namespace Niffler.Rules
         public override void Init()
         {
             //At a minumum need SymbolCode & CloseTime or CloseMinsFromOpen
-            if (StrategyConfig.Config.TryGetValue(StrategyConfiguration.EXCHANGE, out SymbolCode)) IsInitialised = false;
-            if (SymbolCode == "" || SymbolCode == null) IsInitialised = false;
+            SymbolCode = StrategyConfig.Config.Exchange;
+            if (String.IsNullOrEmpty(SymbolCode)) IsInitialised = false;
 
             bool initSuccess = false;
             if (RuleConfig.Params.TryGetValue(RuleConfiguration.TERMINATEAFTEROPEN, out object terminateAfterOpen))
@@ -115,11 +115,11 @@ namespace Niffler.Rules
             //Listen for OnTick
             List<RoutingKey> routingKeys = RoutingKey.Create(Source.WILDCARD, Messaging.RabbitMQ.Action.WILDCARD, Event.ONTICK).ToList();
 
-            //Listen for Update State Notification from OnOpenForTrading
-            routingKeys.Add(RoutingKey.Create(nameof(OnOpenForTrading), Messaging.RabbitMQ.Action.UPDATESTATE, Event.WILDCARD));
+            //Listen for successful Service execution Notification from OnOpenForTrading
+            routingKeys.Add(RoutingKey.Create(nameof(OnOpenForTrading), Messaging.RabbitMQ.Action.NOTIFY, Event.WILDCARD));
 
             //Listen for Update State Notification from StateManager for the Open Time
-            routingKeys.Add(RoutingKey.Create(nameof(OnOpenForTrading), Messaging.RabbitMQ.Action.UPDATESTATE, Event.WILDCARD));
+            routingKeys.Add(RoutingKey.Create(nameof(StateManager), Messaging.RabbitMQ.Action.UPDATESTATE, Event.WILDCARD));
 
             return routingKeys;
         }

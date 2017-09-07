@@ -213,5 +213,11 @@ namespace Niffler.Common
             }
             return false;
         }
+
+
+        public static string GetStrategyId(string Label)
+        {
+            return Label.Substring(0, 5);
+        }
     }
 }

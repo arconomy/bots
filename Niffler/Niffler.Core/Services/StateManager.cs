@@ -26,7 +26,11 @@ namespace Niffler.Services
 
         public override void Init()
         {
-            if(!StrategyConfig.Config.TryGetValue(StrategyConfiguration.STRATEGYID, out StrategyId))  IsInitialised = false;
+            StrategyId = StrategyConfig.Config.StrategyId;
+            if (String.IsNullOrEmpty(StrategyId)) IsInitialised = false;
+
+            ExchangeName = StrategyConfig.Config.Exchange;
+            if (String.IsNullOrEmpty(ExchangeName)) IsInitialised = false;
         }
 
         protected override void OnMessageReceived(Object o, MessageReceivedEventArgs e)
@@ -49,6 +53,9 @@ namespace Niffler.Services
                 case Messaging.Protobuf.State.Types.ValueType.Double:
                     value = e.Message.State.DoubleValue;
                     break;
+                case Messaging.Protobuf.State.Types.ValueType.Datetime:
+                    if (!DateTime.TryParse(e.Message.State.StringValue, out DateTime datetime)) value = e.Message.State.StringValue;
+                    break;
             }
 
             if (value != null && State.ContainsKey(e.Message.State.Key))
@@ -59,6 +66,14 @@ namespace Niffler.Services
             {
                 State.Add(e.Message.State.Key, value);
             }
+
+            Console.WriteLine("****************");
+            foreach (KeyValuePair<string, object> kvp in State)
+            {
+                Console.WriteLine(kvp.Key + " = " + kvp.Value);
+            }
+
+
         }
             
         protected override List<RoutingKey> SetListeningRoutingKeys()

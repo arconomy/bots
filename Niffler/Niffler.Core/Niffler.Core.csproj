@@ -89,7 +89,7 @@
     <Compile Include="Services\ServicesManager.cs" />
     <Compile Include="Services\StateManager.cs" />
     <Compile Include="Services\TradeManager.cs" />
-    <Compile Include="Strategy\StrategyConfig.cs" />
+    <Compile Include="Strategy\JsonAppConfiguration.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config">
