@@ -4,11 +4,24 @@
     {
         //Static strings used for state update messages
         public static readonly string OPENTIME = "OpenTime";
+        public static readonly string CLOSETIME = "CloseTime";
+        public static readonly string REDUCERISKTIME = "ReduceRiskTime";
+        public static readonly string TERMINATETIME = "TerminateTime";
         public static readonly string ISOPENTIME = "IsOpenTime";
         public static readonly string ISREDUCERISKTIME = "IsReduceRiskTime";
         public static readonly string ISTERMINATETIME = "IsTerminateTime";
-        
-
+        public static readonly string OPENPRICE = "OpenPrice";
+        public static readonly string SPIKEUPPEAK = "SpikeUpPeak";
+        public static readonly string SPIKEDOWNPEAK = "SpikeDownPeak";
+        public static readonly string SPIKEDIRECTION = "SpikeDirection";
+        public static readonly string SPIKESTARTPRICE = "SpikeStartPrice";
+       
+        public enum SpikeDirection
+        {
+            NONE = 0,
+            UP = 1,
+            DOWN = 2
+        }
     }
 }
 

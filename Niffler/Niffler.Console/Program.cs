@@ -1,5 +1,5 @@
 ﻿using Newtonsoft.Json;
-using Niffler.Core.Strategy;
+using Niffler.Core.Config;
 using System.IO;
 using Niffler.Services;
 

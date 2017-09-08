@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Niffler.Messaging.Protobuf;
 using Niffler.Messaging.RabbitMQ;
 using Niffler.Common;
-using Niffler.Core.Strategy;
+using Niffler.Core.Config;
 
 namespace Niffler.Services
 {
@@ -34,10 +34,10 @@ namespace Niffler.Services
 
         public override void Init()
         {
-            StrategyId = StrategyConfig.Config.StrategyId;
+            StrategyId = StrategyConfig.StrategyId;
             if (String.IsNullOrEmpty(StrategyId)) IsInitialised = false;
 
-            ExchangeName = StrategyConfig.Config.Exchange;
+            ExchangeName = StrategyConfig.Exchange;
             if (String.IsNullOrEmpty(ExchangeName)) IsInitialised = false;
 
             ReportDirectory = "C:\\Users\\alist\\Desktop\\" + StrategyName;

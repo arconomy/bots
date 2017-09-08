@@ -29,7 +29,12 @@ namespace Niffler.Common
         public bool IsTimeAfter(DateTime nowUtc, TimeSpan timeToTest)
         {
             DateTime tzTime = TimeZoneInfo.ConvertTimeFromUtc(nowUtc, TimeZone);
-            return tzTime.TimeOfDay >= timeToTest;
+            if (tzTime.TimeOfDay >= timeToTest)
+            {
+                return true;
+            }
+            else
+                return false;
         }
     }
 }

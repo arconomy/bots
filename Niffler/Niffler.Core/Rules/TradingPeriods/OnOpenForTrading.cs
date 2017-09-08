@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Collections;
 using Niffler.Messaging.Protobuf;
 using Niffler.Common;
-using Niffler.Core.Strategy;
+using Niffler.Core.Config;
 
 namespace Niffler.Rules.TradingPeriods
 {
@@ -21,13 +21,14 @@ namespace Niffler.Rules.TradingPeriods
         private bool OpenSaturday;
         private bool OpenSunday;
         private List<DateTime> OpenDates = new List<DateTime>();
+        private bool OpenAnyDate;
 
         public OnOpenForTrading(StrategyConfiguration strategyConfig, RuleConfiguration ruleConfig) : base(strategyConfig, ruleConfig) { }
 
         public override void Init()
         {
             //At a minumum need SymbolCode to determine TimeZone & OpenTime
-            SymbolCode = StrategyConfig.Config.Exchange;
+            SymbolCode = StrategyConfig.Exchange;
             if (String.IsNullOrEmpty(SymbolCode)) IsInitialised = false;
             if (!RuleConfig.Params.TryGetValue(RuleConfiguration.OPENTIME, out object openTime)) IsInitialised = false; ;
             if (!TimeSpan.TryParse(openTime.ToString(), out OpenTime)) IsInitialised = false;
@@ -69,21 +70,27 @@ namespace Niffler.Rules.TradingPeriods
             }
 
             //Configure specific dates to trade
-            if (RuleConfig.Params.TryGetValue(RuleConfiguration.OPENDATES, out object openDates))
+             if (RuleConfig.Params.TryGetValue(RuleConfiguration.OPENANYDATE, out object openAnyDate))
             {
-                if (openDates is IEnumerable OpenDatesArray)
+                Boolean.TryParse(openAnyDate.ToString(), out OpenAnyDate);
+            }
+            
+            if(!OpenAnyDate)
+            {
+                if (RuleConfig.Params.TryGetValue(RuleConfiguration.OPENDATES, out object openDates))
                 {
-                    foreach (object date in OpenDatesArray)
+                    if (openDates is IEnumerable OpenDatesArray)
                     {
-                        if (DateTime.TryParse(date.ToString(), out DateTime dateTime))
+                        foreach (object date in OpenDatesArray)
                         {
-                            OpenDates.Add(dateTime);
+                            if (DateTime.TryParse(date.ToString(), out DateTime dateTime))
+                            {
+                                OpenDates.Add(dateTime);
+                            }
                         }
-
                     }
                 }
             }
-
             DateTimeZoneCalc = new DateTimeZoneCalculator(SymbolCode);
         }
         
@@ -98,6 +105,7 @@ namespace Niffler.Rules.TradingPeriods
             {
                 PublishStateUpdate(Data.State.ISOPENTIME, true);
                 PublishStateUpdate(Data.State.OPENTIME, message.Tick.TimeStamp);
+                PublishStateUpdate(Data.State.OPENPRICE, message.Tick.Bid + message.Tick.Spread / 2);
                 IsActive = false;
                 return true;
             }
@@ -123,6 +131,10 @@ namespace Niffler.Rules.TradingPeriods
 
         private bool IsOpenDate(DateTime now)
         {
+            if (OpenAnyDate)
+            {
+                return true;
+            }
             return OpenDates.Exists(date => date.Date == now.Date);
         }
         
@@ -161,9 +173,6 @@ namespace Niffler.Rules.TradingPeriods
 
         public override void Reset()
         {
-            //Better to have the Date Store just listen for resets and archive data for the whole StrategyId
-            PublishStateUpdate(Data.State.ISOPENTIME, false);
-            PublishStateUpdate(Data.State.OPENTIME, null);
             IsActive = true;
         }
     }

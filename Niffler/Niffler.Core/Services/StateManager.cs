@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using Niffler.Messaging.RabbitMQ;
 using Niffler.Messaging.Protobuf;
 using System;
-using Niffler.Core.Strategy;
+using Niffler.Core.Config;
+using Niffler.Common;
 #endregion
 
 // Need to refactor StateManager to store State in a persistent data store
@@ -26,10 +27,10 @@ namespace Niffler.Services
 
         public override void Init()
         {
-            StrategyId = StrategyConfig.Config.StrategyId;
+            StrategyId = StrategyConfig.StrategyId;
             if (String.IsNullOrEmpty(StrategyId)) IsInitialised = false;
 
-            ExchangeName = StrategyConfig.Config.Exchange;
+            ExchangeName = StrategyConfig.Exchange;
             if (String.IsNullOrEmpty(ExchangeName)) IsInitialised = false;
         }
 
@@ -53,8 +54,11 @@ namespace Niffler.Services
                 case Messaging.Protobuf.State.Types.ValueType.Double:
                     value = e.Message.State.DoubleValue;
                     break;
-                case Messaging.Protobuf.State.Types.ValueType.Datetime:
-                    if (!DateTime.TryParse(e.Message.State.StringValue, out DateTime datetime)) value = e.Message.State.StringValue;
+                case Messaging.Protobuf.State.Types.ValueType.Int:
+                    value = e.Message.State.IntValue;
+                    break;
+                case Messaging.Protobuf.State.Types.ValueType.Datetimelong:
+                    value = e.Message.State.LongValue;
                     break;
             }
 
@@ -70,10 +74,15 @@ namespace Niffler.Services
             Console.WriteLine("****************");
             foreach (KeyValuePair<string, object> kvp in State)
             {
-                Console.WriteLine(kvp.Key + " = " + kvp.Value);
+                if(kvp.Key == Niffler.Data.State.OPENTIME || kvp.Key == Niffler.Data.State.CLOSETIME || kvp.Key == Niffler.Data.State.REDUCERISKTIME || kvp.Key == Niffler.Data.State.TERMINATETIME)
+                {
+                    Console.WriteLine(kvp.Key + " = " + Utils.FormatDateTimeWithSeparators(Convert.ToInt64(kvp.Value)));
+                }
+                else
+                {
+                    Console.WriteLine(kvp.Key + " = " + kvp.Value);
+                }
             }
-
-
         }
             
         protected override List<RoutingKey> SetListeningRoutingKeys()

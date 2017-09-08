@@ -4,6 +4,7 @@ using Niffler.Messaging.RabbitMQ;
 using Niffler.Messaging.Protobuf;
 using System;
 using Niffler.Common;
+using System.Threading;
 
 namespace Niffler.cAlgoClient
 
@@ -156,6 +157,7 @@ namespace Niffler.cAlgoClient
         protected override void OnStop()
         {
             TradeManager.ShutDown();
+            Thread.Sleep(50);
         }
     }
 }

@@ -2,7 +2,7 @@
 using System;
 using Niffler.Rules;
 using Niffler.Messaging.RabbitMQ;
-using Niffler.Core.Strategy;
+using Niffler.Core.Config;
 
 namespace Niffler.Services
 {
@@ -31,7 +31,7 @@ namespace Niffler.Services
             foreach (StrategyConfiguration strategyConfig in AppConfig.StrategyConfig)
             {
                 //Generate Strategy ID here and pass to the State and Rules
-                strategyConfig.Config.StrategyId = GenerateStrategyId();
+                strategyConfig.StrategyId = GenerateStrategyId();
 
                 //Create the rule services per strategy
                 Rules = (RulesFactory.CreateAndInitRules(strategyConfig));

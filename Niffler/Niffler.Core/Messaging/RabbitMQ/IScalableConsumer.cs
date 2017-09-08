@@ -7,7 +7,7 @@ namespace Niffler.Messaging.RabbitMQ
     abstract public class IScalableConsumerService : IService
     {
         //If any of the values required from config have not been set then IsInitialised will be set to false in derived classes
-        protected bool IsInitialised = true; 
+        public bool IsInitialised = true; 
 
         protected Adapter Adapter;
         protected string ExchangeName;

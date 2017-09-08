@@ -55,11 +55,10 @@ namespace Niffler.Services
               PipSize = symbol.PipSize,
               TickSize = symbol.TickSize,
               Spread = symbol.TickSize,
-              TimeStamp = timeStamp.ToBinary(),
-              IsBackTesting = isBackTesting,
+              TimeStamp = timeStamp.ToBinary()
             };
 
-            Publisher.TickEvent(tick, positions, orders);
+            Publisher.TickEvent(tick, positions, orders, isBackTesting);
         }
 
         public void PublishOnPositionOpened(cAlgo.API.Position _postion, cAlgo.API.Positions _positions, cAlgo.API.PendingOrders _orders, bool isBackTesting = false)
@@ -67,7 +66,7 @@ namespace Niffler.Services
             Utils.ParseOpenPositions(_positions, out Positions positions,_postion.Label);
             Utils.ParsePendingOrders(_orders, out Orders orders);
             Utils.ParseOpenPosition(_postion, out Position position);
-            Publisher.PositionOpenedEvent(position,positions, orders);
+            Publisher.PositionOpenedEvent(position,positions, orders, isBackTesting);
         }
 
         public void PublishOnPositionClosed(cAlgo.API.Position _postion, double closePrice, cAlgo.API.Positions _positions, cAlgo.API.PendingOrders _orders, DateTime closeTime, bool isBackTesting = false)
@@ -75,7 +74,7 @@ namespace Niffler.Services
             Utils.ParseOpenPositions(_positions, out Positions positions);
             Utils.ParsePendingOrders(_orders, out Orders orders);
             Utils.ParseClosedPosition(_postion, closePrice, closeTime, out Position position);
-            Publisher.PositionClosedEvent(position, positions, orders);
+            Publisher.PositionClosedEvent(position, positions, orders, isBackTesting);
         }
 
         protected override void OnMessageReceived(object sender, MessageReceivedEventArgs e)

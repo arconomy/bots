@@ -2,7 +2,7 @@
 using Niffler.Messaging.Protobuf;
 using Niffler.Common;
 using System;
-using Niffler.Core.Strategy;
+using Niffler.Core.Config;
 
 namespace Niffler.Rules
 {
@@ -19,10 +19,10 @@ namespace Niffler.Rules
             this.StrategyConfig = strategyConfig;
             this.RuleConfig = ruleConfig;
 
-            StrategyId = StrategyConfig.Config.StrategyId;
+            StrategyId = StrategyConfig.StrategyId;
             if (String.IsNullOrEmpty(StrategyId)) IsInitialised = false;
 
-            ExchangeName = StrategyConfig.Config.Exchange;
+            ExchangeName = StrategyConfig.Exchange;
             if (String.IsNullOrEmpty(ExchangeName)) IsInitialised = false;
         }
 
@@ -37,7 +37,10 @@ namespace Niffler.Rules
             switch (e.Message.Type)
             {
                 case Niffle.Types.Type.Service:
-                    ManageRule(e.Message, new RoutingKey(e.EventArgs.RoutingKey));
+                    OnServiceMessageReceived(e.Message, new RoutingKey(e.EventArgs.RoutingKey));
+                    break;
+                case Niffle.Types.Type.State:
+                    OnStateMessageReceived(e.Message, new RoutingKey(e.EventArgs.RoutingKey));
                     break;
                 default:
                     {
@@ -48,12 +51,30 @@ namespace Niffler.Rules
             };
         }
 
-        protected void ManageRule(Niffle message, RoutingKey routingKey)
+        protected void OnStateMessageReceived(Niffle message, RoutingKey routingKey)
+        {
+            if (IsStateMessageEmpty(message))
+            {
+                Console.WriteLine("ERROR: State Type message received with no State message");
+                return;
+            }
+
+            OnStateUpdate(message, routingKey);
+        }
+
+            protected void OnServiceMessageReceived(Niffle message, RoutingKey routingKey)
         {
             switch (message.Service.Command)
             {
                 case Service.Types.Command.Notify:
                     {
+                        //Test for Service Message
+                        if (IsServiceMessageEmpty(message))
+                        {
+                            Console.WriteLine("ERROR: Service Notify Type message received with no Service message");
+                            return;
+                        }
+
                         OnServiceNotify(message, routingKey);
                         break;
                     }
@@ -98,6 +119,19 @@ namespace Niffler.Rules
         }
 
         //Publish State update message
+        protected void PublishStateUpdate(string key, int value)
+        {
+            State stateUpdate = new State()
+            {
+                Key = key,
+                ValueType = State.Types.ValueType.Int,
+                IntValue = value
+            };
+
+            Publisher.UpdateState(stateUpdate, GetServiceName(), StrategyId);
+        }
+
+        //Publish State update message
         protected void PublishStateUpdate(string key, string value)
         {
             State stateUpdate = new State()
@@ -105,6 +139,19 @@ namespace Niffler.Rules
                 Key = key,
                 ValueType = State.Types.ValueType.String,
                 StringValue = value
+            };
+
+            Publisher.UpdateState(stateUpdate, GetServiceName(), StrategyId);
+        }
+
+        //Publish State update message
+        protected void PublishStateUpdate(string key, long dateTimeLong)
+        {
+            State stateUpdate = new State()
+            {
+                Key = key,
+                ValueType = State.Types.ValueType.Datetimelong,
+                LongValue = dateTimeLong
             };
 
             Publisher.UpdateState(stateUpdate, GetServiceName(), StrategyId);

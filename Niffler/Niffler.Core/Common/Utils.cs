@@ -8,10 +8,7 @@ namespace Niffler.Common
     {
         private static DateTime GetDateTime(Tick tick)
         {
-            if (tick.IsBackTesting)
-                return DateTime.FromBinary(tick.TimeStamp);
-            else
-                return System.DateTime.Now;
+            return DateTime.FromBinary(tick.TimeStamp);
         }
 
         public static string GetTimeStamp(bool formatWithSeperators = false)
@@ -36,12 +33,17 @@ namespace Niffler.Common
 
         public static string FormatDateTime(DateTime datetime)
         {
-            return datetime.Year.ToString() + datetime.Month + datetime.Day + datetime.Hour + datetime.Minute + datetime.Second;
+            return datetime.Year.ToString() + datetime.Month + datetime.Day + datetime.Hour.ToString("00") + datetime.Minute.ToString("00") + datetime.Second.ToString("00");
         }
 
-        public static string FormatDateTimeWithSeparators(DateTime datetime)
+        public static string FormatDateTimeWithSeparators(long datetime)
         {
-            return datetime.Day + "-" + datetime.Month + "-" + datetime.Year.ToString() + " " + datetime.Hour + ":" + datetime.Minute + ":" + datetime.Second;
+            return FormatDateTimeWithSeparators(DateTime.FromBinary(datetime));
+        }
+
+            public static string FormatDateTimeWithSeparators(DateTime datetime)
+        {
+            return datetime.Day + "-" + datetime.Month + "-" + datetime.Year.ToString() + " " + datetime.Hour.ToString("00") + ":" + datetime.Minute.ToString("00") + ":" + datetime.Second.ToString("00");
         }
 
         public static string GetUniqueID()
@@ -219,5 +221,12 @@ namespace Niffler.Common
         {
             return Label.Substring(0, 5);
         }
+
+        public static double GetMidPrice(Tick tick)
+        {
+            return tick.Bid + tick.Spread / 2;
+        }
+
+
     }
 }

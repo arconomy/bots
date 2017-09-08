@@ -1,4 +1,4 @@
-﻿using Niffler.Core.Strategy;
+﻿using Niffler.Core.Config;
 using Niffler.Rules.TradingPeriods;
 using System;
 using System.Collections.Generic;
@@ -19,8 +19,16 @@ namespace Niffler.Rules
                 if(rule !=null)
                 {
                     rule.Init();
-                    createdRules.Add(rule);
-                    Console.WriteLine("CREATED Rule: " + ruleConfig.Name);
+
+                    if(rule.IsInitialised)
+                    {
+                        createdRules.Add(rule);
+                        Console.WriteLine("CREATED Rule: " + ruleConfig.Name);
+                    }
+                    else
+                    {
+                        Console.WriteLine("FAILED to Initialise Rule: " + ruleConfig.Name);
+                    }
                 }
                 else
                 {

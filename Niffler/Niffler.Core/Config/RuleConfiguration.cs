@@ -1,17 +1,11 @@
 ﻿using Niffler.Rules;
+using Niffler.Rules.Capture;
 using Niffler.Rules.TradingPeriods;
 using System;
 using System.Collections.Generic;
 
-namespace Niffler.Core.Strategy
-{
-
-    public class Config
-    {
-        public string Exchange { get; set; }
-        public string StrategyId { get; set; }
-    }
-
+namespace Niffler.Core.Config
+{ 
     public class RuleConfiguration
     {
         //Available Rules
@@ -20,8 +14,12 @@ namespace Niffler.Core.Strategy
             {nameof(OnOpenForTrading),typeof(OnOpenForTrading) },
             {nameof(OnCloseForTrading),typeof(OnCloseForTrading) },
             {nameof(OnReduceRiskTime),typeof(OnReduceRiskTime) },
-            {nameof(OnTerminateTime),typeof(OnTerminateTime) }
+            {nameof(OnTerminateTime),typeof(OnTerminateTime) },
+            {nameof(CaptureSpike),typeof(CaptureSpike) }
         };
+
+
+        // {nameof(CaptureOpenPrice),typeof(CaptureOpenPrice)
 
             //RuleNames.Add(nameof(OnTickCaptureSpike));
             //RuleNames.Add(nameof(CloseTimeCancelPendingOrders));
@@ -60,6 +58,7 @@ namespace Niffler.Core.Strategy
 
         public static readonly string OPENTIME = "OpenTime";
         public static readonly string OPENWEEKDAYS = "OpenWeekDays";
+        public static readonly string OPENANYDATE = "OpenAnyDate";
         public static readonly string OPENDATES = "OpenDates";
         public static readonly string CLOSETIME = "CloseTime";
         public static readonly string CLOSEAFTEROPEN = "CloseAfterOpen";
@@ -71,21 +70,5 @@ namespace Niffler.Core.Strategy
 
         public IDictionary<string,object> Params { get; set; }
         public string Name { get; set; }
-    }
-
-    public class StrategyConfiguration
-    {
-        public static readonly string EXCHANGE = "Exchange";
-        public static readonly string STRATEGYID = "StrategyId";
-        public static readonly string QUEUENAME = "QueueName";
-
-        public string Name { get; set; }
-        public Config Config { get; set; }
-        public List<RuleConfiguration> Rules { get; set; }
-    }
-
-    public class JsonAppConfig
-    {
-        public List<StrategyConfiguration> StrategyConfig { get; set; }
     }
 }

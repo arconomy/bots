@@ -3,7 +3,7 @@ using Niffler.Messaging.RabbitMQ;
 using System.Collections.Generic;
 using Niffler.Messaging.Protobuf;
 using Niffler.Services;
-using Niffler.Core.Strategy;
+using Niffler.Core.Config;
 using Niffler.Common;
 
 namespace Niffler.Rules.TradingPeriods
@@ -21,7 +21,7 @@ namespace Niffler.Rules.TradingPeriods
         public override void Init()
         {
             //At a minumum need SymbolCode & CloseTime or CloseMinsFromOpen
-            SymbolCode = StrategyConfig.Config.Exchange;
+            SymbolCode = StrategyConfig.Exchange;
             if (String.IsNullOrEmpty(SymbolCode)) IsInitialised = false;
 
             bool initSuccess = false;
@@ -47,18 +47,14 @@ namespace Niffler.Rules.TradingPeriods
         override protected bool ExcuteRuleLogic(Niffle message)
         {
             if (IsTickMessageEmpty(message)) return false;
+            if (CloseTime == TimeSpan.Zero) return false;
 
             DateTime Now = DateTime.FromBinary(message.Tick.TimeStamp);
-
-            //First Tick recieved after service is activated will be the first tick after OpenForTrading has sent notified this service - therefore use this Tick time as OpenTime
-            if (CloseAfterOpen > TimeSpan.Zero)
-            {
-                SetCloseTime(Now);
-            }
 
             if (DateTimeZoneCalc.IsTimeAfter(Now, CloseTime))
             {
                 PublishStateUpdate(Data.State.ISOPENTIME, false);
+                PublishStateUpdate(Data.State.CLOSETIME, message.Tick.TimeStamp);
                 IsActive = false;
                 return true;
             }
@@ -70,7 +66,7 @@ namespace Niffler.Rules.TradingPeriods
             if (CloseAfterOpen != TimeSpan.Zero)
             {
                 CloseTime = openTime.TimeOfDay;
-                CloseTime.Add(CloseAfterOpen);
+                CloseTime = CloseTime.Add(CloseAfterOpen);
 
                 //Set CloseAfterOpen to TimeSpan.Zero so that CloseTime is only updated once.
                 CloseAfterOpen = TimeSpan.Zero;
@@ -92,13 +88,12 @@ namespace Niffler.Rules.TradingPeriods
         {
             if (IsStateMessageEmpty(message)) return;
 
-            //Could listen to updateState msg from OpenTrading Service, but better to get state updates from the State Manager
-            if (routingKey.Source == nameof(StateManager))
+            //Listen to updateState msg from OpenTrading Service
+            if (routingKey.Source == nameof(OnOpenForTrading))
             {
-                if(message.State.Key == Data.State.OPENTIME && message.State.ValueType == Messaging.Protobuf.State.Types.ValueType.String)
+                if (message.State.Key == Data.State.OPENTIME && message.State.ValueType == Messaging.Protobuf.State.Types.ValueType.Datetimelong)
                 {
-                    DateTime.TryParse(message.State.StringValue, out DateTime opentime);
-                    SetCloseTime(opentime);
+                    SetCloseTime(DateTime.FromBinary(message.State.LongValue));
                 }
             }
         }
@@ -117,7 +112,7 @@ namespace Niffler.Rules.TradingPeriods
             routingKeys.Add(RoutingKey.Create(nameof(OnOpenForTrading), Messaging.RabbitMQ.Action.NOTIFY, Event.WILDCARD));
 
             //Listen for Update State Notification from StateManager for the Open Time
-            routingKeys.Add(RoutingKey.Create(nameof(StateManager), Messaging.RabbitMQ.Action.UPDATESTATE, Event.WILDCARD));
+            routingKeys.Add(RoutingKey.Create(nameof(OnOpenForTrading), Messaging.RabbitMQ.Action.UPDATESTATE, Event.WILDCARD));
             return routingKeys;
         }
 

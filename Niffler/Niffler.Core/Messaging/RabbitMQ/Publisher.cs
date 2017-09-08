@@ -3,6 +3,7 @@ using Niffler.Common;
 using Niffler.Messaging.Protobuf;
 using RabbitMQ.Client;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace Niffler.Messaging.RabbitMQ
 {
@@ -70,13 +71,14 @@ namespace Niffler.Messaging.RabbitMQ
             Publish(routingKey, niffle);
         }
 
-        public void TickEvent(Tick tick, Positions positions, Orders orders)
+        public void TickEvent(Tick tick, Positions positions, Orders orders, bool isBackTesting)
         {
             RoutingKey routingKey = RoutingKey.Create(Event.ONTICK);
 
             Niffle niffle = new Niffle
             {
                 IsStrategyIdRequired = false,
+                IsBackTesting = isBackTesting,
                 Type = Niffle.Types.Type.Tick,
                 Tick = tick,
                 Positions = positions,
@@ -85,7 +87,7 @@ namespace Niffler.Messaging.RabbitMQ
             Publish(routingKey, niffle);
         }
 
-        public void PositionClosedEvent(Position position,Positions positions, Orders orders)
+        public void PositionClosedEvent(Position position,Positions positions, Orders orders, bool isBackTesting)
         {
             RoutingKey routingKey = RoutingKey.Create(Event.ONPOSITIONCLOSED);
             string strategyId = Utils.GetStrategyId(position.Label);
@@ -94,6 +96,7 @@ namespace Niffler.Messaging.RabbitMQ
             {
                 IsStrategyIdRequired = true,
                 StrategyId = strategyId,
+                IsBackTesting = isBackTesting,
                 Type = Niffle.Types.Type.Position,
                 Position = position,
                 Positions = positions,
@@ -102,7 +105,7 @@ namespace Niffler.Messaging.RabbitMQ
             Publish(routingKey, niffle);
         }
 
-        public void PositionOpenedEvent(Position position, Positions positions, Orders orders)
+        public void PositionOpenedEvent(Position position, Positions positions, Orders orders, bool isBackTesting)
         {
             RoutingKey routingKey = RoutingKey.Create(Event.ONPOSITIONOPENED);
             string strategyId = Utils.GetStrategyId(position.Label);
@@ -111,6 +114,7 @@ namespace Niffler.Messaging.RabbitMQ
             {
                 IsStrategyIdRequired = true,
                 StrategyId = strategyId,
+                IsBackTesting = isBackTesting,
                 Type = Niffle.Types.Type.Position,
                 Position = position,
                 Positions = positions,
@@ -121,6 +125,7 @@ namespace Niffler.Messaging.RabbitMQ
 
         private void Publish(RoutingKey routingKey,Niffle niffle)
         {
+            //if (niffle.IsBackTesting) Thread.Sleep(50);
             Model.BasicPublish(exchange: ExchangeName, routingKey: routingKey.GetRoutingKey(),
                 basicProperties: RabbitMQProperties.CreateDefaultProperties(Model), body: niffle.ToByteArray());
         }
