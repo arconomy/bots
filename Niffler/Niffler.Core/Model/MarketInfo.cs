@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Niffler.Data
+namespace Niffler.Model
 {
     class MarketInfo
     {

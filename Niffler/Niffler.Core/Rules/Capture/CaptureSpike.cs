@@ -2,9 +2,10 @@
 using System.Collections.Generic;
 using Niffler.Messaging.Protobuf;
 using Niffler.Core.Config;
-using static Niffler.Data.State;
+using static Niffler.Model.State;
 using Niffler.Common;
 using Niffler.Rules.TradingPeriods;
+using Niffler.Model;
 
 namespace Niffler.Rules.Capture
 {
@@ -40,19 +41,28 @@ namespace Niffler.Rules.Capture
             bool notifyOfSpikePeakCapture = false;
             if(SetSpikeUpPeak(Utils.GetMidPrice(message.Tick)))
             {
-                PublishStateUpdate(Data.State.SPIKEUPPEAK, SpikeUpPeakPips);
+                StateManager.UpdateState(StrategyId, new State
+                    {
+                        { State.SPIKEUPPEAK, SpikeUpPeakPips }
+                    });
                 notifyOfSpikePeakCapture = true;
             }
 
             if (SetSpikeDownPeak(Utils.GetMidPrice(message.Tick)))
             {
-                PublishStateUpdate(Data.State.SPIKEDOWNPEAK, SpikeDownPeakPips);
+                StateManager.UpdateState(StrategyId, new State
+                    {
+                        { State.SPIKEDOWNPEAK, SpikeDownPeakPips }
+                    });
                 notifyOfSpikePeakCapture = true;
             }
 
             if(SetSpikeDirection())
             {
-                PublishStateUpdate(Data.State.SPIKEDIRECTION, (int)SpikeDirection);
+                StateManager.UpdateState(StrategyId, new State
+                    {
+                        { State.SPIKEDIRECTION, SpikeDirection }
+                    });
                 notifyOfSpikePeakCapture = true;
             }
             return notifyOfSpikePeakCapture;
@@ -122,15 +132,13 @@ namespace Niffler.Rules.Capture
             }
         }
 
-        protected override void OnStateUpdate(Niffle message, RoutingKey routingKey)
+        protected override void OnStateUpdate(StateReceivedEventArgs stateupdate)
         {
-            //Listen to updateState msg from OpenTrading Service
-            if (routingKey.Source == nameof(OnOpenForTrading))
+            //Listening for update to OpenPrice State
+            if (stateupdate.Key == Model.State.OPENPRICE)
             {
-                if (message.State.Key == Data.State.OPENPRICE && message.State.ValueType == Messaging.Protobuf.State.Types.ValueType.Double)
-                {
-                    SetSpikeStart(message.State.DoubleValue);
-                }
+                if (double.TryParse(stateupdate.Value.ToString(), out double openPrice))
+                    SetSpikeStart(openPrice);
             }
         }
 

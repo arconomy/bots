@@ -1,6 +1,8 @@
-﻿namespace Niffler.Data
+﻿using System.Collections.Generic;
+
+namespace Niffler.Model
 {
-    class State
+    public class State : Dictionary<string, object>
     {
         //Static strings used for state update messages
         public static readonly string OPENTIME = "OpenTime";
@@ -22,6 +24,8 @@
             UP = 1,
             DOWN = 2
         }
+
+        public string StrategyId { get; set; }
     }
 }
 

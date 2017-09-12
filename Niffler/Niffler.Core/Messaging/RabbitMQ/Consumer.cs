@@ -2,13 +2,10 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
-using Niffler.Messaging.AMQP;
+using Niffler.Error;
 using Niffler.Messaging.Protobuf;
-using System.Threading;
-using RabbitMQ.Client.MessagePatterns;
 
 #endregion
 

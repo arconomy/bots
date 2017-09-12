@@ -21,10 +21,9 @@ message Niffle {
         POSITION = 1;
         ORDER = 2;
         SERVICE = 3;
-        STATE = 4;
-        TRADE = 5;
-		TRADES = 6;
-        ERROR = 7;
+        TRADE = 4;
+		TRADES = 5;
+        ERROR = 6;
     }
 	bool isStrategyIdRequired = 1;
     string strategyId = 2;
@@ -37,10 +36,9 @@ message Niffle {
     Order order = 9;
     Orders orders = 10;
     Service service = 11;
-    State state = 12;
-    Trade trade = 13;
-    Trades trades = 14;
-    Error error = 15;
+    Trade trade = 12;
+    Trades trades = 13;
+    Error error = 14;
 }
 
 message Error {
@@ -133,26 +131,6 @@ message Order {
 message Orders {
     int32 Count = 1;
     repeated Order order = 2;
-}
-
-
-message State  {
-    
-    enum ValueType{
-    STRING = 0;
-    BOOL = 1;
-    DOUBLE = 2;
-	INT = 3;
-	DATETIMELONG = 4;
-    }
-
-    string key = 1;
-    ValueType valueType = 2;
-    string stringValue = 3;
-    bool boolValue = 4;
-    double doubleValue = 5;
-	int64 longValue =6;
-	int32 intValue =7;
 }
 
 message Service  {

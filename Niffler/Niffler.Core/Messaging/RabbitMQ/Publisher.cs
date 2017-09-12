@@ -32,19 +32,6 @@ namespace Niffler.Messaging.RabbitMQ
             }
         }
 
-        public void UpdateState(State state, string entityName, string strategyId)
-        {
-            RoutingKey routingKey = RoutingKey.Create(entityName, Action.UPDATESTATE, Event.WILDCARD);
-
-            Niffle niffle = new Niffle
-            {
-                StrategyId = strategyId,
-                Type = Niffle.Types.Type.State,
-                State = state
-            };
-            Publish(routingKey, niffle);
-        }
-
         public void ServiceNotify(Service service, string entityName, string strategyId)
         {
             RoutingKey routingKey = RoutingKey.Create(entityName, Action.NOTIFY, Event.WILDCARD);

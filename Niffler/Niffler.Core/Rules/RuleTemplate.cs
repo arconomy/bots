@@ -4,6 +4,7 @@ using Niffler.Messaging.Protobuf;
 using Niffler.Services;
 using Niffler.Core.Config;
 using Niffler.Rules.TradingPeriods;
+using Niffler.Model;
 
 namespace Niffler.Rules
 {
@@ -43,16 +44,9 @@ namespace Niffler.Rules
             }
         }
 
-        protected override void OnStateUpdate(Niffle message, RoutingKey routingKey)
+        protected override void OnStateUpdate(StateReceivedEventArgs stateupdate)
         {
-            //Test for State message(s)
-            if (IsStateMessageEmpty(message)) return;
-
-            //Listening for State change Nofitification from a StateManager (or other) service
-            if (routingKey.Source == nameof(StateManager) && message.State.Key == "StateDataField")
-            {
-                //Perform actions e.g. update local variables
-            }
+            //Listening for updates to State
         }
 
         protected override string GetServiceName()

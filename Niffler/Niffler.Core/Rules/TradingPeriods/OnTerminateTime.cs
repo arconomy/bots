@@ -6,6 +6,7 @@ using Niffler.Rules.TradingPeriods;
 using Niffler.Services;
 using Niffler.Core.Config;
 using Niffler.Common;
+using Niffler.Model;
 
 namespace Niffler.Rules.TradingPeriods
 {
@@ -40,6 +41,9 @@ namespace Niffler.Rules.TradingPeriods
 
             DateTimeZoneCalc = new DateTimeZoneCalculator(SymbolCode);
 
+            //Listen for state updates for the OpenTime
+            StateManager.ListenForStateItemUpdates(StrategyId, RuleConfiguration.OPENTIME);
+
             //Wait until OpenForTrading notifies before becoming active
             IsActive = false;
         }
@@ -55,8 +59,12 @@ namespace Niffler.Rules.TradingPeriods
 
             if (DateTimeZoneCalc.IsTimeAfter(Now, TerminateTime))
             {
-                PublishStateUpdate(Data.State.ISTERMINATETIME, true);
-                PublishStateUpdate(Data.State.TERMINATETIME, message.Tick.TimeStamp);
+                StateManager.UpdateState(StrategyId, new State
+                    {
+                        { State.ISTERMINATETIME, true },
+                        { State.TERMINATETIME, message.Tick.TimeStamp }
+                    });
+
                 IsActive = false;
                 return true;
             }
@@ -86,15 +94,13 @@ namespace Niffler.Rules.TradingPeriods
             }
         }
 
-        protected override void OnStateUpdate(Niffle message, RoutingKey routingKey)
+        protected override void OnStateUpdate(StateReceivedEventArgs stateupdate)
         {
-            //Listen to updateState msg from OpenTrading Service
-            if (routingKey.Source == nameof(OnOpenForTrading))
+            //Listening for update to OpenTime State
+            if (stateupdate.Key == Model.State.OPENTIME)
             {
-                if (message.State.Key == Data.State.OPENTIME && message.State.ValueType == Messaging.Protobuf.State.Types.ValueType.Datetimelong)
-                {
-                    SetTerminateTime(DateTime.FromBinary(message.State.LongValue));
-                }
+                if (long.TryParse(stateupdate.Value.ToString(), out long openTime))
+                    SetTerminateTime(DateTime.FromBinary(openTime));
             }
         }
 

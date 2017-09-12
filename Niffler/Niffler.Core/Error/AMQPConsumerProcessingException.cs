@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using Niffler.Messaging.RabbitMQ;
 #endregion
 
-namespace Niffler.Messaging.AMQP {
+namespace Niffler.Error {
     [Serializable]
     public class AMQPConsumerProcessingException : Exception {
         public AMQPConsumerProcessingException(Exception innerException, string exchangeName, List<RoutingKey> routingKeys) :

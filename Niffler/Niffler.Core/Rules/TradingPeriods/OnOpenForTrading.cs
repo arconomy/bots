@@ -5,6 +5,7 @@ using System.Collections;
 using Niffler.Messaging.Protobuf;
 using Niffler.Common;
 using Niffler.Core.Config;
+using Niffler.Model;
 
 namespace Niffler.Rules.TradingPeriods
 {
@@ -30,6 +31,7 @@ namespace Niffler.Rules.TradingPeriods
             //At a minumum need SymbolCode to determine TimeZone & OpenTime
             SymbolCode = StrategyConfig.Exchange;
             if (String.IsNullOrEmpty(SymbolCode)) IsInitialised = false;
+
             if (!RuleConfig.Params.TryGetValue(RuleConfiguration.OPENTIME, out object openTime)) IsInitialised = false; ;
             if (!TimeSpan.TryParse(openTime.ToString(), out OpenTime)) IsInitialised = false;
 
@@ -103,9 +105,13 @@ namespace Niffler.Rules.TradingPeriods
 
             if (IsOpenDate(now) && IsOpenWeekday(now) && IsOpenTime(now))
             {
-                PublishStateUpdate(Data.State.ISOPENTIME, true);
-                PublishStateUpdate(Data.State.OPENTIME, message.Tick.TimeStamp);
-                PublishStateUpdate(Data.State.OPENPRICE, message.Tick.Bid + message.Tick.Spread / 2);
+                StateManager.UpdateState(StrategyId, new State
+                    {
+                        { State.ISOPENTIME, true },
+                        { State.OPENTIME, message.Tick.TimeStamp },
+                        { State.OPENPRICE, message.Tick.Bid + message.Tick.Spread / 2 }
+                    });
+
                 IsActive = false;
                 return true;
             }
@@ -118,7 +124,7 @@ namespace Niffler.Rules.TradingPeriods
             throw new NotImplementedException();
         }
 
-        protected override void OnStateUpdate(Niffle message, RoutingKey routingKey)
+        protected override void OnStateUpdate(StateReceivedEventArgs stateupdate)
         {
             //Not Listening for any specific State Update Notifications.
             throw new NotImplementedException();

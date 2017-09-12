@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 #endregion
 
-namespace Niffler.Messaging.AMQP {
+namespace Niffler.Error {
     [Serializable]
     public class AMQPConsumerInitialisationException : Exception {
         public AMQPConsumerInitialisationException(Exception innerException,string exchangeName, List<RoutingKey> routingKeys) :

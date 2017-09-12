@@ -3,6 +3,8 @@ using Niffler.Messaging.Protobuf;
 using Niffler.Common;
 using System;
 using Niffler.Core.Config;
+using Niffler.Core.Services;
+using Niffler.Model;
 
 namespace Niffler.Rules
 {
@@ -11,6 +13,7 @@ namespace Niffler.Rules
         protected string StrategyId;
         protected StrategyConfiguration StrategyConfig;
         protected RuleConfiguration RuleConfig;
+        protected FirebaseManager StateManager;
 
         protected bool IsActive = true; //Default state is active
 
@@ -24,6 +27,12 @@ namespace Niffler.Rules
 
             ExchangeName = StrategyConfig.Exchange;
             if (String.IsNullOrEmpty(ExchangeName)) IsInitialised = false;
+
+            //Add Rule configuration to Firebase
+            StateManager = new FirebaseManager(StrategyConfiguration.PATH);
+            if (StateManager == null) IsInitialised = false;
+            StateManager.UpdateState(StrategyId, RuleConfig.Params);
+            StateManager.StateUpdateReceived += OnStateEventUpdate;
         }
 
         protected override void OnMessageReceived(Object o, MessageReceivedEventArgs e)
@@ -39,9 +48,6 @@ namespace Niffler.Rules
                 case Niffle.Types.Type.Service:
                     OnServiceMessageReceived(e.Message, new RoutingKey(e.EventArgs.RoutingKey));
                     break;
-                case Niffle.Types.Type.State:
-                    OnStateMessageReceived(e.Message, new RoutingKey(e.EventArgs.RoutingKey));
-                    break;
                 default:
                     {
                     if (IsInitialised && IsActive)
@@ -51,18 +57,7 @@ namespace Niffler.Rules
             };
         }
 
-        protected void OnStateMessageReceived(Niffle message, RoutingKey routingKey)
-        {
-            if (IsStateMessageEmpty(message))
-            {
-                Console.WriteLine("ERROR: State Type message received with no State message");
-                return;
-            }
-
-            OnStateUpdate(message, routingKey);
-        }
-
-            protected void OnServiceMessageReceived(Niffle message, RoutingKey routingKey)
+        protected void OnServiceMessageReceived(Niffle message, RoutingKey routingKey)
         {
             switch (message.Service.Command)
             {
@@ -105,71 +100,6 @@ namespace Niffler.Rules
             Publisher.ServiceNotify(results, GetServiceName(), StrategyId);
         }
 
-        //Publish State update message
-        protected void PublishStateUpdate(string key, bool value)
-        {
-            State stateUpdate = new State()
-            {
-                Key = key,
-                ValueType = State.Types.ValueType.Bool,
-                BoolValue = value
-            };
-
-            Publisher.UpdateState(stateUpdate, GetServiceName(), StrategyId);
-        }
-
-        //Publish State update message
-        protected void PublishStateUpdate(string key, int value)
-        {
-            State stateUpdate = new State()
-            {
-                Key = key,
-                ValueType = State.Types.ValueType.Int,
-                IntValue = value
-            };
-
-            Publisher.UpdateState(stateUpdate, GetServiceName(), StrategyId);
-        }
-
-        //Publish State update message
-        protected void PublishStateUpdate(string key, string value)
-        {
-            State stateUpdate = new State()
-            {
-                Key = key,
-                ValueType = State.Types.ValueType.String,
-                StringValue = value
-            };
-
-            Publisher.UpdateState(stateUpdate, GetServiceName(), StrategyId);
-        }
-
-        //Publish State update message
-        protected void PublishStateUpdate(string key, long dateTimeLong)
-        {
-            State stateUpdate = new State()
-            {
-                Key = key,
-                ValueType = State.Types.ValueType.Datetimelong,
-                LongValue = dateTimeLong
-            };
-
-            Publisher.UpdateState(stateUpdate, GetServiceName(), StrategyId);
-        }
-
-        //Publish State update message
-        protected void PublishStateUpdate(string key, double value)
-        {
-            State stateUpdate = new State()
-            {
-                Key = key,
-                ValueType = State.Types.ValueType.Double,
-                DoubleValue = value
-            };
-
-            Publisher.UpdateState(stateUpdate, GetServiceName(), StrategyId);
-        }
-
         protected bool IsTickMessageEmpty(Niffle message)
         {
             if (message.Type != Niffle.Types.Type.Tick) return true;
@@ -191,22 +121,20 @@ namespace Niffler.Rules
             return false;
         }
 
-        protected bool IsStateMessageEmpty(Niffle message)
-        {
-            if (message.Type != Niffle.Types.Type.State) return true;
-            if (message.State == null) return true;
-            return false;
-        }
-
         public override void ShutDown()
         {
             ShutDownService();
+        }
+
+        private void OnStateEventUpdate(object sender, StateReceivedEventArgs stateupdate)
+        {
+            OnStateUpdate(stateupdate);
         }
 
         public override abstract void Init();
         abstract protected string GetServiceName();
         abstract protected bool ExcuteRuleLogic(Niffle message);
         abstract protected void OnServiceNotify(Niffle message, RoutingKey routingKey);
-        abstract protected void OnStateUpdate(Niffle message, RoutingKey routingKey);
+        abstract protected void OnStateUpdate(StateReceivedEventArgs stateupdate);
     }
 }
