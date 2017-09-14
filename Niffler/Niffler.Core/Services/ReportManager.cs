@@ -4,6 +4,9 @@ using Niffler.Messaging.Protobuf;
 using Niffler.Messaging.RabbitMQ;
 using Niffler.Common;
 using Niffler.Core.Config;
+using Niffler.Rules.TradingPeriods;
+using Niffler.Core.Services;
+using Niffler.Model;
 
 namespace Niffler.Services
 {
@@ -12,11 +15,11 @@ namespace Niffler.Services
         StrategyConfiguration StrategyConfig;
         string StrategyName;
         string StrategyId;
-        string Market;
 
         private double ProfitTotal;
         private double PipsTotal;
         private int PositionsOpenedCount;
+        private int PositionsClosedCount;
         private int OrdersPlacedCount;
         private int RulesExecutedCount;
         private int ErrorCount;
@@ -25,11 +28,14 @@ namespace Niffler.Services
         private List<string> StrategyExecutionReport = new List<string>();
         private string ReportDirectory;
         private string ReportFile;
+        private StateManager StateManager;
 
         public ReportManager(StrategyConfiguration strategyConfig)
         {
             StrategyConfig = strategyConfig;
             StrategyName = strategyConfig.Name;
+            StateManager = new StateManager(StrategyConfiguration.PATH, strategyConfig.StrategyId);
+            StateManager.StateUpdateReceived += OnStateEventUpdate;
         }
 
         public override void Init()
@@ -41,9 +47,36 @@ namespace Niffler.Services
             if (String.IsNullOrEmpty(ExchangeName)) IsInitialised = false;
 
             ReportDirectory = "C:\\Users\\alist\\Desktop\\" + StrategyName;
-            ReportFile = "C:\\Users\\alist\\Desktop\\" + StrategyName + "\\" + StrategyName + "-" + Market + "-" + StrategyId + "-" + Utils.GetTimeStamp(true) + ".csv";
+            ReportFile = "C:\\Users\\alist\\Desktop\\" + StrategyName + "\\" + StrategyName + "-" + StrategyConfig.Exchange + StrategyId + "-" + Utils.GetTimeStamp() + ".csv";
 
-            Reset();
+            //Listen for state updates of totals
+            StateManager.ListenForStateUpdates();
+        }
+
+        private void OnStateEventUpdate(object sender, StateReceivedEventArgs stateupdate)
+        {
+            //Listening for updates to any of the state data that ReportManager needs to sync with - support scaling of ReportManager
+            switch(stateupdate.Key)
+            {
+                case RuleConfiguration.POSITIONSOPENEDCOUNT:
+                        int.TryParse(stateupdate.Value.ToString(), out PositionsOpenedCount);
+                    break;
+                case RuleConfiguration.POSITIONCLOSEDCOUNT:
+                    int.TryParse(stateupdate.Value.ToString(), out PositionsClosedCount);
+                    break;
+                case RuleConfiguration.ORDERSPLACEDCOUNT:
+                    int.TryParse(stateupdate.Value.ToString(), out OrdersPlacedCount);
+                    break;
+                case RuleConfiguration.PIPSTOTAL:
+                    double.TryParse(stateupdate.Value.ToString(), out PipsTotal);
+                    break;
+                case RuleConfiguration.PROFITTOTAL:
+                    double.TryParse(stateupdate.Value.ToString(), out ProfitTotal);
+                    break;
+                case RuleConfiguration.ERRORCOUNT:
+                    int.TryParse(stateupdate.Value.ToString(), out ErrorCount);
+                    break;
+            }
         }
 
         protected override void OnMessageReceived(object sender, MessageReceivedEventArgs e)
@@ -63,6 +96,13 @@ namespace Niffler.Services
                     if (e.Message.Service.Success)
                     {
                         ReportExecution(source, action, _event, Utils.FormatDateTimeWithSeparators(niffleTimeStamp));
+
+                        //If Strategy ended then report.
+                        if (source == nameof(OnTerminateTime))
+                        {
+                            Report();
+                            //Reset();
+                        }
                     }
                 }
             }
@@ -149,15 +189,26 @@ namespace Niffler.Services
         public void ReportPositionOpened(Messaging.Protobuf.Position position)
         {
             PositionsOpenedCount++;
+            StateManager.UpdateState(new Dictionary<string, object>
+                                        {
+                                            { RuleConfiguration.POSITIONSOPENEDCOUNT, PipsTotal }
+                                        }
+           );
             StrategyExecutionReport.Add(position.EntryTime + "," + position.Label + "," + "*" + "," + "OnPositionOpened");
         }
 
         public void ReportPositionClosed(Messaging.Protobuf.Position position)
         {
+            PositionsClosedCount++;
             PipsTotal += position.Pips;
             ProfitTotal += position.GrossProfit;
-
-
+            StateManager.UpdateState(new Dictionary<string, object>
+                                        {
+                                            { RuleConfiguration.PIPSTOTAL, PipsTotal },
+                                            { RuleConfiguration.PROFITTOTAL, ProfitTotal },
+                                            { RuleConfiguration.POSITIONCLOSEDCOUNT, ProfitTotal }
+                                        }
+            );
             StrategyExecutionReport.Add(position.CloseTime + "," + position.Label + "," + "*" + "," + "OnPositionClosed");
             
             //Add the Rules to the TradeResult report to see which rules executed prior to a position closing
@@ -182,6 +233,11 @@ namespace Niffler.Services
         public void ReportOrderPlaced(Messaging.Protobuf.Order order)
         {
             OrdersPlacedCount++;
+            StateManager.UpdateState(new Dictionary<string, object>
+                                        {
+                                            { RuleConfiguration.ORDERSPLACEDCOUNT, OrdersPlacedCount }
+                                        }
+           );
             StrategyExecutionReport.Add(order.EntryTime + "," + order.Label + "," + "*" + "," + "OnOrderPlaced");
         }
 
@@ -198,6 +254,11 @@ namespace Niffler.Services
         public void ReportError(string source, Messaging.Protobuf.Error error, string timestamp)
         {
             ErrorCount++;
+            StateManager.UpdateState(new Dictionary<string, object>
+                                        {
+                                            { RuleConfiguration.ERRORCOUNT, ErrorCount }
+                                        }
+            );
             StrategyExecutionReport.Add(timestamp + "," + source + "," + "*" + "," + "OnError" + "," + error.Message);
         }
 
@@ -293,10 +354,15 @@ namespace Niffler.Services
 
         public override void Reset()
         {
+            //Remove all State Variables
+            StateManager.Reset();
+
+
             // reset reporting variables
             ProfitTotal = 0;
             PipsTotal = 0;
             PositionsOpenedCount = 0;
+            PositionsClosedCount = 0;
             OrdersPlacedCount = 0;
             RulesExecutedCount = 0;
             ErrorCount = 0;

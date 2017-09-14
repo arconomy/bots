@@ -164,7 +164,7 @@
     <Compile Include="Common\Utils.cs" />
     <Compile Include="Error\FireBaseException.cs" />
     <Compile Include="Model\StateReceivedEventArgs.cs" />
-    <Compile Include="Services\FirebaseManager.cs" />
+    <Compile Include="Services\StateManager.cs" />
     <Compile Include="Model\Constants.cs" />
     <Compile Include="Model\MarketInfo.cs" />
     <Compile Include="Model\State.cs" />
@@ -191,10 +191,8 @@
     <Compile Include="Rules\TradingPeriods\OnOpenForTrading.cs" />
     <Compile Include="Rules\TradingPeriods\OnReduceRiskTime.cs" />
     <Compile Include="Rules\TradingPeriods\OnTerminateTime.cs" />
-    <Compile Include="Model\FireBaseResponse.cs" />
     <Compile Include="Services\ReportManager.cs" />
     <Compile Include="Services\ServicesManager.cs" />
-    <Compile Include="Services\StateManager.cs" />
     <Compile Include="Services\TradeManager.cs" />
     <Compile Include="Config\RuleConfiguration.cs" />
     <Compile Include="Config\JsonAppConfiguration.cs" />

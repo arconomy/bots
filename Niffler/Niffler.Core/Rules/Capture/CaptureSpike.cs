@@ -28,6 +28,9 @@ namespace Niffler.Rules.Capture
                 if (!int.TryParse(minSpikePips.ToString(), out MinSpikePips)) IsInitialised = false;
             }
 
+            //Listen for state updates
+            StateManager.ListenForStateUpdates();
+
             //Activate on OpenForTrading notification
             IsActive = false;
         }

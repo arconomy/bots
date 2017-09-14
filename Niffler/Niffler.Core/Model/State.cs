@@ -27,19 +27,6 @@ namespace Niffler.Model
             UP = 1,
             DOWN = 2
         }
-
-        public string StrategyId { get; set; }
-        public string OpenTime { get; set; }
-        public string CloseTime { get; set; }
-        public string ReduceRiskTime { get; set; }
-        public string TerminateTime { get; set; }
-        public string OpenPrice { get; set; }
-        public int MinSpikePips { get; set; }
-        public string[] OpenDates { get; set; }
-        public string[] OpenWeekDays { get; set; }
-        public bool OpenAnyDate { get; set; }
-        
-
     }
 }
 

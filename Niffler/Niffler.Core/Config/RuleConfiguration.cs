@@ -56,17 +56,25 @@ namespace Niffler.Core.Config
             //RuleNames.Add(nameof(TerminateTimeSetBotState));
 
 
-        public static readonly string OPENTIME = "OpenTime";
-        public static readonly string OPENWEEKDAYS = "OpenWeekDays";
-        public static readonly string OPENANYDATE = "OpenAnyDate";
-        public static readonly string OPENDATES = "OpenDates";
-        public static readonly string CLOSETIME = "CloseTime";
-        public static readonly string CLOSEAFTEROPEN = "CloseAfterOpen";
-        public static readonly string REDUCERISKTIME = "ReduceRiskTime";
-        public static readonly string REDUCERISKAFTEROPEN = "ReduceRiskAfterOpen";
-        public static readonly string TERMINATETIME = "TerminateTime";
-        public static readonly string TERMINATEAFTEROPEN = "TerminateAfterOpen";
-        public static readonly string MINSPIKEPIPS = "MinSpikePips";
+        public const string OPENTIME = "OpenTime";
+        public const string OPENWEEKDAYS = "OpenWeekDays";
+        public const string OPENANYDATE = "OpenAnyDate";
+        public const string OPENDATES = "OpenDates";
+        public const string CLOSETIME = "CloseTime";
+        public const string CLOSEAFTEROPEN = "CloseAfterOpen";
+        public const string REDUCERISKTIME = "ReduceRiskTime";
+        public const string REDUCERISKAFTEROPEN = "ReduceRiskAfterOpen";
+        public const string TERMINATETIME = "TerminateTime";
+        public const string TERMINATEAFTEROPEN = "TerminateAfterOpen";
+        public const string MINSPIKEPIPS = "MinSpikePips";
+        public const string PIPSTOTAL = "PipsTotal";
+        public const string PROFITTOTAL = "ProfitTotal";
+        public const string ORDERSPLACEDCOUNT = "OrdersPlacedCount";
+        public const string ERRORCOUNT = "ErrorCount";
+        public const string POSITIONSOPENEDCOUNT = "PositionsOpenedCount";
+        public const string POSITIONCLOSEDCOUNT = "PositionsClosedCount";
+        
+
 
         public IDictionary<string,object> Params { get; set; }
         public string Name { get; set; }

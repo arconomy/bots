@@ -13,7 +13,7 @@ namespace Niffler.Rules
         protected string StrategyId;
         protected StrategyConfiguration StrategyConfig;
         protected RuleConfiguration RuleConfig;
-        protected FirebaseManager StateManager;
+        protected StateManager StateManager;
 
         protected bool IsActive = true; //Default state is active
 
@@ -29,7 +29,7 @@ namespace Niffler.Rules
             if (String.IsNullOrEmpty(ExchangeName)) IsInitialised = false;
 
             //Add Rule configuration to Firebase
-            StateManager = new FirebaseManager(StrategyId,StrategyConfiguration.PATH);
+            StateManager = new StateManager(StrategyConfiguration.PATH, StrategyId);
             if (StateManager == null) IsInitialised = false;
             StateManager.UpdateState(RuleConfig.Params);
             StateManager.StateUpdateReceived += OnStateEventUpdate;
