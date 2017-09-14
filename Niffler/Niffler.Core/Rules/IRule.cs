@@ -29,9 +29,9 @@ namespace Niffler.Rules
             if (String.IsNullOrEmpty(ExchangeName)) IsInitialised = false;
 
             //Add Rule configuration to Firebase
-            StateManager = new FirebaseManager(StrategyConfiguration.PATH);
+            StateManager = new FirebaseManager(StrategyId,StrategyConfiguration.PATH);
             if (StateManager == null) IsInitialised = false;
-            StateManager.UpdateState(StrategyId, RuleConfig.Params);
+            StateManager.UpdateState(RuleConfig.Params);
             StateManager.StateUpdateReceived += OnStateEventUpdate;
         }
 

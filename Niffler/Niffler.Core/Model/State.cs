@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Newtonsoft.Json;
+using System.Collections.Generic;
 
 namespace Niffler.Model
 {
@@ -17,7 +18,9 @@ namespace Niffler.Model
         public static readonly string SPIKEDOWNPEAK = "SpikeDownPeak";
         public static readonly string SPIKEDIRECTION = "SpikeDirection";
         public static readonly string SPIKESTARTPRICE = "SpikeStartPrice";
-       
+        public static readonly string MINSPIKEPIPS = "MinSpikePips";
+        
+
         public enum SpikeDirection
         {
             NONE = 0,
@@ -26,6 +29,17 @@ namespace Niffler.Model
         }
 
         public string StrategyId { get; set; }
+        public string OpenTime { get; set; }
+        public string CloseTime { get; set; }
+        public string ReduceRiskTime { get; set; }
+        public string TerminateTime { get; set; }
+        public string OpenPrice { get; set; }
+        public int MinSpikePips { get; set; }
+        public string[] OpenDates { get; set; }
+        public string[] OpenWeekDays { get; set; }
+        public bool OpenAnyDate { get; set; }
+        
+
     }
 }
 

@@ -105,7 +105,7 @@ namespace Niffler.Rules.TradingPeriods
 
             if (IsOpenDate(now) && IsOpenWeekday(now) && IsOpenTime(now))
             {
-                StateManager.UpdateState(StrategyId, new State
+                StateManager.UpdateState(new State
                     {
                         { State.ISOPENTIME, true },
                         { State.OPENTIME, message.Tick.TimeStamp },

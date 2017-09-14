@@ -41,7 +41,7 @@ namespace Niffler.Rules.TradingPeriods
             DateTimeZoneCalc = new DateTimeZoneCalculator(SymbolCode);
 
             //Listen for state updates for the OpenTime
-            StateManager.ListenForStateItemUpdates(StrategyId, RuleConfiguration.OPENTIME);
+            StateManager.ListenForStateUpdates();
 
             //Wait until OpenForTrading notifies before becoming active
             IsActive = false; 
@@ -57,7 +57,7 @@ namespace Niffler.Rules.TradingPeriods
 
             if (DateTimeZoneCalc.IsTimeAfter(Now, CloseTime))
             {
-                StateManager.UpdateState(StrategyId, new State
+                StateManager.UpdateState(new State
                     {
                         { State.ISOPENTIME, false },
                         { State.CLOSETIME, message.Tick.TimeStamp }

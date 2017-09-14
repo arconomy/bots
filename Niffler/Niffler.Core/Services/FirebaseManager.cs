@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using Niffler.Model;
 using System.Threading.Tasks;
 using Niffler.Core.Config;
+using System.Collections.Specialized;
 
 namespace Niffler.Core.Services
 {
@@ -14,19 +15,27 @@ namespace Niffler.Core.Services
         private FirebaseClient FireBaseClient;
         private string Path;
         private string BaseUrl;
+        private string StrategyId;
+        private bool HasStrategyId = true;
 
-        public FirebaseManager(string path)
+        private readonly string Auth = "8MT7N9S0H1rmW39SIDdH53USHCt3MY4CGogAQayg"; // Firebase database Secret
+
+        //Constructor for generic services (not strategy specific)
+        public FirebaseManager(string path) : this("",path)
+        {
+            HasStrategyId = false;
+        }
+        public FirebaseManager(string strategyId, string path)
         {
             Path = path;
+            StrategyId = strategyId;
             BaseUrl = StrategyConfiguration.BASEURL;
-            var auth = "8MT7N9S0H1rmW39SIDdH53USHCt3MY4CGogAQayg"; // Firebase database Secret
             FireBaseClient = new FirebaseClient(
               BaseUrl,
               new FirebaseOptions
               {
-                  AuthTokenAsyncFactory = () => Task.FromResult(auth)
+                  AuthTokenAsyncFactory = () => Task.FromResult(Auth)
               });
-
         }
 
         public async Task<string> AddStrategyAsync(string stategyName)
@@ -38,10 +47,11 @@ namespace Niffler.Core.Services
             return result.Key;
         }
 
-        public async void GetStateData(string strategyId)
+        public async void GetStateData()
         {
+            if (!HasStrategyId) return;
             var stateData = await FireBaseClient
-           .Child(Path + strategyId)
+           .Child(Path + StrategyId)
            .OnceSingleAsync<State>();
            
             OnStateUpdateReceived(new StateReceivedEventArgs()
@@ -50,29 +60,32 @@ namespace Niffler.Core.Services
                                     });
         }
 
-        public async void UpdateState(string strategyId, IDictionary<string, object> stateData)
+        public async void UpdateState(IDictionary<string, object> stateData)
         {
+            if (!HasStrategyId) return;
             string JsonStateData = JsonConvert.SerializeObject(stateData);
-            await FireBaseClient.Child(Path + strategyId).PatchAsync(JsonStateData);
+            await FireBaseClient.Child(Path + StrategyId).PatchAsync(JsonStateData);
         }
 
-        public void ListenForAllStateUpdates(string strategyId)
+        public void ListenForStateUpdates()
         {
+            if (!HasStrategyId) return;
             var observable = FireBaseClient
-            .Child(Path)
-            .AsObservable<State>()
-            .Subscribe(s => OnStateUpdateReceived(new StateReceivedEventArgs() { StateDataType = StateDataType.FULL, State = (State) s.Object }));
+            .Child(Path + StrategyId)
+            .AsObservable<Object>()
+            .Subscribe(s =>
+                {
+                    if (s.Object != null)
+                    {
+                        Console.WriteLine(s.Key.ToString());
+                        Console.WriteLine(s.Object.ToString());
+                        OnStateUpdateReceived(new StateReceivedEventArgs() { StateDataType = StateDataType.ITEM, Key = s.Key.ToString(), Value = s.Object.ToString() });
+                    }
+                }
+            );
         }
 
-        public void ListenForStateItemUpdates(string strategyId, string key)
-        {
-            var observable = FireBaseClient
-            .Child(Path + strategyId)
-            .AsObservable<KeyValuePair<string, object>>()
-            .Subscribe(kvp => OnStateUpdateReceived(new StateReceivedEventArgs() { StateDataType = StateDataType.ITEM, Key = kvp.Key, Value = kvp.Object}));
-        }
-
-        protected void OnStateUpdateReceived(StateReceivedEventArgs e)
+        public void OnStateUpdateReceived(StateReceivedEventArgs e)
         {
             StateUpdateReceived?.Invoke(this, e);
         }
