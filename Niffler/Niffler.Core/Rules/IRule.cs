@@ -5,6 +5,8 @@ using System;
 using Niffler.Core.Config;
 using Niffler.Core.Services;
 using Niffler.Model;
+using System.Collections.Generic;
+using System.Collections;
 
 namespace Niffler.Rules
 {
@@ -14,8 +16,10 @@ namespace Niffler.Rules
         protected StrategyConfiguration StrategyConfig;
         protected RuleConfiguration RuleConfig;
         protected StateManager StateManager;
+        protected Dictionary<string, bool> ActivateRules = new Dictionary<string, bool>();
+        protected Dictionary<string, bool> DeactivateRules = new Dictionary<string, bool>();
 
-        protected bool IsActive = true; //Default state is active
+        private bool IsActive = true; //Default state is active
 
         public IRule(StrategyConfiguration strategyConfig, RuleConfiguration ruleConfig)
         {
@@ -29,10 +33,33 @@ namespace Niffler.Rules
             if (String.IsNullOrEmpty(ExchangeName)) IsInitialised = false;
 
             //Add Rule configuration to Firebase
-            StateManager = new StateManager(StrategyConfiguration.PATH, StrategyId);
+            StateManager = new StateManager(StrategyId);
             if (StateManager == null) IsInitialised = false;
-            StateManager.UpdateState(RuleConfig.Params);
+            StateManager.SetInitialState(RuleConfig.Params);
+
+            //Manage State updates if subscribed to by the derived rule
             StateManager.StateUpdateReceived += OnStateEventUpdate;
+
+            StateManager.SetActivationRules(GetServiceName(), RuleConfig.ActivateRules);
+            StateManager.SetDeactivationRules(GetServiceName(), RuleConfig.DeactivateRules);
+
+            //If this rule has activation rules default state IsActive = false
+            if(RuleConfig.ActivateRules != null)
+            {
+                IsActive = false;
+            }
+            StateManager.UpdateRuleStatus(GetServiceName(), RuleConfiguration.ISACTIVE, IsActive);
+        }
+
+        protected void SetActiveState(bool isActive)
+        {
+            StateManager.UpdateRuleStatus(GetServiceName(), RuleConfiguration.ISACTIVE,isActive);
+            IsActive = isActive;
+        }
+
+        private void OnStateEventUpdate(object sender, StateChangedEventArgs stateupdate)
+        {
+            OnStateUpdate(stateupdate);
         }
 
         protected override void OnMessageReceived(Object o, MessageReceivedEventArgs e)
@@ -70,6 +97,7 @@ namespace Niffler.Rules
                             return;
                         }
 
+                        OnServiceActivationNotify(message, routingKey);
                         OnServiceNotify(message, routingKey);
                         break;
                     }
@@ -126,15 +154,69 @@ namespace Niffler.Rules
             ShutDownService();
         }
 
-        private void OnStateEventUpdate(object sender, StateReceivedEventArgs stateupdate)
+        private void OnServiceActivationNotify(Niffle message, RoutingKey routingKey)
         {
-            OnStateUpdate(stateupdate);
+            //Listening for activation notifications
+            if(ActivateRules.ContainsKey(routingKey.Source) && message.Service.Success)
+            {
+                ActivateRules[routingKey.Source] = true;
+            }
+
+            if (!ActivateRules.ContainsValue(false) && !IsActive)
+            {
+                SetActiveState(true);
+            }
+
+            //Listening for deactivation notifications
+            if (DeactivateRules.ContainsKey(routingKey.Source) && message.Service.Success)
+            {
+                DeactivateRules[routingKey.Source] = true;
+            }
+
+            if (!DeactivateRules.ContainsValue(false) && IsActive)
+            {
+                SetActiveState(false);
+            }
+        }
+
+        //Listen for a success notification from activation and deactivation rules
+        private void AddRoutingKeys(ref List<RoutingKey> routingKeys)
+        {
+            if (RuleConfig.ActivateRules != null)
+            {
+                foreach (string ruleName in RuleConfig.ActivateRules)
+                {
+                    ActivateRules.Add(ruleName, false);
+                    routingKeys.Add(RoutingKey.Create(ruleName, Messaging.RabbitMQ.Action.NOTIFY, Event.WILDCARD));
+                }
+            }
+
+            if (RuleConfig.DeactivateRules != null)
+            {
+                foreach (string ruleName in RuleConfig.DeactivateRules)
+                {
+                    DeactivateRules.Add(ruleName, false);
+                    routingKeys.Add(RoutingKey.Create(ruleName, Messaging.RabbitMQ.Action.NOTIFY, Event.WILDCARD));
+                }
+            }
+        }
+
+
+
+        protected override List<RoutingKey> SetListeningRoutingKeys()
+        {
+            List<RoutingKey> routingKeys = new List<RoutingKey>();
+            AddRoutingKeys(ref routingKeys);
+            AddListeningRoutingKeys(ref routingKeys);
+            return routingKeys;
         }
 
         public override abstract void Init();
         abstract protected string GetServiceName();
         abstract protected bool ExcuteRuleLogic(Niffle message);
         abstract protected void OnServiceNotify(Niffle message, RoutingKey routingKey);
-        abstract protected void OnStateUpdate(StateReceivedEventArgs stateupdate);
+        abstract protected void OnStateUpdate(StateChangedEventArgs stateupdate);
+        protected abstract void AddListeningRoutingKeys(ref List<RoutingKey> routingKeys);
+
     }
 }

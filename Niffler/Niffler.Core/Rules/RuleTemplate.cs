@@ -16,7 +16,7 @@ namespace Niffler.Rules
         public override void Init()
         {
             //Set Inactive if waiting for event or notification to activate
-            IsActive = false;
+            SetActiveState(false);
         }
 
         //Execute rule logic
@@ -27,7 +27,7 @@ namespace Niffler.Rules
             if (IsOnPositionMessageEmpty(message)) return false;
 
             //Set inactive if only executing once
-            IsActive = false;
+            SetActiveState(false);
 
             //return true to publish a success Service Notify message
             return true;
@@ -40,11 +40,11 @@ namespace Niffler.Rules
             //Listening for Success Nofitification from a SOURCE service
             if (routingKey.Source == nameof(OnOpenForTrading) && message.Service.Success)
             {
-                //Perform actions e.g. Activate... IsActive = true;
+                //Perform actions e.g. Activate... SetActiveState(true);
             }
         }
 
-        protected override void OnStateUpdate(StateReceivedEventArgs stateupdate)
+        protected override void OnStateUpdate(StateChangedEventArgs stateupdate)
         {
             //Listening for updates to State
         }
@@ -55,23 +55,21 @@ namespace Niffler.Rules
             return nameof(Template);
         }
 
-        protected override List<RoutingKey> SetListeningRoutingKeys()
+        protected override void AddListeningRoutingKeys(ref List<RoutingKey> routingKeys)
         {
             //Set the message(s) that this service is interested in receiving
 
             //e.g. Listen for OnTick
-            List<RoutingKey> routingKeys = RoutingKey.Create(Source.WILDCARD, Messaging.RabbitMQ.Action.WILDCARD, Event.ONTICK).ToList();
+            routingKeys.Add(RoutingKey.Create(Source.WILDCARD, Messaging.RabbitMQ.Action.WILDCARD, Event.ONTICK));
 
             //e.g. Listen for Service Notification success messages from OnOpenForTrading
             routingKeys.Add(RoutingKey.Create(nameof(OnOpenForTrading), Messaging.RabbitMQ.Action.NOTIFY, Event.WILDCARD));
-
-            return routingKeys;
         }
 
         public override void Reset()
         {
             //Reset local variables and set to original ready state
-            IsActive = false;
+            SetActiveState(false);
         }
     }
 }

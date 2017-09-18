@@ -29,13 +29,15 @@ namespace Niffler.Services
             Adapter.Connect();
 
             //Create a FirebaseManager to set up state data mangement
-            StateManager StateManager = new StateManager(StrategyConfiguration.PATH);
+            StateManager StateManager = new StateManager();
             
             //For each StrategyConfig Initialise Rules as micro-services and other default micro-services
             foreach (StrategyConfiguration strategyConfig in AppConfig.StrategyConfig)
             {
                 //Generate Strategy ID here and pass to the State and Rules
-                strategyConfig.StrategyId = StateManager.AddStrategyAsync(strategyConfig.Name).Result.ToString();
+                strategyConfig.StrategyId = StateManager.AddStrategyAsync().Result.ToString();
+                StateManager.SetStrategyId(strategyConfig.StrategyId);
+                StateManager.UpdateState("Name", strategyConfig.Name);
 
                 //Create the rule services per strategy
                 Rules = (RulesFactory.CreateAndInitRules(strategyConfig));

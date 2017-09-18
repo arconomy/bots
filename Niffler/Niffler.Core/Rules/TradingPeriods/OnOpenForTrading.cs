@@ -105,14 +105,14 @@ namespace Niffler.Rules.TradingPeriods
 
             if (IsOpenDate(now) && IsOpenWeekday(now) && IsOpenTime(now))
             {
-                StateManager.UpdateState(new State
+                StateManager.SetInitialState(new State
                     {
                         { State.ISOPENTIME, true },
                         { State.OPENTIME, message.Tick.TimeStamp },
                         { State.OPENPRICE, message.Tick.Bid + message.Tick.Spread / 2 }
                     });
 
-                IsActive = false;
+                SetActiveState(false);
                 return true;
             }
             return false;
@@ -124,7 +124,7 @@ namespace Niffler.Rules.TradingPeriods
             throw new NotImplementedException();
         }
 
-        protected override void OnStateUpdate(StateReceivedEventArgs stateupdate)
+        protected override void OnStateUpdate(StateChangedEventArgs stateupdate)
         {
             //Not Listening for any specific State Update Notifications.
             throw new NotImplementedException();
@@ -172,14 +172,14 @@ namespace Niffler.Rules.TradingPeriods
             return nameof(OnOpenForTrading);
         }
 
-        protected override List<RoutingKey> SetListeningRoutingKeys()
+        protected override void AddListeningRoutingKeys(ref List<RoutingKey> routingKeys)
         {
-            return RoutingKey.Create(Source.WILDCARD, Messaging.RabbitMQ.Action.WILDCARD, Event.ONTICK).ToList();
+            routingKeys.Add(RoutingKey.Create(Source.WILDCARD, Messaging.RabbitMQ.Action.WILDCARD, Event.ONTICK));
         }
 
         public override void Reset()
         {
-            IsActive = true;
+            SetActiveState(true);
         }
     }
 }

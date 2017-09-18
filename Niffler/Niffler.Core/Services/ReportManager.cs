@@ -34,7 +34,7 @@ namespace Niffler.Services
         {
             StrategyConfig = strategyConfig;
             StrategyName = strategyConfig.Name;
-            StateManager = new StateManager(StrategyConfiguration.PATH, strategyConfig.StrategyId);
+            StateManager = new StateManager(strategyConfig.StrategyId);
             StateManager.StateUpdateReceived += OnStateEventUpdate;
         }
 
@@ -53,7 +53,7 @@ namespace Niffler.Services
             StateManager.ListenForStateUpdates();
         }
 
-        private void OnStateEventUpdate(object sender, StateReceivedEventArgs stateupdate)
+        private void OnStateEventUpdate(object sender, StateChangedEventArgs stateupdate)
         {
             //Listening for updates to any of the state data that ReportManager needs to sync with - support scaling of ReportManager
             switch(stateupdate.Key)
@@ -189,7 +189,7 @@ namespace Niffler.Services
         public void ReportPositionOpened(Messaging.Protobuf.Position position)
         {
             PositionsOpenedCount++;
-            StateManager.UpdateState(new Dictionary<string, object>
+            StateManager.SetInitialState(new Dictionary<string, object>
                                         {
                                             { RuleConfiguration.POSITIONSOPENEDCOUNT, PipsTotal }
                                         }
@@ -202,7 +202,7 @@ namespace Niffler.Services
             PositionsClosedCount++;
             PipsTotal += position.Pips;
             ProfitTotal += position.GrossProfit;
-            StateManager.UpdateState(new Dictionary<string, object>
+            StateManager.SetInitialState(new Dictionary<string, object>
                                         {
                                             { RuleConfiguration.PIPSTOTAL, PipsTotal },
                                             { RuleConfiguration.PROFITTOTAL, ProfitTotal },
@@ -233,7 +233,7 @@ namespace Niffler.Services
         public void ReportOrderPlaced(Messaging.Protobuf.Order order)
         {
             OrdersPlacedCount++;
-            StateManager.UpdateState(new Dictionary<string, object>
+            StateManager.SetInitialState(new Dictionary<string, object>
                                         {
                                             { RuleConfiguration.ORDERSPLACEDCOUNT, OrdersPlacedCount }
                                         }
@@ -254,7 +254,7 @@ namespace Niffler.Services
         public void ReportError(string source, Messaging.Protobuf.Error error, string timestamp)
         {
             ErrorCount++;
-            StateManager.UpdateState(new Dictionary<string, object>
+            StateManager.SetInitialState(new Dictionary<string, object>
                                         {
                                             { RuleConfiguration.ERRORCOUNT, ErrorCount }
                                         }

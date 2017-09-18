@@ -8,7 +8,7 @@ namespace Niffler.Model
         ITEM = 1
     }
 
-    public class StateReceivedEventArgs : EventArgs
+    public class StateChangedEventArgs : EventArgs
     {
         public StateDataType StateDataType { get; set; }
         public State State { get; set; }

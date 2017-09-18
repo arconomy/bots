@@ -42,9 +42,6 @@ namespace Niffler.Rules.TradingPeriods
 
             //Listen for state updates for the OpenTime
             StateManager.ListenForStateUpdates();
-
-            //Wait until OpenForTrading notifies before becoming active
-            IsActive = false; 
         }
         
         //Execute rule logic
@@ -57,13 +54,13 @@ namespace Niffler.Rules.TradingPeriods
 
             if (DateTimeZoneCalc.IsTimeAfter(Now, CloseTime))
             {
-                StateManager.UpdateState(new State
+                StateManager.SetInitialState(new State
                     {
                         { State.ISOPENTIME, false },
                         { State.CLOSETIME, message.Tick.TimeStamp }
                     });
 
-                IsActive = false;
+                SetActiveState(false);
                 return true;
             }
             return false;
@@ -83,16 +80,10 @@ namespace Niffler.Rules.TradingPeriods
 
         override protected void OnServiceNotify(Niffle message,RoutingKey routingKey)
         {
-            if (IsServiceMessageEmpty(message)) return;
-
-            //Listening for OpenForTrading notification to activate
-            if (routingKey.Source == nameof(OnOpenForTrading) && message.Service.Success)
-            {
-                IsActive = true;
-            }
+            //Nothing required
         }
 
-        protected override void OnStateUpdate(StateReceivedEventArgs stateupdate)
+        protected override void OnStateUpdate(StateChangedEventArgs stateupdate)
         {
             //Listening for update to OpenTime State
             if (stateupdate.Key == Model.State.OPENTIME)
@@ -107,23 +98,16 @@ namespace Niffler.Rules.TradingPeriods
             return nameof(OnCloseForTrading);
         }
 
-        protected override List<RoutingKey> SetListeningRoutingKeys()
+        protected override void AddListeningRoutingKeys(ref List<RoutingKey> routingKeys)
         {
             //Listen for OnTick
-            List < RoutingKey > routingKeys = RoutingKey.Create(Source.WILDCARD, Messaging.RabbitMQ.Action.WILDCARD, Event.ONTICK).ToList();
-
-            //Listen for successful Service execution Notification from OnOpenForTrading
-            routingKeys.Add(RoutingKey.Create(nameof(OnOpenForTrading), Messaging.RabbitMQ.Action.NOTIFY, Event.WILDCARD));
-
-            //Listen for Update State Notification from StateManager for the Open Time
-            routingKeys.Add(RoutingKey.Create(nameof(OnOpenForTrading), Messaging.RabbitMQ.Action.UPDATESTATE, Event.WILDCARD));
-            return routingKeys;
+            routingKeys.Add(RoutingKey.Create(Source.WILDCARD, Messaging.RabbitMQ.Action.WILDCARD, Event.ONTICK));
         }
 
         public override void Reset()
         {
             //Wait until OpenForTrading notifies before becoming active
-            IsActive = false;
+            SetActiveState(false);
         }
     }
 }

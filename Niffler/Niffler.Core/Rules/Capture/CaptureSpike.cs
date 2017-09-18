@@ -30,9 +30,6 @@ namespace Niffler.Rules.Capture
 
             //Listen for state updates
             StateManager.ListenForStateUpdates();
-
-            //Activate on OpenForTrading notification
-            IsActive = false;
         }
 
         //Execute rule logic
@@ -44,7 +41,7 @@ namespace Niffler.Rules.Capture
             bool notifyOfSpikePeakCapture = false;
             if(SetSpikeUpPeak(Utils.GetMidPrice(message.Tick)))
             {
-                StateManager.UpdateState(new State
+                StateManager.SetInitialState(new State
                     {
                         { State.SPIKEUPPEAK, SpikeUpPeakPips }
                     });
@@ -53,7 +50,7 @@ namespace Niffler.Rules.Capture
 
             if (SetSpikeDownPeak(Utils.GetMidPrice(message.Tick)))
             {
-                StateManager.UpdateState(new State
+                StateManager.SetInitialState(new State
                     {
                         { State.SPIKEDOWNPEAK, SpikeDownPeakPips }
                     });
@@ -62,7 +59,7 @@ namespace Niffler.Rules.Capture
 
             if(SetSpikeDirection())
             {
-                StateManager.UpdateState(new State
+                StateManager.SetInitialState(new State
                     {
                         { State.SPIKEDIRECTION, SpikeDirection }
                     });
@@ -120,22 +117,10 @@ namespace Niffler.Rules.Capture
 
         override protected void OnServiceNotify(Niffle message, RoutingKey routingKey)
         {
-            if (IsServiceMessageEmpty(message)) return;
-
-            //Listening for OpenForTrading notification to activate
-            if (routingKey.Source == nameof(OnOpenForTrading) && message.Service.Success)
-            {
-                IsActive = true;
-            }
-
-            //Listening for OnCloseForTrading notification to deactivate
-            if (routingKey.Source == nameof(OnCloseForTrading) && message.Service.Success)
-            {
-                IsActive = false;
-            }
+            //Nothing Required
         }
 
-        protected override void OnStateUpdate(StateReceivedEventArgs stateupdate)
+        protected override void OnStateUpdate(StateChangedEventArgs stateupdate)
         {
             //Listening for update to OpenPrice State
             if (stateupdate.Key == Model.State.OPENPRICE)
@@ -150,27 +135,16 @@ namespace Niffler.Rules.Capture
             return nameof(CaptureSpike);
         }
 
-        protected override List<RoutingKey> SetListeningRoutingKeys()
+        protected override void AddListeningRoutingKeys(ref List<RoutingKey> routingKeys)
         {
             //Listen for OnTick
-            List<RoutingKey> routingKeys = RoutingKey.Create(Source.WILDCARD, Messaging.RabbitMQ.Action.WILDCARD, Event.ONTICK).ToList();
-
-            //Listen for successful Service execution Notification from OnOpenForTrading
-            routingKeys.Add(RoutingKey.Create(nameof(OnOpenForTrading), Messaging.RabbitMQ.Action.NOTIFY, Event.WILDCARD));
-
-            //Listen for successful Service execution Notification from OnOpenForTrading
-            routingKeys.Add(RoutingKey.Create(nameof(OnCloseForTrading), Messaging.RabbitMQ.Action.NOTIFY, Event.WILDCARD));
-
-            //Listen for successful Service execution Notification from OnOpenForTrading
-            routingKeys.Add(RoutingKey.Create(nameof(OnOpenForTrading), Messaging.RabbitMQ.Action.UPDATESTATE, Event.WILDCARD));
-
-            return routingKeys;
+            routingKeys.Add(RoutingKey.Create(Source.WILDCARD, Messaging.RabbitMQ.Action.WILDCARD, Event.ONTICK));
         }
 
         public override void Reset()
         {
             //Wait until OpenForTrading notifies before becoming active
-            IsActive = false;
+            SetActiveState(false);
         }
     }
 }
