@@ -1,0 +1,174 @@
+﻿
+// [START declaration]
+syntax = "proto3";
+package Niffler.Messaging.Protobuf;
+// [END declaration]
+
+// [START java_declaration]
+//option java_package = "com.example.tutorial";
+//option java_outer_classname = "AddressBookProtos";
+// [END java_declaration]
+
+// [START csharp_declaration]
+option csharp_namespace = "Niffler.Messaging.Protobuf";
+// [END csharp_declaration]
+
+// [START messages]
+
+message Niffle {
+    enum Type   {
+        TICK = 0;
+        POSITION = 1;
+        ORDER = 2;
+        SERVICE = 3;
+        TRADE = 4;
+		TRADES = 5;
+        ERROR = 6;
+    }
+	bool isStrategyIdRequired = 1;
+    string strategyId = 2;
+    int64 timeStamp = 3;
+	bool isBackTesting = 4;
+    Type type = 5;
+    Tick tick = 6;
+    Position position = 7;
+    Positions positions = 8;
+    Order order = 9;
+    Orders orders = 10;
+    Service service = 11;
+    Trade trade = 12;
+    Trades trades = 13;
+    Error error = 14;
+}
+
+message Error {
+  string code = 1;
+  string message = 2;
+}
+
+message Tick {
+  string code = 1;
+  double ask = 2;
+  double bid = 3;
+  int32 digits = 4;
+  double pipSize = 5;
+  double tickSize = 6;
+  double spread = 7;
+  int64 timeStamp = 8;
+}
+    
+message Position {
+
+    enum TradeType {
+        BUY = 0;
+        SELL = 1;
+    }
+
+    enum StateChange {
+        NONE = 0;
+        OPENED = 1;
+        CLOSED = 2;
+        MODIFIED = 3;
+    }
+
+    string label = 1;
+    int32 id = 2;
+    string symbolCode = 3;
+    TradeType tradeType = 4;
+	int64 volume = 5;
+    double entryPrice = 6;
+    double stopLossPrice = 7;
+    double takeProfitPrice = 8;
+    double pips = 9;
+    int64 entryTime = 10;
+    int64 closeTime = 11;
+    double closePrice = 12;
+    double grossProfit = 13;
+    StateChange stateChange = 14;
+}
+
+message Positions {
+    int32 Count = 1;
+    repeated Position position = 2;
+}
+
+message Order {
+
+    enum OrderType {
+        LIMIT = 0;
+        STOP = 1;
+        STOPLIMIT = 2;
+	}
+
+	 enum TradeType   {
+        BUY = 0;
+		SELL = 1;
+	}
+
+    enum StateChange {
+        NONE = 0;
+        PLACED = 1;
+        CANCELLED = 2;
+        MODIFIED = 3;
+    }
+
+    string label = 1;
+    int32 id = 2;
+    string symbolCode = 3;
+    OrderType orderType = 4;
+	TradeType tradeType = 5;
+    int64 volume = 6;
+    double targetEntryPrice = 7;
+    double stopLossPrice = 8;
+    double stopLossPips = 9;
+    double takeProfitPrice = 10;
+    double takeProfitPips = 11;
+    int64 expiryTime = 12;
+    int64 entryTime = 13;
+    StateChange stateChange = 14;
+}
+
+message Orders {
+    int32 Count = 1;
+    repeated Order order = 2;
+}
+
+message Service  {
+    enum Command {
+        RESET = 0;
+        NOTIFY = 1;
+        SCALEUP = 2;
+        SCALEDOWN = 3;
+        SHUTDOWN = 4;
+    }
+
+    Command command = 1;
+    bool success = 2;
+	string queueName = 3;
+}
+
+message Trade   {
+
+    enum TradeAction   {
+        BUY = 0;
+        SELL = 1;
+        BUYLIMITORDER = 3;
+        SELLLIMITORDER = 4;
+        BUYSTOPORDER = 5;
+        SELLSTOPORDER = 6;
+        MODIFYPOSITION = 7;
+        MODIFYORDER = 8;
+		CLOSEPOSITION = 9;
+		CANCELORDER = 10;
+    }
+
+	TradeAction tradeAction = 1;
+	Order order = 2;
+	Position position = 3;
+}
+
+message Trades  {
+    repeated Trade trade = 1;
+}
+
+// [END messages]

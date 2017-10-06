@@ -124,6 +124,8 @@ namespace cAlgo
         protected double _spikePeakPips = 0;
         protected double _spikePeakPrice = 0;
 
+        protected int _count = 0;
+
         protected override void OnStart()
         {
             Print(Time + " Working");
@@ -918,7 +920,9 @@ namespace cAlgo
             string profit = "";
             if (_dayProfitTotal != 0 && _dayPipsTotal != 0)
             {
-                profit = ("DAY TOTAL," + _dayProfitTotal + "," + _dayPipsTotal + "," + _openedPositionsCount + "," + _spikePeakPips + "," + Time.DayOfWeek + "," + Time);
+                profit = ("DAY TOTALS," + _dayProfitTotal + "," + _dayPipsTotal + "," + _openedPositionsCount + "," + _openPrice + "," + _spikePeakPips + "," + Time.DayOfWeek + "," + Time);
+                debugCSV.Add("----------------------------------");
+                debugCSV.Add(",Profit,Pips,Opened Positions,Open Price, SpikePeakPips, Day, DateTime");
                 debugCSV.Add(profit);
             }
         }
