@@ -81,6 +81,9 @@ namespace cAlgo
         [Parameter("Trailing fixed SL", DefaultValue = 5)]
         public double TrailingStopPips { get; set; }
 
+        [Parameter("Enable Buy Orders", DefaultValue = true)]
+        public bool EnableBuyOrders { get; set; }
+
         protected MarketTimeInfo _swordFishTimeInfo;
         protected BollingerBands _boli;
 
@@ -110,6 +113,7 @@ namespace cAlgo
         protected bool _isSwordfishTerminated = false;
         protected bool _isSwordFishReset = true;
         protected bool _isReducedRiskTime = false;
+        protected bool _printOnce = false;
         protected string _botId = null;
 
         List<string> debugCSV = new List<string>();
@@ -124,6 +128,7 @@ namespace cAlgo
 
         protected override void OnStart()
         {
+            Print(Time + " Working");
             _botId = generateBotId();
             _swordFishTimeInfo = new MarketTimeInfo();
             setTimeZone();
@@ -170,6 +175,7 @@ namespace cAlgo
 
         protected override void OnTick()
         {
+
             // If backtesting use the Server.Time.        
             if (IsSwordFishTime())
             {
@@ -181,7 +187,7 @@ namespace cAlgo
                 {
                     //Get the Market Open Price
                     _openPrice = MarketSeries.Close.LastValue;
-                    Print("OPEN PRICE: " + _openPrice);
+                    Print(Time + " OPEN PRICE: " + _openPrice);
                     _openPriceCaptured = true;
                 }
 
@@ -192,8 +198,9 @@ namespace cAlgo
                     {
                         placeSellLimitOrders();
                     }
+
                     //Price moves 5pts DOWN from open then look to set BUY LimitOrders
-                    else if (_openPrice - SwordFishTrigger > Symbol.Ask)
+                    else if (_openPrice - SwordFishTrigger > Symbol.Ask && EnableBuyOrders)
                     {
                         placeBuyLimitOrders();
                     }
@@ -204,6 +211,12 @@ namespace cAlgo
             //It is outside SwordFish Time
             else
             {
+                if (!_printOnce && _openPriceCaptured)
+                {
+                    Print(Time + " - End of Swordfish Trading Time");
+                    _printOnce = true;
+                }
+
                 if (_ordersPlaced)
                 {
                     if (_openedPositionsCount - _closedPositionsCount > 0)
@@ -893,6 +906,7 @@ namespace cAlgo
             _isSwordfishTerminated = false;
             _isSwordFishReset = true;
             _isReducedRiskTime = false;
+            _printOnce = false;
 
             // reset reporting variables
             _dayProfitTotal = 0;
@@ -950,7 +964,7 @@ namespace cAlgo
         protected override void OnStop()
         {
             // Put your deinitialization logic here
-            System.IO.File.WriteAllLines("C:\\Users\\alist\\Desktop\\swordfish\\" + _swordFishTimeInfo.market + "-" + _botId + "-" + "swordfish-" + getTimeStamp(true) + ".csv", debugCSV.ToArray());
+            System.IO.File.WriteAllLines("C:\\Users\\cornishac\\Desktop\\swordfish\\" + _swordFishTimeInfo.market + "-" + _botId + "-" + "swordfish-" + getTimeStamp(true) + ".csv", debugCSV.ToArray());
         }
 
         protected string getTimeStamp(bool unformatted = false)
@@ -978,6 +992,16 @@ namespace cAlgo
 
                     break;
                 case "GER30":
+                    _swordFishTimeInfo.market = "DAX";
+                    _swordFishTimeInfo.tz = TimeZoneInfo.FindSystemTimeZoneById("W. Europe Standard Time");
+                    // Market for swordfish opens at 9:00.
+                    _swordFishTimeInfo.open = new TimeSpan(8, 59, 59);
+                    // Market for swordfish closes at 9:05.
+                    _swordFishTimeInfo.close = new TimeSpan(9, 3, 30);
+                    // Close all open Swordfish position at 11:29am before US opens.
+                    _swordFishTimeInfo.closeAll = new TimeSpan(11, 29, 0);
+                    break;
+                case "DE30":
                     _swordFishTimeInfo.market = "DAX";
                     _swordFishTimeInfo.tz = TimeZoneInfo.FindSystemTimeZoneById("W. Europe Standard Time");
                     // Market for swordfish opens at 9:00.

@@ -12,7 +12,7 @@ namespace cAlgo
     {
         protected override void OnStart()
         {
-
+            Print("Time Syncer started");
         }
 
         protected override void OnTick()
