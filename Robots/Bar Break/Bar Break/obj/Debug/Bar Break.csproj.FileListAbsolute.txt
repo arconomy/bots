@@ -1,7 +1,0 @@
-C:\Users\andrewfblake\Documents\cAlgo\Sources\Robots\Bar Break\Bar Break\bin\Debug\Bar Break.dll
-C:\Users\andrewfblake\Documents\cAlgo\Sources\Robots\Bar Break\Bar Break\bin\Debug\Bar Break.pdb
-C:\Users\andrewfblake\Documents\cAlgo\Sources\Robots\Bar Break\Bar Break\bin\Debug\cAlgo.API.dll
-C:\Users\andrewfblake\Documents\cAlgo\Sources\Robots\Bar Break\Bar Break\bin\Debug\cAlgo.API.xml
-C:\Users\andrewfblake\Documents\cAlgo\Sources\Robots\Bar Break\Bar Break\obj\Debug\Bar Break.csprojResolveAssemblyReference.cache
-C:\Users\andrewfblake\Documents\cAlgo\Sources\Robots\Bar Break\Bar Break\obj\Debug\Bar Break.dll
-C:\Users\andrewfblake\Documents\cAlgo\Sources\Robots\Bar Break\Bar Break\obj\Debug\Bar Break.pdb

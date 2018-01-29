@@ -1,7 +1,0 @@
-C:\Users\alist\Documents\cAlgo\Sources\Robots\Majors Bot\Majors Bot\obj\Debug\Majors Bot.csprojResolveAssemblyReference.cache
-C:\Users\alist\Documents\cAlgo\Sources\Robots\Majors Bot\Majors Bot\bin\Debug\Majors Bot.dll
-C:\Users\alist\Documents\cAlgo\Sources\Robots\Majors Bot\Majors Bot\bin\Debug\Majors Bot.pdb
-C:\Users\alist\Documents\cAlgo\Sources\Robots\Majors Bot\Majors Bot\bin\Debug\cAlgo.API.dll
-C:\Users\alist\Documents\cAlgo\Sources\Robots\Majors Bot\Majors Bot\bin\Debug\cAlgo.API.xml
-C:\Users\alist\Documents\cAlgo\Sources\Robots\Majors Bot\Majors Bot\obj\Debug\Majors Bot.dll
-C:\Users\alist\Documents\cAlgo\Sources\Robots\Majors Bot\Majors Bot\obj\Debug\Majors Bot.pdb
