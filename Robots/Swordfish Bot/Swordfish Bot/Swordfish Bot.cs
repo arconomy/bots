@@ -88,6 +88,7 @@ namespace cAlgo
         protected BollingerBands _boli;
 
         //Price and Position Variables
+        protected double _preOpenPrice;
         protected double _openPrice;
         protected string _lastPositionLabel;
         protected TradeType _lastPositionTradeType;
@@ -107,8 +108,11 @@ namespace cAlgo
         protected bool _isBreakEvenStopLossActive = false;
 
         //Swordfish State Variables
+        protected bool _usePreOpenPriceForBuys = false;
+        protected bool _usePreOpenPriceForSells = false;
         protected bool _isPendingOrdersClosed = false;
         protected bool _openPriceCaptured = false;
+        protected bool _preOpenPriceCaptured = false;
         protected bool _ordersPlaced = false;
         protected bool _isSwordfishTerminated = false;
         protected bool _isSwordFishReset = true;
@@ -175,6 +179,17 @@ namespace cAlgo
 
         protected override void OnTick()
         {
+            //Capture pre-open market price
+            if (IsTradingTimeIn(3))
+            {
+                if (!_preOpenPriceCaptured)
+                {
+                    //Get the Market Pre-Open Price
+                    _preOpenPrice = MarketSeries.Close.LastValue;
+                    Print(Time + " PRE-OPEN PRICE: " + _preOpenPrice);
+                    _preOpenPriceCaptured = true;
+                }
+            }
 
             // If backtesting use the Server.Time.        
             if (IsSwordFishTime())
@@ -193,16 +208,49 @@ namespace cAlgo
 
                 if (!_ordersPlaced)
                 {
-                    //Price moves 5pts UP from open then look to set SELL LimitOrders
-                    if (_openPrice + SwordFishTrigger < Symbol.Bid)
+                    //Use pre-Open price if price already moved more than 5points up
+                    if (_openPrice - _preOpenPrice > 5)
                     {
-                        placeSellLimitOrders();
+                        _usePreOpenPriceForSells = true;
                     }
 
-                    //Price moves 5pts DOWN from open then look to set BUY LimitOrders
-                    else if (_openPrice - SwordFishTrigger > Symbol.Ask && EnableBuyOrders)
+                    //Use pre-Open price if price already moved more than 5points down
+                    if (_preOpenPrice - _openPrice > 5)
                     {
-                        placeBuyLimitOrders();
+                        _usePreOpenPriceForBuys = true;
+                    }
+
+                    //Price moves 5pts UP from open then look to set SELL LimitOrders
+                    if (_usePreOpenPriceForSells)
+                    {
+                        if (_preOpenPrice + SwordFishTrigger < Symbol.Bid)
+                        {
+                            _openPrice = _preOpenPrice;
+                            placeSellLimitOrders();
+                        }
+                    }
+                    else
+                    {
+                        if (_openPrice + SwordFishTrigger < Symbol.Bid)
+                        {
+                            placeSellLimitOrders();
+                        }
+                    }
+
+                    if (_usePreOpenPriceForBuys)
+                    {
+                        if (_openPrice - SwordFishTrigger > Symbol.Ask && EnableBuyOrders)
+                        {
+                            _openPrice = _preOpenPrice;
+                            placeBuyLimitOrders();
+                        }
+                    }
+                    else
+                    {
+                        if (_openPrice - SwordFishTrigger > Symbol.Ask && EnableBuyOrders)
+                        {
+                            placeBuyLimitOrders();
+                        }
                     }
                 }
 
@@ -763,7 +811,17 @@ namespace cAlgo
                 _lastProfitPrice = Symbol.Bid;
         }
 
+        protected bool IsTradingTimeIn(int mins)
+        {
+            return _swordFishTimeInfo.IsTimeBeforeOpen(IsBacktesting, Server.Time, mins);
+        }
+
         protected bool IsSwordFishTime()
+        {
+            return _swordFishTimeInfo.IsPlacePendingOrdersTime(IsBacktesting, Server.Time);
+        }
+
+        protected bool IsSwordFishTimeIn()
         {
             return _swordFishTimeInfo.IsPlacePendingOrdersTime(IsBacktesting, Server.Time);
         }
@@ -900,6 +958,9 @@ namespace cAlgo
             _isHardSLLastProfitPrice = false;
 
             // swordfish bot state variables
+            _usePreOpenPriceForBuys = false;
+            _usePreOpenPriceForSells = false;
+            _preOpenPriceCaptured = false;
             _openPriceCaptured = false;
             _ordersPlaced = false;
             _isPendingOrdersClosed = false;
@@ -1038,6 +1099,26 @@ public struct MarketTimeInfo
     public TimeSpan open;
     public TimeSpan close;
     public TimeSpan closeAll;
+
+    //Time X minutes from open
+    public bool IsTimeBeforeOpen(bool isBackTesting, DateTime serverTime, int timeFromOpen)
+    {
+        if (isBackTesting)
+        {
+            return IsTimeBeforeOpen(serverTime, timeFromOpen);
+        }
+        else
+        {
+            return IsTimeBeforeOpen(DateTime.UtcNow, timeFromOpen);
+        }
+    }
+
+    //Is the time x mins before open.
+    private bool IsTimeBeforeOpen(DateTime dateTimeUtc, int timeToOpen)
+    {
+        DateTime tzTime = TimeZoneInfo.ConvertTimeFromUtc(dateTimeUtc, tz);
+        return (tzTime.TimeOfDay < open && tzTime.TimeOfDay >= open.Subtract(TimeSpan.FromMinutes(timeToOpen)));
+    }
 
     //Is the current time within the period Swordfish Pending Orders can be placed
     public bool IsPlacePendingOrdersTime(bool isBackTesting, DateTime serverTime)
