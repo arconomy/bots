@@ -1,7 +1,0 @@
-﻿C:\Users\andrewfblake\Documents\cAlgo\Sources\Robots\3 Minute Moving Average\3 Minute Moving Average\bin\Debug\3 Minute Moving Average.dll
-C:\Users\andrewfblake\Documents\cAlgo\Sources\Robots\3 Minute Moving Average\3 Minute Moving Average\bin\Debug\3 Minute Moving Average.pdb
-C:\Users\andrewfblake\Documents\cAlgo\Sources\Robots\3 Minute Moving Average\3 Minute Moving Average\bin\Debug\cAlgo.API.dll
-C:\Users\andrewfblake\Documents\cAlgo\Sources\Robots\3 Minute Moving Average\3 Minute Moving Average\bin\Debug\cAlgo.API.xml
-C:\Users\andrewfblake\Documents\cAlgo\Sources\Robots\3 Minute Moving Average\3 Minute Moving Average\obj\Debug\3 Minute Moving Average.csprojResolveAssemblyReference.cache
-C:\Users\andrewfblake\Documents\cAlgo\Sources\Robots\3 Minute Moving Average\3 Minute Moving Average\obj\Debug\3 Minute Moving Average.dll
-C:\Users\andrewfblake\Documents\cAlgo\Sources\Robots\3 Minute Moving Average\3 Minute Moving Average\obj\Debug\3 Minute Moving Average.pdb

@@ -1062,6 +1062,16 @@ namespace cAlgo
                     // Close all open Swordfish position at 11:29am before US opens.
                     _swordFishTimeInfo.closeAll = new TimeSpan(11, 29, 0);
                     break;
+                case "DE30":
+                    _swordFishTimeInfo.market = "DAX";
+                    _swordFishTimeInfo.tz = TimeZoneInfo.FindSystemTimeZoneById("W. Europe Standard Time");
+                    // Market for swordfish opens at 9:00.
+                    _swordFishTimeInfo.open = new TimeSpan(8, 59, 59);
+                    // Market for swordfish closes at 9:05.
+                    _swordFishTimeInfo.close = new TimeSpan(9, 3, 30);
+                    // Close all open Swordfish position at 11:29am before US opens.
+                    _swordFishTimeInfo.closeAll = new TimeSpan(11, 29, 0);
+                    break;
                 case "HK50":
                     _swordFishTimeInfo.market = "HSI";
                     _swordFishTimeInfo.tz = TimeZoneInfo.FindSystemTimeZoneById("China Standard Time");
