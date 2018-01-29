@@ -18,6 +18,9 @@ namespace cAlgo
         [Parameter("Use Bollinger Bollinger Band Entry", DefaultValue = false)]
         public bool useBollingerBandEntry { get; set; }
 
+        [Parameter("Mins before open to capturing pre-entry price", DefaultValue = false)]
+        public int preEntryCaptureMins { get; set; }
+
         [Parameter("Pips inside Bollinger Band Entry", DefaultValue = 2)]
         public int targetBolliEntryPips { get; set; }
 
@@ -180,7 +183,7 @@ namespace cAlgo
         protected override void OnTick()
         {
             //Capture pre-open market price
-            if (IsTradingTimeIn(3))
+            if (IsTradingTimeIn(preEntryCaptureMins))
             {
                 if (!_preOpenPriceCaptured)
                 {
