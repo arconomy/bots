@@ -1,5 +1,5 @@
 ﻿[ChartParameters]
-Symbol = UK100
+Symbol = DE30
 Timeframe = m1
 
 [cBotParameters]
