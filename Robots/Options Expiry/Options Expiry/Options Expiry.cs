@@ -939,7 +939,7 @@ namespace cAlgo
                 {
                     if (isThisBotId(p.Label))
                     {
-                        ModifyPositionAsync(p, p.StopLoss, p.EntryPrice + calcAscendingTakeProfit(positionCount), OnModifyTakeProfitComplete);
+                        ModifyPositionAsync(p, p.StopLoss, p.EntryPrice + calcAscendingTakeProfit(positionCount) * Symbol.TickSize, OnModifyTakeProfitComplete);
                     }
                 } catch (Exception e)
                 {

@@ -1,0 +1,29 @@
+﻿[ChartParameters]
+Symbol = DE30
+Timeframe = m1
+
+[cBotParameters]
+DataSeriesSource = Close
+useBollingerBandEntry = False
+targetBolliEntryPips = 2
+SwordFishTrigger = 15
+OrderEntryOffset = 17
+OrderSpacing = 1
+OrderSpacingLevels = 20
+OrderSpacingMultipler = 2
+OrderSpacingMax = 3
+NumberOfOrders = 25
+Volume = 5
+VolumeMax = 10
+OrderVolumeLevels = 5
+VolumeMultipler = 2
+TakeProfit = 5
+ReducePositionRiskTime = 45
+retraceEnabled = True
+retraceLevel1 = 33
+retraceLevel2 = 50
+retraceLevel3 = 66
+FinalOrderStopLoss = 15
+HardStopLossBuffer = 15
+TrailingStopPips = 7
+EnableBuyOrders = False
