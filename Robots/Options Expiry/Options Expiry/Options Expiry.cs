@@ -212,7 +212,7 @@ namespace cAlgo
             {
                 if (!_earlyEntryPriceCaptured)
                 {
-                    //Get the Price 5mins before open
+                    //Get the Price 1min before open
                     _orderEntryStartPrice = Symbol.Bid;
                     _earlyEntryPriceCaptured = true;
                 }
@@ -939,7 +939,7 @@ namespace cAlgo
                 {
                     if (isThisBotId(p.Label))
                     {
-                        ModifyPositionAsync(p, p.StopLoss, p.EntryPrice + calcAscendingTakeProfit(positionCount), OnModifyTakeProfitComplete);
+                        ModifyPositionAsync(p, p.StopLoss, p.EntryPrice + calcAscendingTakeProfit(positionCount)*Symbol.TickSize, OnModifyTakeProfitComplete);
                     }
                 } catch (Exception e)
                 {
@@ -1299,7 +1299,7 @@ namespace cAlgo
                     // Instantiate a MarketTimeInfo object.
                     _marketTimeInfo.market = "FTSE";
                     _marketTimeInfo.tz = TimeZoneInfo.FindSystemTimeZoneById("GMT Standard Time");
-                    // Market for swordfish trades opens at 10:08am.
+                    // Market for swordfish trades opens at 10:09:50 am.
                     _marketTimeInfo.open = new TimeSpan(10, 9, 50);
                     // Market for swordfish trades closes at 10:13am.
                     _marketTimeInfo.close = _marketTimeInfo.open.Add(TimeSpan.FromMinutes(CloseTime));

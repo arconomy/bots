@@ -647,7 +647,7 @@ namespace cAlgo
                 {
                     if (isThisBotId(p.Label))
                     {
-                        ModifyPositionAsync(p, p.StopLoss, p.EntryPrice - calcTakeProfit(positionCount), OnModifyTakeProfitComplete);
+                        ModifyPositionAsync(p, p.StopLoss, p.EntryPrice - calcTakeProfit(positionCount)*Symbol.TickSize, OnModifyTakeProfitComplete);
                     }
                 } catch (Exception e)
                 {
@@ -903,7 +903,7 @@ namespace cAlgo
                     _marketTimeInfo.closeAll = new TimeSpan(18, 45, 0);
 
                     break;
-                case "GER30":
+                case "DE30":
                     _marketTimeInfo.market = "DAX";
                     _marketTimeInfo.tz = TimeZoneInfo.FindSystemTimeZoneById("W. Europe Standard Time");
                     // Market for swordfish opens at 9:00.
