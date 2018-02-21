@@ -153,7 +153,9 @@ namespace cAlgo
         protected bool _startPriceCaptured = false;
         protected bool _earlyEntryPriceCaptured = false;
         protected bool _ordersPlaced = false;
+        protected bool _ordersRequested = false;
         protected bool _positionsPlaced = false;
+        protected bool _positionsRequested = false;
         protected bool _isTerminated = false;
         protected bool _isReset = true;
         protected bool _isCloseTime = false;
@@ -217,7 +219,7 @@ namespace cAlgo
                     _earlyEntryPriceCaptured = true;
                 }
 
-                if (!_ordersPlaced)
+                if (!_ordersPlaced && !_ordersRequested)
                 {
                     placeBuyLimitOrders();
                 }
@@ -237,7 +239,7 @@ namespace cAlgo
                     _startPriceCaptured = true;
                 }
 
-                if (!_positionsPlaced)
+                if (!_positionsPlaced && !_positionsRequested)
                 {
                     placeBuyOrders();
                 }
@@ -737,6 +739,9 @@ namespace cAlgo
                 {
                     Print("Failed to place Buy Limit Order: " + e.Message);
                 }
+                //If orders have been sent set flag
+                if (_orderCountLabel > 0)
+                    _positionsRequested = true;
             }
         }
 
@@ -776,6 +781,8 @@ namespace cAlgo
                 {
                     Print("Failed to place Buy Limit Order: " + e.Message);
                 }
+                if (OrderCount > 0)
+                    _ordersRequested = true;
             }
         }
 
