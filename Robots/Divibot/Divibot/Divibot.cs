@@ -100,7 +100,9 @@ namespace cAlgo
         protected bool _startPriceCaptured = false;
         protected bool _earlyEntryPriceCaptured = false;
         protected bool _ordersPlaced = false;
+        protected bool _ordersRequested = false;
         protected bool _positionsPlaced = false;
+        protected bool _positionsRequested = false;
         protected bool _isTerminated = false;
         protected bool _isReset = true;
         protected bool _isReducedRiskTime = false;
@@ -176,12 +178,12 @@ namespace cAlgo
                     _startPriceCaptured = true;
                 }
 
-                if (!_positionsPlaced && _earlyEntryPrice - 3 < Symbol.Ask)
+                if (!_positionsRequested && !_positionsPlaced && _earlyEntryPrice - 3 < Symbol.Ask)
                 {
                     placeSellOrders();
                 }
 
-                if (!_ordersPlaced)
+                if (!_ordersPlaced && !_ordersRequested)
                 {
                     placeSellLimitOrders();
                 }
@@ -478,7 +480,7 @@ namespace cAlgo
                         symbol = Symbol,
                         volume = setVolume(OrderCount),
                         entryPrice = 0,
-                        label = _botId + "-" + getTimeStamp() + _marketTimeInfo.market + "-SWF#" + _orderCountLabel,
+                        label = _botId + "-" + getTimeStamp() + _marketTimeInfo.market + "-#" + _orderCountLabel,
                         stopLossPips = FinalOrderStopLoss,
                         takeProfitPips = calcTakeProfit(OrderCount)
                     };
@@ -486,20 +488,23 @@ namespace cAlgo
                         continue;
 
                     //Place Market Orders immediately
-                    ExecuteMarketOrderAsync(data.tradeType, data.symbol, data.volume, data.label + "XX", data.stopLossPips, data.takeProfitPips, OnPlaceTradeOperationComplete);
+                    ExecuteMarketOrderAsync(data.tradeType, data.symbol, data.volume, data.label + "X", data.stopLossPips, data.takeProfitPips, OnPlaceTradeOperationComplete);
                     _orderCountLabel++;
                 } catch (Exception e)
                 {
                     Print("Failed to place Sell Limit Order: " + e.Message);
                 }
             }
+            if (_orderCountLabel > 0)
+                _positionsRequested = true;
         }
 
         // Place Sell Limit Orders
         protected void placeSellLimitOrders()
         {
             //Place Sell Limit Orders
-            for (int OrderCount = 0; OrderCount < NumberOfSellLimitOrders; OrderCount++)
+            int OrderCount = 0;
+            for (; OrderCount < NumberOfSellLimitOrders; OrderCount++)
             {
                 try
                 {
@@ -509,7 +514,7 @@ namespace cAlgo
                         symbol = Symbol,
                         volume = setVolume(OrderCount),
                         entryPrice = calcSellEntryPrice(OrderCount),
-                        label = _botId + "-" + getTimeStamp() + _marketTimeInfo.market + "-SWF#" + OrderCount,
+                        label = _botId + "-" + getTimeStamp() + _marketTimeInfo.market + "-#" + OrderCount,
                         stopLossPips = setPendingOrderStopLossPips(OrderCount, NumberOfSellLimitOrders),
                         takeProfitPips = calcTakeProfit(OrderCount)
                     };
@@ -519,19 +524,21 @@ namespace cAlgo
                     //Check that entry price is valid
                     if (data.entryPrice > Symbol.Ask)
                     {
-                        PlaceLimitOrderAsync(data.tradeType, data.symbol, data.volume, data.entryPrice, data.label, data.stopLossPips, data.takeProfitPips, OnPlaceOrderOperationComplete);
+                        PlaceLimitOrderAsync(data.tradeType, data.symbol, data.volume, data.entryPrice, data.label + "O", data.stopLossPips, data.takeProfitPips, OnPlaceOrderOperationComplete);
                     }
                     else
                     {
                         //Tick price has 'jumped' - therefore avoid placing all PendingOrders by re-calculating the OrderCount to the equivelant entry point.
                         OrderCount = calculateNewOrderCount(NumberOfSellLimitOrders, OrderCount, Symbol.Ask);
-                        ExecuteMarketOrderAsync(data.tradeType, data.symbol, data.volume, data.label + "X", data.stopLossPips, data.takeProfitPips, OnPlaceOrderOperationComplete);
+                        ExecuteMarketOrderAsync(data.tradeType, data.symbol, data.volume, data.label + "OX", data.stopLossPips, data.takeProfitPips, OnPlaceOrderOperationComplete);
                     }
                 } catch (Exception e)
                 {
                     Print("Failed to place Sell Limit Order: " + e.Message);
                 }
             }
+            if (OrderCount > 0)
+                _ordersRequested = true;
         }
 
         protected double calcSellEntryPrice(int orderCount)
@@ -647,7 +654,7 @@ namespace cAlgo
                 {
                     if (isThisBotId(p.Label))
                     {
-                        ModifyPositionAsync(p, p.StopLoss, p.EntryPrice - calcTakeProfit(positionCount)*Symbol.TickSize, OnModifyTakeProfitComplete);
+                        ModifyPositionAsync(p, p.StopLoss, p.EntryPrice - calcTakeProfit(positionCount) * Symbol.TickSize, OnModifyTakeProfitComplete);
                     }
                 } catch (Exception e)
                 {
