@@ -212,13 +212,13 @@ namespace cAlgo
                 if (!_ordersPlaced)
                 {
                     //Use pre-Open price if price already moved more than 5points up
-                    if (_openPrice - _preOpenPrice > 5)
+                    if (_openPrice - _preOpenPrice > (OrderEntryOffset / 2))
                     {
                         _usePreOpenPriceForSells = true;
                     }
 
                     //Use pre-Open price if price already moved more than 5points down
-                    if (_preOpenPrice - _openPrice > 5)
+                    if (_preOpenPrice - _openPrice > (OrderEntryOffset / 2))
                     {
                         _usePreOpenPriceForBuys = true;
                     }
