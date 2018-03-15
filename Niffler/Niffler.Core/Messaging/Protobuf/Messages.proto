@@ -1,11 +1,12 @@
-﻿
-// [START declaration]
+﻿// [START declaration]
 syntax = "proto3";
-package Niffler.Messaging.Protobuf;
+//package Niffler.Messaging.Protobuf;
+
 // [END declaration]
 
 // [START java_declaration]
-//option java_package = "com.example.tutorial";
+option java_package = "com.niffler.messaging.protobuf";
+option java_multiple_files = true;
 //option java_outer_classname = "AddressBookProtos";
 // [END java_declaration]
 
@@ -69,13 +70,13 @@ message Position {
         OPENED = 1;
         CLOSED = 2;
         MODIFIED = 3;
-    }
+	}
 
     string label = 1;
     int32 id = 2;
     string symbolCode = 3;
     TradeType tradeType = 4;
-	int64 volume = 5;
+	double volume = 5;
     double entryPrice = 6;
     double stopLossPrice = 7;
     double takeProfitPrice = 8;
@@ -85,6 +86,7 @@ message Position {
     double closePrice = 12;
     double grossProfit = 13;
     StateChange stateChange = 14;
+    string positionId = 15;
 }
 
 message Positions {
@@ -98,6 +100,7 @@ message Order {
         LIMIT = 0;
         STOP = 1;
         STOPLIMIT = 2;
+        MARKET = 3;
 	}
 
 	 enum TradeType   {
@@ -106,10 +109,21 @@ message Order {
 	}
 
     enum StateChange {
-        NONE = 0;
-        PLACED = 1;
-        CANCELLED = 2;
-        MODIFIED = 3;
+            NEW = 0;
+            PARTIALLY_FILLED = 1;
+            FILLED = 2;
+            DONE_FOR_DAY = 3;
+            CANCELED = 4;
+            REPLACED = 5;
+            PENDING_CANCEL = 6;
+            STOPPED = 7;
+            REJECTED = 8;
+            SUSPENDED = 9;
+            PENDING_NEW = 10;
+            CALCULATED = 11;
+            EXPIRED = 12;
+            ACCEPTED_FOR_BIDDING = 13;
+            PENDING_REPLACE = 14;
     }
 
     string label = 1;
@@ -117,7 +131,7 @@ message Order {
     string symbolCode = 3;
     OrderType orderType = 4;
 	TradeType tradeType = 5;
-    int64 volume = 6;
+    double volume = 6;
     double targetEntryPrice = 7;
     double stopLossPrice = 8;
     double stopLossPips = 9;
@@ -126,6 +140,7 @@ message Order {
     int64 expiryTime = 12;
     int64 entryTime = 13;
     StateChange stateChange = 14;
+    string posMaintRptID  = 15;
 }
 
 message Orders {
@@ -165,6 +180,8 @@ message Trade   {
 	TradeAction tradeAction = 1;
 	Order order = 2;
 	Position position = 3;
+	bool linkedTrade = 4;
+	Trade parentTrade = 5;
 }
 
 message Trades  {

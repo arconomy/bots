@@ -13,6 +13,7 @@ namespace Niffler.Messaging.RabbitMQ
         TRADEOPERATION = 3,  //Niffler cAlgo Client listens for this
         SHUTDOWN = 4,        //All Rules listen for this event
         RESET = 5            //All Rules listen for this event
+        TRADEMANAGEMENT = 6  //TradeManager Service listens for this
     }
 
     //Allows consumers to listen for generic Events

@@ -84,11 +84,18 @@ namespace Niffler.Services
             string action = routingKey.GetAction();
             string _event = routingKey.GetEvent();
 
-            //Check for init messages
+            switch (routingKey.GetActionAsEnum())
+            {
+                case Messaging.RabbitMQ.Action.TRADEMANAGEMENT:
+                    // Add order labels and action required on filled to State in order to listen for them and take action
 
-
-            //Check it is a trade operation
-            if (routingKey.GetActionAsEnum() != Messaging.RabbitMQ.Action.TRADEOPERATION) return;
+                    break;
+                case Messaging.RabbitMQ.Action.TRADEOPERATION:
+                    // Check State for order labels of filled orders and place Stop loss or Take Profit orders.
+                    break;
+                default:
+                    return;
+            };
 
             //Single Trade operation messages
             if (e.Message.Type == Niffle.Types.Type.Trade)

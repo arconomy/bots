@@ -69,10 +69,10 @@ namespace Niffler.Messaging.RabbitMQ
             //"localhost", "nifflermq", 15672, "niffler", "niffler", 50);
 
             var factory = new ConnectionFactory()
-                {   HostName = "localhost",
-                    VirtualHost = "nifflermq",
-                    UserName = "niffler",
-                    Password = "niffler",
+                {   HostName = "35.189.48.147",
+                    //VirtualHost = "nifflermq",
+                    UserName = "user",
+                    Password = "Mz4ymfMJYZ5r",
                     UseBackgroundThreadsForIO = false
                 };
             Connection = factory.CreateConnection();

@@ -15,8 +15,11 @@ namespace Niffler.Core.Config
             {nameof(OnCloseForTrading),typeof(OnCloseForTrading) },
             {nameof(OnReduceRiskTime),typeof(OnReduceRiskTime) },
             {nameof(OnTerminateTime),typeof(OnTerminateTime) },
-            {nameof(CaptureSpike),typeof(CaptureSpike) }
+            {nameof(CaptureSpike),typeof(CaptureSpike) },
+            {nameof(OnTriggerPipsPlaceSellLimit),typeof(OnTriggerPipsPlaceSellLimit) }
         };
+
+                //RuleNames.Add(nameof(OpenTimePlaceLimitOrders)); Implementing this..
 
 
         // {nameof(CaptureOpenPrice),typeof(CaptureOpenPrice)
@@ -36,7 +39,7 @@ namespace Niffler.Core.Config
         //RuleNames.Add(nameof(OnTickChaseFixedTrailingSL));
         //RuleNames.Add(nameof(OpenTimeCapturePrice));
         //RuleNames.Add(nameof(OpenTimeCaptureSpike));
-        //RuleNames.Add(nameof(OpenTimePlaceLimitOrders));
+
         //RuleNames.Add(nameof(OpenTimeSetBotState));
         //RuleNames.Add(nameof(OpenTimeUseBollingerBand));
         //RuleNames.Add(nameof(ReduceRiskTimeReduceRetraceLevels));
@@ -55,6 +58,9 @@ namespace Niffler.Core.Config
         //RuleNames.Add(nameof(TerminateTimeCloseAllPositionsReset));
         //RuleNames.Add(nameof(TerminateTimeSetBotState));
 
+
+
+        //key names for JSON values
         public const string ACTIVATERULES = "ActivateRules";
         public const string DEACTIVATERULES = "DeactivateRules";
         public const string OPENTIME = "OpenTime";
@@ -77,7 +83,20 @@ namespace Niffler.Core.Config
         public const string ACTIVATIONSTATUS = "/Activate";
         public const string DEACTIVATESTATUS = "/Deactivate";
         public const string ISACTIVE = "IsActive";
+        public const string EXECUTEONLYONCE = "ExecuteOnlyOnce";
+        public const string TRIGGERPIPS = "TriggerPips";
+        public const string NUMBEROFORDERS = "NumberOfOrders";
+        public const string TRIGGERPIPSFROMTRADEOPENPRICE = "TriggerPipsFromTradeOpenPrice";
+        public const string TAKEPROFIPIPS = "TakeProfitPips";
+        public const string ORDERSPACINGMINPIPS = "OrderSpacingMinPips";
+        public const string ORDERSPACINGMAXPIPS = "OrderSpacingMaxPips";
+        public const string ORDERSPACINGINCPIPS = "OrderSpacingIncrementPips";
+        public const string NUMORDERSBEFORESPACINGADJ = "NumberOfOrdersBeforeSpacingAdjustment";
+        public const string ORDERSPACINGINCADJPIPS = "OrderSpacingIncrementAdjustmentPips";
         
+
+
+
 
         public IDictionary<string,object> Params { get; set; }
         public string Name { get; set; }

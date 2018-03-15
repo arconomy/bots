@@ -162,8 +162,10 @@
     <Compile Include="Common\DateTimeZoneCalculator.cs" />
     <Compile Include="Common\Notifications.cs" />
     <Compile Include="Common\Utils.cs" />
+    <Compile Include="Config\BrokerConfiguration.cs" />
     <Compile Include="Error\FireBaseException.cs" />
     <Compile Include="Model\StateReceivedEventArgs.cs" />
+    <Compile Include="Services\Rules\Trade\OnTriggerPipsPlaceSellLimit.cs" />
     <Compile Include="Services\StateManager.cs" />
     <Compile Include="Model\Constants.cs" />
     <Compile Include="Model\MarketInfo.cs" />
@@ -183,19 +185,22 @@
     <Compile Include="Microservices\IService.cs" />
     <Compile Include="Microservices\QueueWatchMicroservice.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Rules\RuleTemplate.cs" />
-    <Compile Include="Rules\Capture\CaptureSpike.cs" />
-    <Compile Include="Rules\IRule.cs" />
-    <Compile Include="Rules\RuleFactory.cs" />
-    <Compile Include="Rules\TradingPeriods\OnCloseForTrading.cs" />
-    <Compile Include="Rules\TradingPeriods\OnOpenForTrading.cs" />
-    <Compile Include="Rules\TradingPeriods\OnReduceRiskTime.cs" />
-    <Compile Include="Rules\TradingPeriods\OnTerminateTime.cs" />
+    <Compile Include="Services\Rules\RuleTemplate.cs" />
+    <Compile Include="Services\Rules\Capture\CaptureSpike.cs" />
+    <Compile Include="Services\Rules\IRule.cs" />
+    <Compile Include="Services\Rules\RuleFactory.cs" />
+    <Compile Include="Services\Rules\TradingPeriods\OnCloseForTrading.cs" />
+    <Compile Include="Services\Rules\TradingPeriods\OnOpenForTrading.cs" />
+    <Compile Include="Services\Rules\TradingPeriods\OnReduceRiskTime.cs" />
+    <Compile Include="Services\Rules\TradingPeriods\OnTerminateTime.cs" />
     <Compile Include="Services\ReportManager.cs" />
     <Compile Include="Services\ServicesManager.cs" />
     <Compile Include="Services\TradeManager.cs" />
     <Compile Include="Config\RuleConfiguration.cs" />
     <Compile Include="Config\JsonAppConfiguration.cs" />
+    <Compile Include="Trades\TradeUtils.cs" />
+    <Compile Include="Trades\TradePublisher.cs" />
+    <Compile Include="Trades\TradesFactory.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config">
