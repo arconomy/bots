@@ -31,7 +31,7 @@ namespace cAlgo
         public int OrderEntryOffset { get; set; }
 
         [Parameter("Order spacing in Pips", DefaultValue = 1)]
-        public int OrderSpacing { get; set; }
+        public double OrderSpacing { get; set; }
 
         [Parameter("# Order placed before order spacing multiplies", DefaultValue = 10)]
         public int OrderSpacingLevels { get; set; }
@@ -524,7 +524,7 @@ namespace cAlgo
         }
 
         //Returns the distance from the first entry point to an order based on OrderSpacingMultipler and OrderMultiplierLevels until OrderSpacingMax reached
-        protected int calcOrderSpacingDistance(int orderCount)
+        protected double calcOrderSpacingDistance(int orderCount)
         {
             double orderSpacingLevel = 0;
             double orderSpacing = 0;
@@ -543,7 +543,7 @@ namespace cAlgo
                 orderSpacingResult += orderSpacing;
             }
 
-            return (int)orderSpacingResult;
+            return orderSpacingResult;
         }
 
 
