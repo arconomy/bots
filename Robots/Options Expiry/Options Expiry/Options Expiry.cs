@@ -27,20 +27,26 @@ namespace cAlgo
         [Parameter("# of Limit Orders", DefaultValue = 20)]
         public int NumberOfBuyLimitOrders { get; set; }
 
+        [Parameter("Min Volume (Lots)", DefaultValue = 5)]
+        public int MinLimitOrderVolume { get; set; }
+
+        [Parameter("Max Volume (Lots)", DefaultValue = 15)]
+        public int MaxLimitOrderVolume { get; set; }
+
         [Parameter("# limit orders placed with Spacing level 1", DefaultValue = 5)]
         public int LimitOrderPlacedSpacingLevel1 { get; set; }
 
         [Parameter("Limit Order Spacing level 1 (Pips)", DefaultValue = 2)]
-        public int LimitOrderSpacingLevel1 { get; set; }
+        public double LimitOrderSpacingLevel1 { get; set; }
 
         [Parameter("# limit orders placed with Spacing level 2", DefaultValue = 10)]
         public int LimitOrderPlacedSpacingLevel2 { get; set; }
 
         [Parameter("Limit Order Spacing level 2 (Pips)", DefaultValue = 1)]
-        public int LimitOrderSpacingLevel2 { get; set; }
+        public double LimitOrderSpacingLevel2 { get; set; }
 
         [Parameter("Limit Order Spacing After Level 2 (Pips)", DefaultValue = 2)]
-        public int LimitOrderSpacingLevel3 { get; set; }
+        public double LimitOrderSpacingLevel3 { get; set; }
 
         [Parameter("Pips offset from 10.09am Price for 1st Limit Order", DefaultValue = 3)]
         public int BuyLimitOrderEntryOffsetPips { get; set; }
@@ -1150,11 +1156,11 @@ namespace cAlgo
         {
 
             double orderVolumeLevel = orderCount / OrderVolumeLevels;
-            double volume = Math.Pow(BuyLimitVolumeMultipler, orderVolumeLevel) * MinVolume;
+            double volume = Math.Pow(BuyLimitVolumeMultipler, orderVolumeLevel) * MinLimitOrderVolume;
 
-            if (volume > MaxVolume)
+            if (volume > MaxLimitOrderVolume)
             {
-                volume = MaxVolume;
+                volume = MaxLimitOrderVolume;
             }
 
             return (int)volume;
