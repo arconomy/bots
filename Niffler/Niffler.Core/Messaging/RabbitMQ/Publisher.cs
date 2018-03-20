@@ -58,20 +58,17 @@ namespace Niffler.Messaging.RabbitMQ
             Publish(routingKey, niffle);
         }
 
-        public void TradeManagement(Trade trade, string entityName)
+        public void TradeManagement(Trade trade,string label, string entityName)
         {
             RoutingKey routingKey = RoutingKey.Create(entityName, Action.TRADEMANAGEMENT, Event.WILDCARD);
 
             Niffle niffle = new Niffle
             {
-
                 Type = Niffle.Types.Type.Trade,
                 Trade = trade
             };
             Publish(routingKey, niffle);
         }
-
-
 
         public void TickEvent(Tick tick, Positions positions, Orders orders, bool isBackTesting)
         {

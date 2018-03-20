@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace Niffler.Core.Config
 {
-    class BrokerConfiguration
+    public class BrokerConfiguration
     {
-        private string BrokerId;
-        private string BrokerName;
-        private int PipSize;
+        public string BrokerId { get; }
+        public string BrokerName { get; }
+        public int PipSize { get; }
 
         public BrokerConfiguration(String BrokerId)
         {

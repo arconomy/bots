@@ -16,7 +16,7 @@ namespace Niffler.Core.Config
             {nameof(OnReduceRiskTime),typeof(OnReduceRiskTime) },
             {nameof(OnTerminateTime),typeof(OnTerminateTime) },
             {nameof(CaptureSpike),typeof(CaptureSpike) },
-            {nameof(OnTriggerPipsPlaceSellLimit),typeof(OnTriggerPipsPlaceSellLimit) }
+            {nameof(OnOpenPlaceSellLimit),typeof(OnOpenPlaceSellLimit) }
         };
 
                 //RuleNames.Add(nameof(OpenTimePlaceLimitOrders)); Implementing this..
@@ -58,8 +58,6 @@ namespace Niffler.Core.Config
         //RuleNames.Add(nameof(TerminateTimeCloseAllPositionsReset));
         //RuleNames.Add(nameof(TerminateTimeSetBotState));
 
-
-
         //key names for JSON values
         public const string ACTIVATERULES = "ActivateRules";
         public const string DEACTIVATERULES = "DeactivateRules";
@@ -84,18 +82,24 @@ namespace Niffler.Core.Config
         public const string DEACTIVATESTATUS = "/Deactivate";
         public const string ISACTIVE = "IsActive";
         public const string EXECUTEONLYONCE = "ExecuteOnlyOnce";
-        public const string TRIGGERPIPS = "TriggerPips";
+
         public const string NUMBEROFORDERS = "NumberOfOrders";
-        public const string TRIGGERPIPSFROMTRADEOPENPRICE = "TriggerPipsFromTradeOpenPrice";
+        public const string ENTRYPIPSFROMTRADEOPENPRICE = "EntryPipsFromTradeOpenPrice";
         public const string TAKEPROFIPIPS = "TakeProfitPips";
-        public const string ORDERSPACINGMINPIPS = "OrderSpacingMinPips";
+
+        public const string ENABLEORDERSPACING = "EnableOrderSpacing";
+        public const string ORDERSPACINGBASEPIPS = "OrderSpacingBasePips";
         public const string ORDERSPACINGMAXPIPS = "OrderSpacingMaxPips";
         public const string ORDERSPACINGINCPIPS = "OrderSpacingIncrementPips";
-        public const string NUMORDERSBEFORESPACINGADJ = "NumberOfOrdersBeforeSpacingAdjustment";
-        public const string ORDERSPACINGINCADJPIPS = "OrderSpacingIncrementAdjustmentPips";
-        
+        public const string INCREMENTSPACINGAFTER = "IncrementSpacingAfterOrders";
 
-
+        public const string ENABLEVOLUMEINCREASE = "EnableVolumeIncrease";
+        public const string VOLUMEBASE = "VolumeBase";
+        public const string VOLUMEMAX = "VolumeMax";
+        public const string VOLUMEMULTIPLIER = "VolumeMultiplier";
+        public const string USEVOLUMEMULTIPLIER = "UseVolumeMultiplier";
+        public const string VOLUMEINCREMENT = "VolumeIncrement";
+        public const string INCREASEVOLUMEAFTER = "IncreaseVolumeAfterOrders";
 
 
         public IDictionary<string,object> Params { get; set; }

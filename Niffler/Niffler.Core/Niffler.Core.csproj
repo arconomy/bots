@@ -165,7 +165,7 @@
     <Compile Include="Config\BrokerConfiguration.cs" />
     <Compile Include="Error\FireBaseException.cs" />
     <Compile Include="Model\StateReceivedEventArgs.cs" />
-    <Compile Include="Services\Rules\Trade\OnTriggerPipsPlaceSellLimit.cs" />
+    <Compile Include="Services\Rules\Trade\OnOpenPlaceSellLimit.cs" />
     <Compile Include="Services\StateManager.cs" />
     <Compile Include="Model\Constants.cs" />
     <Compile Include="Model\MarketInfo.cs" />
@@ -198,6 +198,8 @@
     <Compile Include="Services\TradeManager.cs" />
     <Compile Include="Config\RuleConfiguration.cs" />
     <Compile Include="Config\JsonAppConfiguration.cs" />
+    <Compile Include="Trades\OrderSpacingCalculator.cs" />
+    <Compile Include="Trades\TradeVolumeCalculator.cs" />
     <Compile Include="Trades\TradeUtils.cs" />
     <Compile Include="Trades\TradePublisher.cs" />
     <Compile Include="Trades\TradesFactory.cs" />

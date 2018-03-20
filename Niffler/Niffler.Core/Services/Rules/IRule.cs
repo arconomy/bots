@@ -17,7 +17,7 @@ namespace Niffler.Rules
         protected StrategyConfiguration StrategyConfig;
         protected string BrokerId;
         protected RuleConfiguration RuleConfig;
-        protected BrokerConfiguration BrokerConfig;
+        protected TradeUtils TradeUtils;
         protected StateManager StateManager;
         protected TradesFactory TradesFactory;
         protected TradePublisher TradePublisher;
@@ -41,11 +41,11 @@ namespace Niffler.Rules
             BrokerId = StrategyConfig.BrokerId;
             if (String.IsNullOrEmpty(BrokerId)) IsInitialised = false;
 
-            //Initialise broker specific config
-            BrokerConfig = new BrokerConfiguration(BrokerId);
+            //Initialise TradeUtils for broker specific config
+            TradeUtils = new TradeUtils(new BrokerConfiguration(BrokerId));
 
             //Initialise a TradesPublisher
-            TradePublisher = new TradePublisher(Publisher,GetServiceName());
+            TradePublisher = new TradePublisher(Publisher, TradeUtils, GetServiceName());
 
             //Add Rule configuration to Firebase
             StateManager = new StateManager(StrategyId);

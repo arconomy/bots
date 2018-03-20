@@ -4,7 +4,7 @@ namespace Niffler.Core.Trades
 {
     public class TradesFactory
     {
-        public Trade CreateSellLimitOrderTrade(string symbolCode, string label, int volume, double targetEntryPrice)
+        public Trade CreateSellLimitTrade(string symbolCode, string label, int volume, double targetEntryPrice)
         {
             return new Trade()
             {
@@ -21,7 +21,7 @@ namespace Niffler.Core.Trades
             };
         }
 
-        public Trade CreateSellStopOrderTrade(string symbolCode, string label, int volume, double targetEntryPrice)
+        public Trade CreateSellStopTrade(string symbolCode, string label, int volume, double targetEntryPrice)
         {
             return new Trade()
             {
@@ -38,7 +38,7 @@ namespace Niffler.Core.Trades
             };
         }
 
-        public Trade CreateBuyLimitOrderTrade(string symbolCode, string label, int volume, double targetEntryPrice)
+        public Trade CreateBuyLimitTrade(string symbolCode, string label, int volume, double targetEntryPrice)
         {
             return new Trade()
             {
@@ -55,7 +55,7 @@ namespace Niffler.Core.Trades
             };
         }
 
-        public Trade CreateBuyStopOrderTrade(string symbolCode, string label, int volume, double targetEntryPrice)
+        public Trade CreateBuyStopTrade(string symbolCode, string label, int volume, double targetEntryPrice)
         {
             return new Trade()
             {
@@ -72,7 +72,7 @@ namespace Niffler.Core.Trades
             };
         }
 
-        public Trade CreateSellOrderTrade(string symbolCode, string label, int volume, double targetEntryPrice)
+        public Trade CreateSellTrade(string symbolCode, string label, int volume, double targetEntryPrice)
         {
             return new Trade()
             {
@@ -88,7 +88,7 @@ namespace Niffler.Core.Trades
             };
         }
 
-        public Trade CreateBuyOrderTrade(string symbolCode, string label, int volume, double targetEntryPrice)
+        public Trade CreateBuyTrade(string symbolCode, string label, int volume, double targetEntryPrice)
         {
             return new Trade()
             {
