@@ -1,29 +1,30 @@
 ﻿[ChartParameters]
-Symbol = DE30
+Symbol = UK100
 Timeframe = m1
 
 [cBotParameters]
 DataSeriesSource = Close
 useBollingerBandEntry = False
+preEntryCaptureMins = 3
 targetBolliEntryPips = 2
-SwordFishTrigger = 15
-OrderEntryOffset = 17
+SwordFishTrigger = 5
+OrderEntryOffset = 9
 OrderSpacing = 1
-OrderSpacingLevels = 20
+OrderSpacingLevels = 10
 OrderSpacingMultipler = 2
 OrderSpacingMax = 3
-NumberOfOrders = 25
-Volume = 5
-VolumeMax = 10
+NumberOfOrders = 40
+Volume = 1
+VolumeMax = 200
 OrderVolumeLevels = 5
 VolumeMultipler = 2
-TakeProfit = 5
+TakeProfit = 0.5
 ReducePositionRiskTime = 45
 retraceEnabled = True
 retraceLevel1 = 33
 retraceLevel2 = 50
 retraceLevel3 = 66
-FinalOrderStopLoss = 15
-HardStopLossBuffer = 15
-TrailingStopPips = 7
-EnableBuyOrders = False
+FinalOrderStopLoss = 10
+HardStopLossBuffer = 20
+TrailingStopPips = 5
+EnableBuyOrders = True
