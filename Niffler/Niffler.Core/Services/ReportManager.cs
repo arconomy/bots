@@ -189,7 +189,7 @@ namespace Niffler.Services
         public void ReportPositionOpened(Messaging.Protobuf.Position position)
         {
             PositionsOpenedCount++;
-            StateManager.SetInitialState(new Dictionary<string, object>
+            StateManager.SetInitialStateAsync(new Dictionary<string, object>
                                         {
                                             { RuleConfiguration.POSITIONSOPENEDCOUNT, PipsTotal }
                                         }
@@ -202,7 +202,7 @@ namespace Niffler.Services
             PositionsClosedCount++;
             PipsTotal += position.Pips;
             ProfitTotal += position.GrossProfit;
-            StateManager.SetInitialState(new Dictionary<string, object>
+            StateManager.SetInitialStateAsync(new Dictionary<string, object>
                                         {
                                             { RuleConfiguration.PIPSTOTAL, PipsTotal },
                                             { RuleConfiguration.PROFITTOTAL, ProfitTotal },
@@ -233,7 +233,7 @@ namespace Niffler.Services
         public void ReportOrderPlaced(Messaging.Protobuf.Order order)
         {
             OrdersPlacedCount++;
-            StateManager.SetInitialState(new Dictionary<string, object>
+            StateManager.SetInitialStateAsync(new Dictionary<string, object>
                                         {
                                             { RuleConfiguration.ORDERSPLACEDCOUNT, OrdersPlacedCount }
                                         }
@@ -254,7 +254,7 @@ namespace Niffler.Services
         public void ReportError(string source, Messaging.Protobuf.Error error, string timestamp)
         {
             ErrorCount++;
-            StateManager.SetInitialState(new Dictionary<string, object>
+            StateManager.SetInitialStateAsync(new Dictionary<string, object>
                                         {
                                             { RuleConfiguration.ERRORCOUNT, ErrorCount }
                                         }
@@ -355,7 +355,7 @@ namespace Niffler.Services
         public override void Reset()
         {
             //Remove all State Variables
-            StateManager.Reset();
+            StateManager.ResetAsync();
 
 
             // reset reporting variables

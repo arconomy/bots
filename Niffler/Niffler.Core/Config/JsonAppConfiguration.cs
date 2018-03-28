@@ -19,7 +19,8 @@ namespace Niffler.Core.Config
         public static readonly string QUEUENAME = "QueueName";
         public static readonly string BASEURL = "https://niffler-176904.firebaseio.com/";
         public static readonly string STATEPATH = "state/";
-        public static readonly string RULESPATH = "rules/";
+        public static readonly string RULESPATH = "/rules/";
+        public static readonly string TRADESPATH = "trades/";
 
         public string Name { get; set; }
         public string Exchange { get; set; }

@@ -50,25 +50,25 @@ namespace Niffler.Rules
             //Add Rule configuration to Firebase
             StateManager = new StateManager(StrategyId);
             if (StateManager == null) IsInitialised = false;
-            StateManager.SetInitialState(RuleConfig.Params);
+            StateManager.SetInitialStateAsync(RuleConfig.Params);
 
             //Manage State updates if subscribed to by the derived rule
             StateManager.StateUpdateReceived += OnStateEventUpdate;
 
-            StateManager.SetActivationRules(GetServiceName(), RuleConfig.ActivateRules);
-            StateManager.SetDeactivationRules(GetServiceName(), RuleConfig.DeactivateRules);
+            StateManager.SetActivationRulesAsync(GetServiceName(), RuleConfig.ActivateRules);
+            StateManager.SetDeactivationRulesAsync(GetServiceName(), RuleConfig.DeactivateRules);
 
             //If this rule has activation rules default state IsActive = false
             if(RuleConfig.ActivateRules != null)
             {
                 IsActive = false;
             }
-            StateManager.UpdateRuleStatus(GetServiceName(), RuleConfiguration.ISACTIVE, IsActive);
+            StateManager.UpdateRuleStatusAsync(GetServiceName(), RuleConfiguration.ISACTIVE, IsActive);
         }
 
         protected void SetActiveState(bool isActive)
         {
-            StateManager.UpdateRuleStatus(GetServiceName(), RuleConfiguration.ISACTIVE,isActive);
+            StateManager.UpdateRuleStatusAsync(GetServiceName(), RuleConfiguration.ISACTIVE,isActive);
             IsActive = isActive;
         }
 

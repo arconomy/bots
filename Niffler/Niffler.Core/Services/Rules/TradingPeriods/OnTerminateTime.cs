@@ -56,7 +56,7 @@ namespace Niffler.Rules.TradingPeriods
 
             if (DateTimeZoneCalc.IsTimeAfter(Now, TerminateTime))
             {
-                StateManager.SetInitialState(new State
+                StateManager.SetInitialStateAsync(new State
                     {
                         { State.ISTERMINATETIME, true },
                         { State.TERMINATETIME, message.Tick.TimeStamp }

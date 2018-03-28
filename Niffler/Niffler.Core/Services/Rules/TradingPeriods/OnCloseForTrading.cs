@@ -54,7 +54,7 @@ namespace Niffler.Rules.TradingPeriods
 
             if (DateTimeZoneCalc.IsTimeAfter(Now, CloseTime))
             {
-                StateManager.SetInitialState(new State
+                StateManager.SetInitialStateAsync(new State
                     {
                         { State.ISOPENTIME, false },
                         { State.CLOSETIME, message.Tick.TimeStamp }

@@ -82,7 +82,7 @@ namespace Niffler.Rules.TradingPeriods
                 }
             }
             
-            //Listen for state updates for
+            //Listen for state updates for this strategy
             StateManager.ListenForStateUpdates();
         }
 

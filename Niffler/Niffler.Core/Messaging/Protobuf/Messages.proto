@@ -180,8 +180,9 @@ message Trade   {
 	TradeAction tradeAction = 1;
 	Order order = 2;
 	Position position = 3;
-	bool linkedTrade = 4;
-	Trade parentTrade = 5;
+	bool isLinkedTrade = 4;
+	string linkedTradeLabel = 5;
+	string lastUpdatedBy = 6;
 }
 
 message Trades  {

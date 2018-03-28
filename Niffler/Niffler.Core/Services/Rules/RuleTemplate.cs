@@ -17,6 +17,9 @@ namespace Niffler.Rules
         {
             //Set Inactive if waiting for event or notification to activate
             SetActiveState(false);
+
+            //Listen for state updates for this strategy
+            StateManager.ListenForStateUpdates();
         }
 
         //Execute rule logic will only run if rule is activated

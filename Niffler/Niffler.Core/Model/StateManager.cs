@@ -6,8 +6,9 @@ using Niffler.Model;
 using System.Threading.Tasks;
 using Niffler.Core.Config;
 using System.Collections.Specialized;
+using Niffler.Messaging.Protobuf;
 
-namespace Niffler.Core.Services
+namespace Niffler.Core.Model
 {
     public class StateManager
     {
@@ -51,7 +52,7 @@ namespace Niffler.Core.Services
         }
 
         //Use for cloning services and reporting
-        public async void GetStateSnapShot()
+        public async void GetStateSnapShotAsync()
         {
             if (!HasStrategyId) return;
             var data = await FireBaseClient
@@ -61,17 +62,17 @@ namespace Niffler.Core.Services
         }
 
         //Use for cloning services and reporting
-        public async void GetRulesSnapShot(string ruleName)
+        public async void GetRulesSnapShotAsync(string ruleName)
         {
             if (!HasStrategyId) return;
             var data = await FireBaseClient
-           .Child(StrategyConfiguration.RULESPATH + StrategyId + ruleName)
+           .Child(GetRulePath(ruleName))
            .OnceSingleAsync<Object>();
             Console.WriteLine(data.ToString());
         }
 
         //Add or Update a Rule key-value pair
-        public async void UpdateRuleStatus(string ruleName, string Key, object value)
+        public async void UpdateRuleStatusAsync(string ruleName, string Key, object value)
         {
             if (!HasStrategyId) return;
 
@@ -81,11 +82,11 @@ namespace Niffler.Core.Services
             };
 
             string JsonStateData = JsonConvert.SerializeObject(data);
-            await FireBaseClient.Child(StrategyConfiguration.RULESPATH + StrategyId + "/" + ruleName).PatchAsync(JsonStateData);
+            await FireBaseClient.Child(GetRulePath(ruleName)).PatchAsync(JsonStateData);
         }
 
         //Add or Update State key-value pair
-        public async void UpdateState(string Key, object value)
+        public async void UpdateStateAsync(string Key, object value)
         {
             if (!HasStrategyId) return;
 
@@ -98,8 +99,80 @@ namespace Niffler.Core.Services
             await FireBaseClient.Child(StrategyConfiguration.STATEPATH + StrategyId).PatchAsync(JsonStateData);
         }
 
+        //Add or Update Linked Trade
+        public async void UpdateStateLinkedTradeAsync(string linkedTradeLabel, string tradeLabel, Object trade)
+        {
+            if (!HasStrategyId) return;
+
+            //Save the linked trade against a ruleName so that it can be easily reported on
+            Dictionary<string, object> data = new Dictionary<string, Object>
+            {
+                {tradeLabel, trade }
+            };
+
+            string JsonStateData = JsonConvert.SerializeObject(data);
+            await FireBaseClient.Child(StrategyConfiguration.STATEPATH 
+                                            + StrategyId 
+                                            + StrategyConfiguration.TRADESPATH 
+                                            + linkedTradeLabel).PatchAsync(JsonStateData);
+        }
+
+        //Add or Update Trade
+        public async void UpdateStateTradeAsync(string tradeLabel, Object trade)
+        {
+            if (!HasStrategyId) return;
+
+            Dictionary<string, object> data = new Dictionary<string, Object>
+            {
+                {tradeLabel, trade }
+            };
+
+            string JsonStateData = JsonConvert.SerializeObject(data);
+            await FireBaseClient.Child(StrategyConfiguration.STATEPATH
+                                                        + StrategyId
+                                                        + StrategyConfiguration.TRADESPATH).PatchAsync(JsonStateData);
+        }
+
+
+        //Find all Linked Trades
+        public async void FindAllLinkedTradesAsync(string tradeLabel, string FIXTradeId, Action<Trade> executeTrade)
+        {
+            if (!HasStrategyId) return;
+
+            var linkedTrades = await FireBaseClient.Child(StrategyConfiguration.STATEPATH 
+                                                            + StrategyId
+                                                            + StrategyConfiguration.TRADESPATH
+                                                            + tradeLabel).OnceAsync<Trade>();
+
+           foreach (var trade in linkedTrades)
+            {
+                Trade t = JsonConvert.DeserializeObject<Trade>(trade.Object.ToString());
+                t.Order.PosMaintRptID = FIXTradeId;
+                executeTrade(t);
+            }
+        }
+
+        //Find all Linked Trades excluding linked trade
+        public async void FindAllLinkedTradesExcludingAsync(string tradeLabel, string excludeTradeLabel, Action<Trade> executeTrade)
+        {
+            if (!HasStrategyId) return;
+
+            var linkedTrades = await FireBaseClient.Child(StrategyConfiguration.STATEPATH
+                                                            + StrategyId
+                                                            + StrategyConfiguration.TRADESPATH
+                                                            + tradeLabel).OnceAsync<Trade>();
+
+            foreach (var trade in linkedTrades)
+            {
+                if (!(((Trade)trade.Object).Order.Label == excludeTradeLabel))
+                    executeTrade((Trade)trade.Object);
+            }
+        }
+
+
+
         //Set initial State Data from JSON
-        public async void SetInitialState(IDictionary<string, object> stateData)
+        public async void SetInitialStateAsync(IDictionary<string, object> stateData)
         {
             if (!HasStrategyId) return;
             string JsonStateData = JsonConvert.SerializeObject(stateData);
@@ -107,7 +180,7 @@ namespace Niffler.Core.Services
         }
 
         //Set initial Activation and Deactivation rules from JSON
-        public async void SetActivationRules(string ruleName, List<string> rules)
+        public async void SetActivationRulesAsync(string ruleName, List<string> rules)
         {
             if (!HasStrategyId) return;
 
@@ -117,10 +190,10 @@ namespace Niffler.Core.Services
             };
 
             string JsonStateData = JsonConvert.SerializeObject(ruleData);
-            await FireBaseClient.Child(StrategyConfiguration.RULESPATH + StrategyId + "/" + ruleName).PatchAsync(JsonStateData);
+            await FireBaseClient.Child(GetRulePath(ruleName)).PatchAsync(JsonStateData);
         }
 
-        public async void SetDeactivationRules(string ruleName, List<string> rules)
+        public async void SetDeactivationRulesAsync(string ruleName, List<string> rules)
         {
             if (!HasStrategyId) return;
 
@@ -130,7 +203,7 @@ namespace Niffler.Core.Services
             };
 
             string JsonStateData = JsonConvert.SerializeObject(ruleData);
-            await FireBaseClient.Child(StrategyConfiguration.RULESPATH + StrategyId + "/" + ruleName).PatchAsync(JsonStateData);
+            await FireBaseClient.Child(GetRulePath(ruleName)).PatchAsync(JsonStateData);
         }
 
         public void ListenForStateUpdates()
@@ -150,17 +223,24 @@ namespace Niffler.Core.Services
                 }
             );
         }
-
-        public async void Reset()
+        
+        public async void ResetAsync()
         {
             if (!HasStrategyId) return;
             await FireBaseClient.Child(StrategyConfiguration.STATEPATH + StrategyId).DeleteAsync();
-            await FireBaseClient.Child(StrategyConfiguration.RULESPATH + StrategyId).DeleteAsync();
         }
 
         public void OnStateChangeReceived(StateChangedEventArgs e)
         {
             StateUpdateReceived?.Invoke(this, e);
+        }
+
+        private string GetRulePath(string ruleName)
+        {
+            return StrategyConfiguration.STATEPATH
+                        + StrategyId
+                        + StrategyConfiguration.RULESPATH
+                        + ruleName;
         }
     }
 }

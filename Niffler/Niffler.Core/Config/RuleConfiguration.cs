@@ -81,8 +81,10 @@ namespace Niffler.Core.Config
         public const string ACTIVATIONSTATUS = "/Activate";
         public const string DEACTIVATESTATUS = "/Deactivate";
         public const string ISACTIVE = "IsActive";
-        public const string EXECUTEONLYONCE = "ExecuteOnlyOnce";
+        public const string TRADESTATE = "Trade";
 
+
+        public const string EXECUTEONLYONCE = "ExecuteOnlyOnce";
         public const string NUMBEROFORDERS = "NumberOfOrders";
         public const string ENTRYPIPSFROMTRADEOPENPRICE = "EntryPipsFromTradeOpenPrice";
         public const string TAKEPROFIPIPS = "TakeProfitPips";
