@@ -5,7 +5,7 @@ using Niffler.Messaging.RabbitMQ;
 using Niffler.Common;
 using Niffler.Core.Config;
 using Niffler.Rules.TradingPeriods;
-using Niffler.Core.Services;
+using Niffler.Core.Model;
 using Niffler.Model;
 
 namespace Niffler.Services
@@ -145,7 +145,7 @@ namespace Niffler.Services
                 {
                     if (routingKey.GetEventAsEnum() == Event.ONORDERPLACED)
                     {
-                        if (e.Message.Order.StateChange == Messaging.Protobuf.Order.Types.StateChange.Placed)
+                        if (e.Message.Order.StateChange == Messaging.Protobuf.Order.Types.StateChange.Filled)
                         {
                             ReportOrderPlaced(e.Message.Order);
                         }
@@ -153,15 +153,16 @@ namespace Niffler.Services
 
                     if (routingKey.GetEventAsEnum() == Event.ONORDERCANCELLED)
                     {
-                        if (e.Message.Order.StateChange == Messaging.Protobuf.Order.Types.StateChange.Cancelled)
+                        if (e.Message.Order.StateChange == Messaging.Protobuf.Order.Types.StateChange.Canceled)
                         {
                             ReportOrderCancelled(e.Message.Order, Utils.FormatDateTimeWithSeparators(niffleTimeStamp));
                         }
                     }
 
+                    //Need to work out how to determine if order has been modified
                     if (routingKey.GetEventAsEnum() == Event.ONORDERMODIFIED)
                     {
-                        if (e.Message.Order.StateChange == Messaging.Protobuf.Order.Types.StateChange.Modified)
+                        if (e.Message.Order.StateChange == Messaging.Protobuf.Order.Types.StateChange.Filled)
                         {
                             ReportOrderModified(e.Message.Order, Utils.FormatDateTimeWithSeparators(niffleTimeStamp));
                         }

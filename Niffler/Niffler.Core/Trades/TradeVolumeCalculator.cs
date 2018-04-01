@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Niffler.Common;
+using Niffler.Core.Config;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,76 +10,89 @@ namespace Niffler.Core.Trades
 {
     public class TradeVolumeCalculator
     {
-        private bool EnableVolumeIncrease;
+        private bool Intialised = false;
+        private bool EnableDynamicVolumeIncrease = false;
+
+        public enum CalculationType
+        {
+            Multiply = 0,
+            Increment = 1
+        }
+
+        private CalculationType Type;
         private bool UseVolumeMultiplier;
         private double VolumeBase;
         private double VolumeMax;
-        private double VolumeMultiplier;
-        private double VolumeIncrement;
+        private double VolumeIncreaseFactor;
         private double IncreaseVolumeAfterOrders;
 
-        public TradeVolumeCalculator(bool enableVolumeIncrease, bool useVolumeMultiplier, double volumeBase, double volumeMax, double volumeAdjustmentFactor, double increaseVolumeAfterOrders)
+        public TradeVolumeCalculator(RuleConfiguration ruleConfig)
         {
-            this.EnableVolumeIncrease = enableVolumeIncrease;
-            this.UseVolumeMultiplier = useVolumeMultiplier;
-            this.VolumeBase = volumeBase;
-            this.VolumeMax = volumeMax;
-            this.IncreaseVolumeAfterOrders = increaseVolumeAfterOrders;
-
-            if (useVolumeMultiplier)
-            {
-                this.VolumeMultiplier = volumeAdjustmentFactor;
-            }
-            else
-            {
-                this.VolumeIncrement = volumeAdjustmentFactor;
-            }
+            this.Intialised = Initilise(ruleConfig);
         }
 
-        //Increase the volume based on Orders places and volume levels and multiplier until max volume reached
-        public double Calculate(int orderCount)
+        private bool Initilise(RuleConfiguration ruleConfig)
         {
-            if (!EnableVolumeIncrease)
+            VolumeConfiguration VolumeConfiguration = null;
+            if (Utils.GetRuleConfigVolume(ruleConfig, ref VolumeConfiguration)) return false;
+
+            this.EnableDynamicVolumeIncrease = VolumeConfiguration.EnableDynamicVolumeIncrease;
+            this.Type = VolumeConfiguration.Type;
+            this.VolumeBase = VolumeConfiguration.VolumeBase;
+            this.VolumeMax = VolumeConfiguration.VolumeMax;
+            this.IncreaseVolumeAfterOrders = VolumeConfiguration.IncreaseVolumeAfterOrders;
+            this.VolumeIncreaseFactor = VolumeConfiguration.VolumeIncreaseFactor;
+            return true;
+        }
+
+        public double GetNextOrderVolume(int orderNumber)
+        {
+            if (!EnableDynamicVolumeIncrease)
             {
                 return VolumeBase;
             }
 
             if (UseVolumeMultiplier)
             {
-                return CalculateMultipliedVolume(orderCount);
+                return CalculateMultipliedVolume(orderNumber);
             }
             else
             {
-                return CalculateIncrementedVolume(orderCount);
+                return CalculateIncrementedVolume(orderNumber);
             }
         }
 
-        private double CalculateMultipliedVolume(int orderCount)
+        private double CalculateMultipliedVolume(int currentOrderNumber)
         {
-            double orderVolumeLevel = orderCount / IncreaseVolumeAfterOrders;
-            double volume = Math.Pow(VolumeMultiplier, orderVolumeLevel) * VolumeBase;
+            double volumeLevel = Math.Ceiling(currentOrderNumber / IncreaseVolumeAfterOrders);
+            double volume = Math.Ceiling(Math.Pow(VolumeIncreaseFactor, volumeLevel-1) * VolumeBase);
 
             if (volume > VolumeMax)
             {
-                volume = VolumeMax;
+                return VolumeMax;
             }
 
             return volume;
         }
 
-        private double CalculateIncrementedVolume(int orderCount)
+        private double CalculateIncrementedVolume(int currentOrderNumber)
         {
-            double orderVolumeLevel = orderCount / IncreaseVolumeAfterOrders;
-            double volume = Math.Pow(VolumeMultiplier, orderVolumeLevel) * VolumeBase; //NEED TO CALCULATE THE INCREMENTED VOLUME
-
-            if (volume > VolumeMax)
+            double volumeLevel = Math.Ceiling(currentOrderNumber / IncreaseVolumeAfterOrders);
+            double volumeIncrease = VolumeIncreaseFactor * (volumeLevel - 1);
+            if (volumeIncrease < 1)
             {
-                volume = VolumeMax;
+                return VolumeBase;
             }
 
-            return volume;
-        }
+            double orderVolume = VolumeBase + volumeIncrease;
 
+            if (orderVolume > VolumeMax)
+            {
+                return VolumeMax;
+            }
+            
+            return orderVolume;
+        }
     }
 
 }

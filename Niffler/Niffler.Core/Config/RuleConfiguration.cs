@@ -89,21 +89,9 @@ namespace Niffler.Core.Config
         public const string ENTRYPIPSFROMTRADEOPENPRICE = "EntryPipsFromTradeOpenPrice";
         public const string TAKEPROFIPIPS = "TakeProfitPips";
 
-        public const string ENABLEORDERSPACING = "EnableOrderSpacing";
-        public const string ORDERSPACINGBASEPIPS = "OrderSpacingBasePips";
-        public const string ORDERSPACINGMAXPIPS = "OrderSpacingMaxPips";
-        public const string ORDERSPACINGINCPIPS = "OrderSpacingIncrementPips";
-        public const string INCREMENTSPACINGAFTER = "IncrementSpacingAfterOrders";
-
-        public const string ENABLEVOLUMEINCREASE = "EnableVolumeIncrease";
-        public const string VOLUMEBASE = "VolumeBase";
-        public const string VOLUMEMAX = "VolumeMax";
-        public const string VOLUMEMULTIPLIER = "VolumeMultiplier";
-        public const string USEVOLUMEMULTIPLIER = "UseVolumeMultiplier";
-        public const string VOLUMEINCREMENT = "VolumeIncrement";
-        public const string INCREASEVOLUMEAFTER = "IncreaseVolumeAfterOrders";
-
-
+        public const string ORDERSPACING = "OrderSpacing";
+        public const string VOLUME = "Volume";
+ 
         public IDictionary<string,object> Params { get; set; }
         public string Name { get; set; }
         public List<string> ActivateRules { get; set; }

@@ -12,7 +12,7 @@ namespace Niffler.Messaging.RabbitMQ
         UPDATESTATE = 2,     //StateManager listens for this           
         TRADEOPERATION = 3,  //Niffler cAlgo Client listens for this
         SHUTDOWN = 4,        //All Rules listen for this event
-        RESET = 5            //All Rules listen for this event
+        RESET = 5,            //All Rules listen for this event
         TRADEMANAGEMENT = 6  //TradeManager Service listens for this
     }
 

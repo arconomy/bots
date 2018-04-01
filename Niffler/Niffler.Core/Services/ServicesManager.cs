@@ -3,7 +3,7 @@ using System;
 using Niffler.Rules;
 using Niffler.Messaging.RabbitMQ;
 using Niffler.Core.Config;
-using Niffler.Core.Services;
+using Niffler.Core.Model;
 
 namespace Niffler.Services
 {
@@ -44,7 +44,7 @@ namespace Niffler.Services
                 Rules.ForEach(rule => rule.Run(Adapter));
 
                 //Create a TradeManager per Strategy to manage linked orders
-                TradeManager TradeManager = new TradeManager(strategyConfig);
+                TradeManager TradeManager = new TradeManager(strategyConfig,StateManager);
                 TradeManager.Run(Adapter);
 
 

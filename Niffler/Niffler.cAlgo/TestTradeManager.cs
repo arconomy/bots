@@ -31,7 +31,7 @@ namespace Niffler.Services
         public CancelOrder_cAlgo CancelOrder { get; set; }
         public ModifyOrder_cAlgo ModifyOrder { get; set; }
 
-        public TradeManager(String exchangeName)
+        public TestTradeManager(String exchangeName)
         {
             ExchangeName = exchangeName;
         }
@@ -107,16 +107,16 @@ namespace Niffler.Services
             }
 
             //Multiple Trades operation messages
-            if (e.Message.Type == Niffle.Types.Type.Trades)
-            {
-                if (e.Message.Trades != null)
-                {
-                    foreach (Trade trade in e.Message.Trades.Trade)
-                    {
-                        ExecuteTradeOperation(trade);
-                    }
-                }
-            }
+            //if (e.Message.Type == Niffle.Types.Type.Trades)
+            //{
+            //    if (e.Message.Trades != null)
+            //    {
+            //        foreach (Trade trade in e.Message.Trades.Trade)
+            //        {
+            //            ExecuteTradeOperation(trade);
+            //        }
+            //    }
+            //}
         }
 
         protected void ExecuteTradeOperation(Trade trade)

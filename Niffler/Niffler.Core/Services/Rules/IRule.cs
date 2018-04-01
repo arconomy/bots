@@ -3,11 +3,10 @@ using Niffler.Messaging.Protobuf;
 using Niffler.Common;
 using System;
 using Niffler.Core.Config;
-using Niffler.Core.Services;
 using Niffler.Core.Trades;
 using Niffler.Model;
 using System.Collections.Generic;
-using System.Collections;
+using Niffler.Core.Model;
 
 namespace Niffler.Rules
 {
@@ -42,7 +41,7 @@ namespace Niffler.Rules
             if (String.IsNullOrEmpty(BrokerId)) IsInitialised = false;
 
             //Initialise TradeUtils for broker specific config
-            TradeUtils = new TradeUtils(new BrokerConfiguration(BrokerId));
+            TradeUtils = new TradeUtils(new BrokerConfiguration(BrokerId),ruleConfig);
 
             //Initialise a TradesPublisher
             TradePublisher = new TradePublisher(Publisher, TradeUtils, GetServiceName());
@@ -236,49 +235,26 @@ namespace Niffler.Rules
 
         protected int GetRuleConfigIntegerParam(String ruleConfigParamName)
         {
-            int paramInt = -1;
-            if (RuleConfig.Params.TryGetValue(ruleConfigParamName, out object paramIntObj))
-            {
-                if (!Double.TryParse(paramIntObj.ToString(), out paramInt))
-                {
-                    IsInitialised = false;
-                }
-            }
-            return paramInt;
+            Int32 intValue = -1;
+            IsInitialised = Utils.GetRuleConfigIntegerParam(ruleConfigParamName, RuleConfig, ref intValue);
+            return intValue;
         }
 
 
         protected double GetRuleConfigDoubleParam(String ruleConfigParamName)
         {
-            double paramDouble = -1;
-            if (RuleConfig.Params.TryGetValue(ruleConfigParamName, out object paramDoubleObj))
-            {
-                if (!Double.TryParse(paramDoubleObj.ToString(), out paramDouble))
-                {
-                    IsInitialised = false;
-                }
-            }
-            return paramDouble;
+            double doubleValue = -1;
+            IsInitialised = Utils.GetRuleConfigDoubleParam(ruleConfigParamName, RuleConfig, ref doubleValue);
+            return doubleValue;
         }
 
         protected bool GetRuleConfigBoolParam(String ruleConfigParamName)
         {
-            bool paramBool = false;
-            if (RuleConfig.Params.TryGetValue(ruleConfigParamName, out object paramBoolObj))
-            {
-                if (!Boolean.TryParse(paramBoolObj.ToString(), out paramBool))
-                {
-                    IsInitialised = false;
-                }
-            }
-            return paramBool;
+            bool boolValue = false;
+            IsInitialised = Utils.GetRuleConfigBoolParam(ruleConfigParamName, RuleConfig, ref boolValue);
+            return boolValue;
         }
-
-
-
-
-
-
+        
         public override abstract void Init();
         abstract protected string GetServiceName();
         abstract protected bool ExcuteRuleLogic(Niffle message);

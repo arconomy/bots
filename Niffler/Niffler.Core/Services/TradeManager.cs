@@ -4,7 +4,7 @@ using Niffler.Messaging.Protobuf;
 using Niffler.Messaging.RabbitMQ;
 using Niffler.Common;
 using cAlgo.API.Internals;
-using Niffler.Core.Services;
+using Niffler.Core.Model;
 using Niffler.Core.Trades;
 using Niffler.Core.Config;
 
@@ -15,6 +15,7 @@ namespace Niffler.Services
         private StateManager StateManager;
         private TradePublisher TradePublisher;
         private TradeUtils TradeUtils;
+        private String EntityName = "TradeManager";
         protected string StrategyId;
         protected StrategyConfiguration StrategyConfig;
         protected string BrokerId;
@@ -25,8 +26,6 @@ namespace Niffler.Services
 
             ExchangeName = StrategyConfig.Exchange;
             if (String.IsNullOrEmpty(ExchangeName)) IsInitialised = false;
-
-            EntityName = "TradeManager";
         }
 
         public override void Init()
@@ -74,7 +73,7 @@ namespace Niffler.Services
                             if (!trade.IsLinkedTrade)
                             {
                                 //Find all linked trades and cancel them
-                                StateManager.FindAllLinkedTradesAsync(trade.LinkedTradeLabel, CancelTradeOperation);
+                                StateManager.FindAllLinkedTradesAsync(trade.LinkedTradeLabel, trade.Order.PosMaintRptID, CancelTradeOperation);
                             }
                             break;
                     }
@@ -104,7 +103,7 @@ namespace Niffler.Services
 
         protected void ExecuteTradeOperation(Trade trade)
         {
-            Publisher.TradeOperation(trade,entityName);
+            Publisher.TradeOperation(trade,EntityName);
         }
 
         protected override List<RoutingKey> SetListeningRoutingKeys()

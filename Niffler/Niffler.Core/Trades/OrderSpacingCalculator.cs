@@ -1,53 +1,91 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Niffler.Core.Config;
+using Niffler.Common;
 
 namespace Niffler.Core.Trades
 {
     public class OrderSpacingCalculator
     {
-        private bool EnableOrderSpacing;
+        private bool Intialised = false;
+        public bool EnableDynamicOrderSpacing;
         private double OrderSpacingBasePips;
         private double OrderSpacingMaxPips;
         private double OrderSpacingIncrementPips;
-        private double IncrementSpacingAferOrders;
+        private double IncrementSpacingAfterOrders;
+        private int NumberOfOrders;
 
-        public OrderSpacingCalculator(bool enableOrderSpacing, double orderSpacingBasePips, double orderSpacingMaxPips, double orderSpacingIncrementPips, double incrementSpacingAferOrders)
+        public OrderSpacingCalculator(RuleConfiguration ruleConfig)
         {
-            this.EnableOrderSpacing = enableOrderSpacing;
-            this.OrderSpacingBasePips = orderSpacingBasePips;
-            this.OrderSpacingMaxPips = orderSpacingMaxPips;
-            this.OrderSpacingIncrementPips = orderSpacingIncrementPips;
-            this.IncrementSpacingAferOrders = incrementSpacingAferOrders;
+            this.Intialised = Initilise(ruleConfig);
         }
 
-        //Returns the entry distance from the first entry point to an order based on MultiplyOrderSpacingEveryNthOrder, OrderSpacingMultipler and OrderSpacingPips until OrderSpacingMax reached
-        public double Calculate(int orderCount)
+        private bool Initilise(RuleConfiguration ruleConfig)
         {
-            if (!EnableOrderSpacing)
+            OrderSpacingConfiguration OrderSpacingConfiguration = null;
+            if (Utils.GetRuleConfigOrderSpacing(ruleConfig, ref OrderSpacingConfiguration)) return false;
+
+            this.EnableDynamicOrderSpacing = OrderSpacingConfiguration.EnableDynamicOrderSpacing;
+            this.OrderSpacingBasePips = OrderSpacingConfiguration.OrderSpacingBasePips;
+            this.OrderSpacingMaxPips = OrderSpacingConfiguration.OrderSpacingMaxPips;
+            this.OrderSpacingIncrementPips = OrderSpacingConfiguration.OrderSpacingIncrementPips;
+            this.IncrementSpacingAfterOrders = OrderSpacingConfiguration.IncrementSpacingAfterOrders;
+            if (Utils.GetRuleConfigIntegerParam(RuleConfiguration.NUMBEROFORDERS, ruleConfig, ref NumberOfOrders)) return false;
+            return true;
+        }
+
+        public int GetOrderNumberFromPips(double pipsIntoRange)
+        {
+            if (!EnableDynamicOrderSpacing)
             {
-                return OrderSpacingBasePips;
+                return (int) Math.Ceiling(pipsIntoRange/OrderSpacingBasePips);
             }
 
-            double orderSpacingLevel = 0;
-            double orderSpacing = 0;
-            double orderSpacingResult = 0;
-
-            for (int i = 1; i <= orderCount; i++)
+            double orderSpacingDistancePips = 0;
+            for (int orderNumber = 1; orderNumber <= NumberOfOrders; orderNumber++)
             {
-                orderSpacingLevel = i / IncrementSpacingAferOrders;
-                orderSpacing = Math.Pow(OrderSpacingIncrementPips, orderSpacingLevel) * OrderSpacingIncrementPips;
-
-                if (orderSpacing > OrderSpacingMaxPips)
-                {
-                    orderSpacing = OrderSpacingMaxPips;
-                }
-
-                orderSpacingResult += orderSpacing;
+                orderSpacingDistancePips += GetOrderSpacingPips(orderNumber);
+                if (orderSpacingDistancePips > pipsIntoRange)
+                    return orderNumber;
             }
-            return orderSpacingResult;
+            //return the last order number if the pips are outside the total distance for range of orders
+            return NumberOfOrders;
+        }
+        
+        public double GetOrderSpacingDistancePips(int currentOrderNumber)
+        {
+            if (!EnableDynamicOrderSpacing)
+            {
+                return (int)currentOrderNumber * OrderSpacingBasePips;
+            }
+
+            double nextOrderSpacingLimitPips = 0;
+
+            //The spacing distance required is the orderspacing distance limit for the previous order
+            for (int orderNumber = 1; orderNumber < currentOrderNumber; orderNumber++)
+            {
+                nextOrderSpacingLimitPips += GetOrderSpacingPips(orderNumber);
+            }
+            return nextOrderSpacingLimitPips;
+        }
+
+
+        private double GetOrderSpacingPips(int orderNumber)
+        {
+
+            double orderSpacingLevel = Math.Ceiling(orderNumber / IncrementSpacingAfterOrders);
+            double orderSpacingPips = OrderSpacingIncrementPips * (orderSpacingLevel - 1);
+
+            if (orderSpacingPips < 1)
+            {
+                orderSpacingPips = OrderSpacingBasePips;
+            }
+
+            if (orderSpacingPips > OrderSpacingMaxPips)
+            {
+                orderSpacingPips = OrderSpacingMaxPips;
+            }
+
+            return orderSpacingPips;
         }
     }
 }

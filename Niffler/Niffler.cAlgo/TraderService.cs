@@ -11,7 +11,7 @@ namespace Niffler.cAlgoClient
 {
     public class TraderService : cAlgo.API.Robot
     {
-        private TradeManager TradeManager;
+        private TestTradeManager TradeManager;
 
         protected override void OnStart()
         {
@@ -20,7 +20,7 @@ namespace Niffler.cAlgoClient
             Adapter.Init();
             Adapter.Connect();
 
-            TradeManager = new TradeManager(MarketSeries.SymbolCode);
+            TradeManager = new TestTradeManager(MarketSeries.SymbolCode);
             TradeManager.Run(Adapter);
            
             Positions.Opened += OnPositionOpened;
@@ -59,12 +59,12 @@ namespace Niffler.cAlgoClient
 
         protected void ExecuteBuyMarketOrder(Trade trade)
         {
-            this.ExecuteMarketOrderAsync(TradeType.Buy, Symbol, trade.Position.Volume, ExcuteMarketOrderCallBack);
+            this.ExecuteMarketOrderAsync(TradeType.Buy, Symbol, (long)trade.Position.Volume, ExcuteMarketOrderCallBack);
         }
 
         protected void ExecuteSellMarketOrder(Trade trade)
         {
-            this.ExecuteMarketOrderAsync(TradeType.Sell, Symbol, trade.Position.Volume, ExcuteMarketOrderCallBack);
+            this.ExecuteMarketOrderAsync(TradeType.Sell, Symbol, (long)trade.Position.Volume, ExcuteMarketOrderCallBack);
         }
 
         private void ExcuteMarketOrderCallBack(TradeResult obj)
@@ -74,7 +74,7 @@ namespace Niffler.cAlgoClient
 
         protected void PlaceBuyLimitOrder(Trade trade)
         {
-            this.PlaceLimitOrderAsync(TradeType.Buy, Symbol, trade.Order.Volume, trade.Order.TargetEntryPrice, trade.Order.Label,trade.Order.StopLossPips,trade.Order.TakeProfitPips, PlaceBuyLimitOrderCallBack);
+            this.PlaceLimitOrderAsync(TradeType.Buy, Symbol, (long)trade.Order.Volume, trade.Order.TargetEntryPrice, trade.Order.Label,trade.Order.StopLossPips,trade.Order.TakeProfitPips, PlaceBuyLimitOrderCallBack);
         }
 
         private void PlaceBuyLimitOrderCallBack(TradeResult obj)
@@ -84,7 +84,7 @@ namespace Niffler.cAlgoClient
 
         protected void PlaceBuyStopOrder(Trade trade)
         {
-            this.PlaceStopOrderAsync(TradeType.Buy, Symbol, trade.Order.Volume, trade.Order.TargetEntryPrice, trade.Order.Label, trade.Order.StopLossPips, trade.Order.TakeProfitPips, PlaceBuyStopOrderCallBack);
+            this.PlaceStopOrderAsync(TradeType.Buy, Symbol, (long)trade.Order.Volume, trade.Order.TargetEntryPrice, trade.Order.Label, trade.Order.StopLossPips, trade.Order.TakeProfitPips, PlaceBuyStopOrderCallBack);
         }
 
         private void PlaceBuyStopOrderCallBack(TradeResult obj)
@@ -94,7 +94,7 @@ namespace Niffler.cAlgoClient
 
         protected void PlaceSellLimitOrder(Trade trade)
         {
-            this.PlaceLimitOrderAsync(TradeType.Sell, Symbol, trade.Order.Volume, trade.Order.TargetEntryPrice, trade.Order.Label, trade.Order.StopLossPips, trade.Order.TakeProfitPips, PlaceSellLimitOrderCallBack);
+            this.PlaceLimitOrderAsync(TradeType.Sell, Symbol, (long) trade.Order.Volume, trade.Order.TargetEntryPrice, trade.Order.Label, trade.Order.StopLossPips, trade.Order.TakeProfitPips, PlaceSellLimitOrderCallBack);
         }
 
         private void PlaceSellLimitOrderCallBack(TradeResult obj)
@@ -104,7 +104,7 @@ namespace Niffler.cAlgoClient
 
         protected void PlaceSellStopOrder(Trade trade)
         {
-            this.PlaceLimitOrderAsync(TradeType.Sell, Symbol, trade.Order.Volume, trade.Order.TargetEntryPrice, trade.Order.Label, trade.Order.StopLossPips, trade.Order.TakeProfitPips, PlaceSellStopOrderCallBack);
+            this.PlaceLimitOrderAsync(TradeType.Sell, Symbol, (long) trade.Order.Volume, trade.Order.TargetEntryPrice, trade.Order.Label, trade.Order.StopLossPips, trade.Order.TakeProfitPips, PlaceSellStopOrderCallBack);
         }
 
         private void PlaceSellStopOrderCallBack(TradeResult obj)

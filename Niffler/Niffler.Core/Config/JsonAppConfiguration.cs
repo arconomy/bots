@@ -1,6 +1,4 @@
-﻿using Niffler.Rules;
-using Niffler.Rules.TradingPeriods;
-using System;
+﻿using static Niffler.Core.Trades.TradeVolumeCalculator;
 using System.Collections.Generic;
 
 namespace Niffler.Core.Config
@@ -27,5 +25,26 @@ namespace Niffler.Core.Config
         public string StrategyId { get; set; }
         public string BrokerId { get; set; }
         public List<RuleConfiguration> Rules { get; set; }
+    }
+
+    public class VolumeConfiguration
+    {
+        public bool EnableDynamicVolumeIncrease { get; set; }
+        public double VolumeBase { get; set; }
+        public double VolumeMax { get; set; }
+        public CalculationType Type { get; set; }
+        public double VolumeIncrement { get; set; }
+        public double VolumeMultiplier { get; set; }
+        public double VolumeIncreaseFactor { get; set; }
+        public int IncreaseVolumeAfterOrders { get; set; }
+    }
+
+    public class OrderSpacingConfiguration
+    {
+        public bool EnableDynamicOrderSpacing { get; set; }
+        public double OrderSpacingBasePips { get; set; }
+        public double OrderSpacingMaxPips { get; set; }
+        public double OrderSpacingIncrementPips { get; set; }
+        public int IncrementSpacingAfterOrders { get; set; }
     }
 }

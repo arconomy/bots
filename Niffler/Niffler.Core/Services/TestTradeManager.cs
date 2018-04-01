@@ -31,7 +31,7 @@ namespace Niffler.Services
         public CancelOrder_cAlgo CancelOrder { get; set; }
         public ModifyOrder_cAlgo ModifyOrder { get; set; }
 
-        public TradeManager(String exchangeName)
+        public TestTradeManager(String exchangeName)
         {
             ExchangeName = exchangeName;
         }

@@ -1,6 +1,8 @@
 ﻿using System;
 using Niffler.Messaging.Protobuf;
 using cAlgo.API;
+using Niffler.Core.Config;
+using Newtonsoft.Json;
 
 namespace Niffler.Common
 {
@@ -227,6 +229,76 @@ namespace Niffler.Common
             return tick.Bid + tick.Spread / 2;
         }
 
+        public static bool GetRuleConfigIntegerParam(String ruleConfigParamName, RuleConfiguration ruleConfig, ref int intValue)
+        {
+            if (ruleConfig.Params.TryGetValue(ruleConfigParamName, out object paramIntObj))
+            {
+                if (!Int32.TryParse(paramIntObj.ToString(), out intValue))
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
 
+
+        public static bool GetRuleConfigDoubleParam(String ruleConfigParamName, RuleConfiguration ruleConfig, ref double doubleValue)
+        {
+            if (ruleConfig.Params.TryGetValue(ruleConfigParamName, out object paramDoubleObj))
+            {
+                if (!Double.TryParse(paramDoubleObj.ToString(), out doubleValue))
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        public static bool GetRuleConfigBoolParam(String ruleConfigParamName, RuleConfiguration ruleConfig, ref bool boolValue)
+        {
+            if (ruleConfig.Params.TryGetValue(ruleConfigParamName, out object paramBoolObj))
+            {
+                if (!Boolean.TryParse(paramBoolObj.ToString(), out boolValue))
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        public static bool GetRuleConfigStringParam(String ruleConfigParamName, RuleConfiguration ruleConfig, ref string stringValue)
+        {
+            if (!ruleConfig.Params.TryGetValue(ruleConfigParamName, out object paramStringObj)) return false;
+            stringValue = paramStringObj.ToString();
+            return true;
+        }
+
+        public static bool GetRuleConfigOrderSpacing(RuleConfiguration ruleConfig, ref OrderSpacingConfiguration orderSpacingConfig)
+        {
+            if (ruleConfig.Params.TryGetValue(RuleConfiguration.ORDERSPACING, out object paramObj))
+            {
+                orderSpacingConfig = JsonConvert.DeserializeObject<OrderSpacingConfiguration>(paramObj.ToString());
+
+                if (orderSpacingConfig == null)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        public static bool GetRuleConfigVolume(RuleConfiguration ruleConfig, ref VolumeConfiguration VolumeConfig)
+        {
+            if (ruleConfig.Params.TryGetValue(RuleConfiguration.VOLUME, out object paramObj))
+            {
+                VolumeConfig = JsonConvert.DeserializeObject<VolumeConfiguration>(paramObj.ToString());
+
+                if (VolumeConfig == null)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
     }
 }
