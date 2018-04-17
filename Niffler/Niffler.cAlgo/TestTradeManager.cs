@@ -5,7 +5,7 @@ using Niffler.Messaging.RabbitMQ;
 using Niffler.Common;
 using cAlgo.API.Internals;
 
-namespace Niffler.Services
+namespace Niffler.cAlgoClient
 {
     public class TestTradeManager : IScalableConsumerService
     {
@@ -43,8 +43,8 @@ namespace Niffler.Services
 
         public void PublishOnTickEvent(Symbol symbol, cAlgo.API.Positions _positions, cAlgo.API.PendingOrders _orders, DateTime timeStamp, bool isBackTesting = false)
         {
-            Utils.ParseOpenPositions(_positions, out Positions positions);
-            Utils.ParsePendingOrders(_orders, out Orders orders);
+            MessageConverter.ParseOpenPositions(_positions, out Positions positions);
+            MessageConverter.ParsePendingOrders(_orders, out Orders orders);
 
             Tick tick = new Tick()
             {
@@ -54,7 +54,7 @@ namespace Niffler.Services
                 Digits = symbol.Digits,
                 PipSize = symbol.PipSize,
                 TickSize = symbol.TickSize,
-                Spread = symbol.TickSize,
+                Spread = symbol.Spread, //Calculated as the difference between the last bid and last offer prices received
                 TimeStamp = timeStamp.ToBinary()
             };
 
@@ -63,17 +63,17 @@ namespace Niffler.Services
 
         public void PublishOnPositionOpened(cAlgo.API.Position _postion, cAlgo.API.Positions _positions, cAlgo.API.PendingOrders _orders, bool isBackTesting = false)
         {
-            Utils.ParseOpenPositions(_positions, out Positions positions, _postion.Label);
-            Utils.ParsePendingOrders(_orders, out Orders orders);
-            Utils.ParseOpenPosition(_postion, out Position position);
+            MessageConverter.ParseOpenPositions(_positions, out Positions positions, _postion.Label);
+            MessageConverter.ParsePendingOrders(_orders, out Orders orders);
+            MessageConverter.ParseOpenPosition(_postion, out Position position);
             Publisher.PositionOpenedEvent(position, positions, orders, isBackTesting);
         }
 
         public void PublishOnPositionClosed(cAlgo.API.Position _postion, double closePrice, cAlgo.API.Positions _positions, cAlgo.API.PendingOrders _orders, DateTime closeTime, bool isBackTesting = false)
         {
-            Utils.ParseOpenPositions(_positions, out Positions positions);
-            Utils.ParsePendingOrders(_orders, out Orders orders);
-            Utils.ParseClosedPosition(_postion, closePrice, closeTime, out Position position);
+            MessageConverter.ParseOpenPositions(_positions, out Positions positions);
+            MessageConverter.ParsePendingOrders(_orders, out Orders orders);
+            MessageConverter.ParseClosedPosition(_postion, closePrice, closeTime, out Position position);
             Publisher.PositionClosedEvent(position, positions, orders, isBackTesting);
         }
 

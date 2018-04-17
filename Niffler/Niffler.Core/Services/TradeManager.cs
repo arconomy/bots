@@ -5,7 +5,6 @@ using Niffler.Messaging.RabbitMQ;
 using Niffler.Common;
 using cAlgo.API.Internals;
 using Niffler.Core.Model;
-using Niffler.Core.Trades;
 using Niffler.Core.Config;
 
 namespace Niffler.Services
@@ -13,8 +12,6 @@ namespace Niffler.Services
     public class TradeManager : IScalableConsumerService
     {
         private StateManager StateManager;
-        private TradePublisher TradePublisher;
-        private TradeUtils TradeUtils;
         private String EntityName = "TradeManager";
         protected string StrategyId;
         protected StrategyConfiguration StrategyConfig;
@@ -45,13 +42,20 @@ namespace Niffler.Services
             {
                 case Messaging.RabbitMQ.Action.TRADEMANAGEMENT:
                     //Save the trade to execute against the Linked Trade label
-                    StateManager.UpdateStateLinkedTradeAsync(trade.LinkedTradeLabel, trade.Order.Label,trade);
-
+                    StateManager.UpdateStateLinkedTradeAsync(trade.LinkedTradeLabel, trade.Order.Label, trade);
                     break;
-                case Messaging.RabbitMQ.Action.TRADEOPERATION:
+            }
+
+            // Need to have another transforming service if FIX service only publishes raw messages
+            // Need to have a service that listens for routing key FIXServiceName.*.*
+            // This service will then have to unpack the FIX API message and construct the appropriate msg and routing key
+
+            switch (routingKey.GetEventAsEnum())
+            {
+                case Messaging.RabbitMQ.Event.ONPOSITIONCLOSED:
                     switch (e.Message.Trade.Order.StateChange)
                     {
-                        case Order.Types.StateChange.Filled:
+                        case Order.Types.StateChange.Filled: //The stateChange should be used to set the routing key and not needed here.
                             //Check if this is a linked trade 
                             if (trade.IsLinkedTrade)
                             {
@@ -78,11 +82,6 @@ namespace Niffler.Services
                             break;
                     }
                 
-
-
-
-
-
                     //Order filled
                     if (e.Message.Trade.Order.StateChange == Order.Types.StateChange.Filled)
                     {
@@ -108,7 +107,12 @@ namespace Niffler.Services
 
         protected override List<RoutingKey> SetListeningRoutingKeys()
         {
-            List<RoutingKey> routingKeys = RoutingKey.Create(Niffler.Messaging.RabbitMQ.Action.TRADEOPERATION).ToList();
+            List<RoutingKey> routingKeys = RoutingKey.Create(Niffler.Messaging.RabbitMQ.Event.ONORDERCANCELLED).ToList();
+            routingKeys.Add(RoutingKey.Create(Niffler.Messaging.RabbitMQ.Event.ONORDERMODIFIED));
+            routingKeys.Add(RoutingKey.Create(Niffler.Messaging.RabbitMQ.Event.ONORDERPLACED));
+            routingKeys.Add(RoutingKey.Create(Niffler.Messaging.RabbitMQ.Event.ONPOSITIONCLOSED));
+            routingKeys.Add(RoutingKey.Create(Niffler.Messaging.RabbitMQ.Event.ONPOSITIONMODIFIED));
+            routingKeys.Add(RoutingKey.Create(Niffler.Messaging.RabbitMQ.Event.ONPOSITIONOPENED));
             routingKeys.Add(RoutingKey.Create(Niffler.Messaging.RabbitMQ.Action.TRADEMANAGEMENT));
             return routingKeys;
         }

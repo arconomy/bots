@@ -1,9 +1,7 @@
 ﻿using cAlgo.API;
-using Niffler.Services;
 using Niffler.Messaging.RabbitMQ;
 using Niffler.Messaging.Protobuf;
 using System;
-using Niffler.Common;
 using System.Threading;
 
 namespace Niffler.cAlgoClient
@@ -11,7 +9,7 @@ namespace Niffler.cAlgoClient
 {
     public class TraderService : cAlgo.API.Robot
     {
-        private TestTradeManager TradeManager;
+        private TestTradeManager TestTradeManager;
 
         protected override void OnStart()
         {
@@ -20,41 +18,41 @@ namespace Niffler.cAlgoClient
             Adapter.Init();
             Adapter.Connect();
 
-            TradeManager = new TestTradeManager(MarketSeries.SymbolCode);
-            TradeManager.Run(Adapter);
+            TestTradeManager = new TestTradeManager(MarketSeries.SymbolCode);
+            TestTradeManager.Run(Adapter);
            
             Positions.Opened += OnPositionOpened;
             Positions.Closed += OnPositionClosed;
 
-            TradeManager.ExecuteBuyMarketOrder = ExecuteBuyMarketOrder;
-            TradeManager.ExecuteSellMarketOrder = ExecuteSellMarketOrder;
-            TradeManager.PlaceBuyLimitOrder = PlaceBuyLimitOrder;
-            TradeManager.PlaceBuyStopOrder = PlaceBuyStopOrder;
-            TradeManager.PlaceSellLimitOrder = PlaceSellLimitOrder;
-            TradeManager.PlaceSellStopOrder = PlaceSellStopOrder;
-            TradeManager.ModifyPosition = ModifyPosition;
-            TradeManager.ClosePosition = CloseTradePosition;
-            TradeManager.CancelOrder = CancelOrder;
-            TradeManager.ModifyOrder = ModifyOrder;
+            TestTradeManager.ExecuteBuyMarketOrder = ExecuteBuyMarketOrder;
+            TestTradeManager.ExecuteSellMarketOrder = ExecuteSellMarketOrder;
+            TestTradeManager.PlaceBuyLimitOrder = PlaceBuyLimitOrder;
+            TestTradeManager.PlaceBuyStopOrder = PlaceBuyStopOrder;
+            TestTradeManager.PlaceSellLimitOrder = PlaceSellLimitOrder;
+            TestTradeManager.PlaceSellStopOrder = PlaceSellStopOrder;
+            TestTradeManager.ModifyPosition = ModifyPosition;
+            TestTradeManager.ClosePosition = CloseTradePosition;
+            TestTradeManager.CancelOrder = CancelOrder;
+            TestTradeManager.ModifyOrder = ModifyOrder;
         }
 
         protected override void OnTick()
         {
             //Send Tick, Positions and Pending Orders
-            TradeManager.PublishOnTickEvent(Symbol, Positions, PendingOrders, Server.Time, this.IsBacktesting);
+            TestTradeManager.PublishOnTickEvent(Symbol, Positions, PendingOrders, Server.Time, this.IsBacktesting);
         }
 
         protected void OnPositionOpened(PositionOpenedEventArgs args)
         {
             //Send Opened Position, Positions and Pending Orders
-            TradeManager.PublishOnPositionOpened(args.Position, Positions, PendingOrders, this.IsBacktesting);
+            TestTradeManager.PublishOnPositionOpened(args.Position, Positions, PendingOrders, this.IsBacktesting);
         }
 
         protected void OnPositionClosed(PositionClosedEventArgs args)
         {
             //Send Closed Position, Positions and Pending Orders
             double closePrice = this.History.FindLast(args.Position.Label, Symbol, args.Position.TradeType).ClosingPrice;
-            TradeManager.PublishOnPositionClosed(args.Position, closePrice, Positions, PendingOrders, Server.Time, this.IsBacktesting);
+            TestTradeManager.PublishOnPositionClosed(args.Position, closePrice, Positions, PendingOrders, Server.Time, this.IsBacktesting);
         }
 
         protected void ExecuteBuyMarketOrder(Trade trade)
@@ -134,7 +132,7 @@ namespace Niffler.cAlgoClient
 
         protected void CancelOrder(Trade trade)
         {
-            if (Utils.FindPendingOrder(PendingOrders, trade.Order.Label, out PendingOrder order))
+            if (FindPendingOrder(PendingOrders, trade.Order.Label, out PendingOrder order))
                 CancelPendingOrderAsync(order, CancelOrderCallBack);
         }
 
@@ -145,7 +143,7 @@ namespace Niffler.cAlgoClient
 
         protected void ModifyOrder(Trade trade)
         {
-            if (Utils.FindPendingOrder(PendingOrders, trade.Order.Label, out PendingOrder order))
+            if (FindPendingOrder(PendingOrders, trade.Order.Label, out PendingOrder order))
                 this.ModifyPendingOrderAsync(order,trade.Order.TargetEntryPrice, trade.Order.StopLossPips,trade.Order.TakeProfitPips,null, ModifyOrderCallBack);
         }
 
@@ -156,8 +154,22 @@ namespace Niffler.cAlgoClient
 
         protected override void OnStop()
         {
-            TradeManager.ShutDown();
+            TestTradeManager.ShutDown();
             Thread.Sleep(50);
+        }
+
+        private bool FindPendingOrder(PendingOrders pendingOrders, string label, out PendingOrder order)
+        {
+            foreach (PendingOrder p in pendingOrders)
+            {
+                if (p.Label == label)
+                {
+                    order = p;
+                    return true;
+                }
+            }
+            order = null;
+            return false;
         }
     }
 }

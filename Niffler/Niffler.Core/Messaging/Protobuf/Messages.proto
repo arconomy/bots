@@ -19,9 +19,9 @@ option csharp_namespace = "Niffler.Messaging.Protobuf";
 message Niffle {
     enum Type   {
         TICK = 0;
-        POSITION = 1;
-        ORDER = 2;
-        SERVICE = 3;
+		SERVICE = 1;
+        POSITION = 2;
+        ORDER = 3;
         TRADE = 4;
 		TRADES = 5;
         ERROR = 6;
@@ -86,7 +86,6 @@ message Position {
     double closePrice = 12;
     double grossProfit = 13;
     StateChange stateChange = 14;
-    string positionId = 15;
 }
 
 message Positions {
@@ -180,8 +179,8 @@ message Trade   {
 	TradeAction tradeAction = 1;
 	Order order = 2;
 	Position position = 3;
-	bool isLinkedTrade = 4;
-	string linkedTradeLabel = 5;
+	bool isLinked = 4;
+	string linkLabel = 5;
 	string lastUpdatedBy = 6;
 }
 

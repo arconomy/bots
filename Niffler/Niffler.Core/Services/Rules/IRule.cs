@@ -251,7 +251,7 @@ namespace Niffler.Rules
         protected bool GetRuleConfigBoolParam(String ruleConfigParamName)
         {
             bool boolValue = false;
-            IsInitialised = Utils.GetRuleConfigBoolParam(ruleConfigParamName, RuleConfig, ref boolValue);
+            Utils.GetRuleConfigBoolParam(ruleConfigParamName, RuleConfig, ref boolValue);
             return boolValue;
         }
         

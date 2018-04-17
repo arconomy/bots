@@ -195,7 +195,6 @@
     <Compile Include="Services\Rules\TradingPeriods\OnTerminateTime.cs" />
     <Compile Include="Services\ReportManager.cs" />
     <Compile Include="Services\ServicesManager.cs" />
-    <Compile Include="Services\TestTradeManager.cs" />
     <Compile Include="Services\TradeManager.cs" />
     <Compile Include="Config\RuleConfiguration.cs" />
     <Compile Include="Config\JsonAppConfiguration.cs" />

@@ -34,7 +34,7 @@ namespace Niffler.Messaging.RabbitMQ
     public enum Source
     {
         WILDCARD = 0,
-        SERVICEMANAGER = 1,
+        SERVICEMANAGER = 1
     }
 
     public class RoutingKey
@@ -53,6 +53,7 @@ namespace Niffler.Messaging.RabbitMQ
             { RabbitMQ.Action.UPDATESTATE,"UpdateState" },
             { RabbitMQ.Action.NOTIFY,"Notify" },
             { RabbitMQ.Action.TRADEOPERATION,"TradeOperation" },
+            { RabbitMQ.Action.TRADEMANAGEMENT,"TradeManagement" },
             { RabbitMQ.Action.RESET,"Reset" },
             { RabbitMQ.Action.SHUTDOWN,"ShutDown" },
 
