@@ -67,18 +67,17 @@ namespace Niffler.Messaging.Protobuf {
             "AiADKAsyBi5PcmRlciKcAQoHU2VydmljZRIhCgdjb21tYW5kGAEgASgOMhAu",
             "U2VydmljZS5Db21tYW5kEg8KB3N1Y2Nlc3MYAiABKAgSEQoJcXVldWVOYW1l",
             "GAMgASgJIkoKB0NvbW1hbmQSCQoFUkVTRVQQABIKCgZOT1RJRlkQARILCgdT",
-            "Q0FMRVVQEAISDQoJU0NBTEVET1dOEAMSDAoIU0hVVERPV04QBCJDCgtMaW5r",
-            "ZWRUcmFkZRIbCgtwYXJlbnRUcmFkZRgBIAEoCzIGLlRyYWRlEhcKBnRyYWRl",
-            "cxgCIAEoCzIHLlRyYWRlcyKcAgoFVHJhZGUSJwoLdHJhZGVBY3Rpb24YASAB",
-            "KA4yEi5UcmFkZS5UcmFkZUFjdGlvbhIVCgVvcmRlchgCIAEoCzIGLk9yZGVy",
-            "EhsKCHBvc2l0aW9uGAMgASgLMgkuUG9zaXRpb24itQEKC1RyYWRlQWN0aW9u",
-            "EgcKA0JVWRAAEggKBFNFTEwQARIRCg1CVVlMSU1JVE9SREVSEAMSEgoOU0VM",
-            "TExJTUlUT1JERVIQBBIQCgxCVVlTVE9QT1JERVIQBRIRCg1TRUxMU1RPUE9S",
-            "REVSEAYSEgoOTU9ESUZZUE9TSVRJT04QBxIPCgtNT0RJRllPUkRFUhAIEhEK",
-            "DUNMT1NFUE9TSVRJT04QCRIPCgtDQU5DRUxPUkRFUhAKIh8KBlRyYWRlcxIV",
-            "CgV0cmFkZRgBIAMoCzIGLlRyYWRlQj8KHmNvbS5uaWZmbGVyLm1lc3NhZ2lu",
-            "Zy5wcm90b2J1ZlABqgIaTmlmZmxlci5NZXNzYWdpbmcuUHJvdG9idWZiBnBy",
-            "b3RvMw=="));
+            "Q0FMRVVQEAISDQoJU0NBTEVET1dOEAMSDAoIU0hVVERPV04QBCLNAgoFVHJh",
+            "ZGUSJwoLdHJhZGVBY3Rpb24YASABKA4yEi5UcmFkZS5UcmFkZUFjdGlvbhIV",
+            "CgVvcmRlchgCIAEoCzIGLk9yZGVyEhsKCHBvc2l0aW9uGAMgASgLMgkuUG9z",
+            "aXRpb24SFQoNaXNMaW5rZWRUcmFkZRgEIAEoCBIYChBsaW5rZWRUcmFkZUxh",
+            "YmVsGAUgASgJIrUBCgtUcmFkZUFjdGlvbhIHCgNCVVkQABIICgRTRUxMEAES",
+            "EQoNQlVZTElNSVRPUkRFUhADEhIKDlNFTExMSU1JVE9SREVSEAQSEAoMQlVZ",
+            "U1RPUE9SREVSEAUSEQoNU0VMTFNUT1BPUkRFUhAGEhIKDk1PRElGWVBPU0lU",
+            "SU9OEAcSDwoLTU9ESUZZT1JERVIQCBIRCg1DTE9TRVBPU0lUSU9OEAkSDwoL",
+            "Q0FOQ0VMT1JERVIQCiIfCgZUcmFkZXMSFQoFdHJhZGUYASADKAsyBi5UcmFk",
+            "ZUI/Ch5jb20ubmlmZmxlci5tZXNzYWdpbmcucHJvdG9idWZQAaoCGk5pZmZs",
+            "ZXIuTWVzc2FnaW5nLlByb3RvYnVmYgZwcm90bzM="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(null, new pbr::GeneratedClrTypeInfo[] {
@@ -90,8 +89,7 @@ namespace Niffler.Messaging.Protobuf {
             new pbr::GeneratedClrTypeInfo(typeof(global::Niffler.Messaging.Protobuf.Order), global::Niffler.Messaging.Protobuf.Order.Parser, new[]{ "Label", "Id", "SymbolCode", "OrderType", "TradeType", "Volume", "TargetEntryPrice", "StopLossPrice", "StopLossPips", "TakeProfitPrice", "TakeProfitPips", "ExpiryTime", "EntryTime", "StateChange", "PosMaintRptID" }, null, new[]{ typeof(global::Niffler.Messaging.Protobuf.Order.Types.OrderType), typeof(global::Niffler.Messaging.Protobuf.Order.Types.TradeType), typeof(global::Niffler.Messaging.Protobuf.Order.Types.StateChange) }, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Niffler.Messaging.Protobuf.Orders), global::Niffler.Messaging.Protobuf.Orders.Parser, new[]{ "Count", "Order" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Niffler.Messaging.Protobuf.Service), global::Niffler.Messaging.Protobuf.Service.Parser, new[]{ "Command", "Success", "QueueName" }, null, new[]{ typeof(global::Niffler.Messaging.Protobuf.Service.Types.Command) }, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Niffler.Messaging.Protobuf.LinkedTrade), global::Niffler.Messaging.Protobuf.LinkedTrade.Parser, new[]{ "ParentTrade", "Trades" }, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Niffler.Messaging.Protobuf.Trade), global::Niffler.Messaging.Protobuf.Trade.Parser, new[]{ "TradeAction", "Order", "Position" }, null, new[]{ typeof(global::Niffler.Messaging.Protobuf.Trade.Types.TradeAction) }, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Niffler.Messaging.Protobuf.Trade), global::Niffler.Messaging.Protobuf.Trade.Parser, new[]{ "TradeAction", "Order", "Position", "IsLinkedTrade", "LinkedTradeLabel" }, null, new[]{ typeof(global::Niffler.Messaging.Protobuf.Trade.Types.TradeAction) }, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Niffler.Messaging.Protobuf.Trades), global::Niffler.Messaging.Protobuf.Trades.Parser, new[]{ "Trade" }, null, null, null)
           }));
     }
@@ -2645,163 +2643,6 @@ namespace Niffler.Messaging.Protobuf {
 
   }
 
-  public sealed partial class LinkedTrade : pb::IMessage<LinkedTrade> {
-    private static readonly pb::MessageParser<LinkedTrade> _parser = new pb::MessageParser<LinkedTrade>(() => new LinkedTrade());
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public static pb::MessageParser<LinkedTrade> Parser { get { return _parser; } }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public static pbr::MessageDescriptor Descriptor {
-      get { return global::Niffler.Messaging.Protobuf.MessagesReflection.Descriptor.MessageTypes[8]; }
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    pbr::MessageDescriptor pb::IMessage.Descriptor {
-      get { return Descriptor; }
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public LinkedTrade() {
-      OnConstruction();
-    }
-
-    partial void OnConstruction();
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public LinkedTrade(LinkedTrade other) : this() {
-      ParentTrade = other.parentTrade_ != null ? other.ParentTrade.Clone() : null;
-      Trades = other.trades_ != null ? other.Trades.Clone() : null;
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public LinkedTrade Clone() {
-      return new LinkedTrade(this);
-    }
-
-    /// <summary>Field number for the "parentTrade" field.</summary>
-    public const int ParentTradeFieldNumber = 1;
-    private global::Niffler.Messaging.Protobuf.Trade parentTrade_;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public global::Niffler.Messaging.Protobuf.Trade ParentTrade {
-      get { return parentTrade_; }
-      set {
-        parentTrade_ = value;
-      }
-    }
-
-    /// <summary>Field number for the "trades" field.</summary>
-    public const int TradesFieldNumber = 2;
-    private global::Niffler.Messaging.Protobuf.Trades trades_;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public global::Niffler.Messaging.Protobuf.Trades Trades {
-      get { return trades_; }
-      set {
-        trades_ = value;
-      }
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public override bool Equals(object other) {
-      return Equals(other as LinkedTrade);
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public bool Equals(LinkedTrade other) {
-      if (ReferenceEquals(other, null)) {
-        return false;
-      }
-      if (ReferenceEquals(other, this)) {
-        return true;
-      }
-      if (!object.Equals(ParentTrade, other.ParentTrade)) return false;
-      if (!object.Equals(Trades, other.Trades)) return false;
-      return true;
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public override int GetHashCode() {
-      int hash = 1;
-      if (parentTrade_ != null) hash ^= ParentTrade.GetHashCode();
-      if (trades_ != null) hash ^= Trades.GetHashCode();
-      return hash;
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public override string ToString() {
-      return pb::JsonFormatter.ToDiagnosticString(this);
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public void WriteTo(pb::CodedOutputStream output) {
-      if (parentTrade_ != null) {
-        output.WriteRawTag(10);
-        output.WriteMessage(ParentTrade);
-      }
-      if (trades_ != null) {
-        output.WriteRawTag(18);
-        output.WriteMessage(Trades);
-      }
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public int CalculateSize() {
-      int size = 0;
-      if (parentTrade_ != null) {
-        size += 1 + pb::CodedOutputStream.ComputeMessageSize(ParentTrade);
-      }
-      if (trades_ != null) {
-        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Trades);
-      }
-      return size;
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public void MergeFrom(LinkedTrade other) {
-      if (other == null) {
-        return;
-      }
-      if (other.parentTrade_ != null) {
-        if (parentTrade_ == null) {
-          parentTrade_ = new global::Niffler.Messaging.Protobuf.Trade();
-        }
-        ParentTrade.MergeFrom(other.ParentTrade);
-      }
-      if (other.trades_ != null) {
-        if (trades_ == null) {
-          trades_ = new global::Niffler.Messaging.Protobuf.Trades();
-        }
-        Trades.MergeFrom(other.Trades);
-      }
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public void MergeFrom(pb::CodedInputStream input) {
-      uint tag;
-      while ((tag = input.ReadTag()) != 0) {
-        switch(tag) {
-          default:
-            input.SkipLastField();
-            break;
-          case 10: {
-            if (parentTrade_ == null) {
-              parentTrade_ = new global::Niffler.Messaging.Protobuf.Trade();
-            }
-            input.ReadMessage(parentTrade_);
-            break;
-          }
-          case 18: {
-            if (trades_ == null) {
-              trades_ = new global::Niffler.Messaging.Protobuf.Trades();
-            }
-            input.ReadMessage(trades_);
-            break;
-          }
-        }
-      }
-    }
-
-  }
-
   public sealed partial class Trade : pb::IMessage<Trade> {
     private static readonly pb::MessageParser<Trade> _parser = new pb::MessageParser<Trade>(() => new Trade());
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -2809,7 +2650,7 @@ namespace Niffler.Messaging.Protobuf {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Niffler.Messaging.Protobuf.MessagesReflection.Descriptor.MessageTypes[9]; }
+      get { return global::Niffler.Messaging.Protobuf.MessagesReflection.Descriptor.MessageTypes[8]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -2829,6 +2670,8 @@ namespace Niffler.Messaging.Protobuf {
       tradeAction_ = other.tradeAction_;
       Order = other.order_ != null ? other.Order.Clone() : null;
       Position = other.position_ != null ? other.Position.Clone() : null;
+      isLinkedTrade_ = other.isLinkedTrade_;
+      linkedTradeLabel_ = other.linkedTradeLabel_;
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -2869,6 +2712,28 @@ namespace Niffler.Messaging.Protobuf {
       }
     }
 
+    /// <summary>Field number for the "isLinkedTrade" field.</summary>
+    public const int IsLinkedTradeFieldNumber = 4;
+    private bool isLinkedTrade_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool IsLinkedTrade {
+      get { return isLinkedTrade_; }
+      set {
+        isLinkedTrade_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "linkedTradeLabel" field.</summary>
+    public const int LinkedTradeLabelFieldNumber = 5;
+    private string linkedTradeLabel_ = "";
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public string LinkedTradeLabel {
+      get { return linkedTradeLabel_; }
+      set {
+        linkedTradeLabel_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override bool Equals(object other) {
       return Equals(other as Trade);
@@ -2885,6 +2750,8 @@ namespace Niffler.Messaging.Protobuf {
       if (TradeAction != other.TradeAction) return false;
       if (!object.Equals(Order, other.Order)) return false;
       if (!object.Equals(Position, other.Position)) return false;
+      if (IsLinkedTrade != other.IsLinkedTrade) return false;
+      if (LinkedTradeLabel != other.LinkedTradeLabel) return false;
       return true;
     }
 
@@ -2894,6 +2761,8 @@ namespace Niffler.Messaging.Protobuf {
       if (TradeAction != 0) hash ^= TradeAction.GetHashCode();
       if (order_ != null) hash ^= Order.GetHashCode();
       if (position_ != null) hash ^= Position.GetHashCode();
+      if (IsLinkedTrade != false) hash ^= IsLinkedTrade.GetHashCode();
+      if (LinkedTradeLabel.Length != 0) hash ^= LinkedTradeLabel.GetHashCode();
       return hash;
     }
 
@@ -2916,6 +2785,14 @@ namespace Niffler.Messaging.Protobuf {
         output.WriteRawTag(26);
         output.WriteMessage(Position);
       }
+      if (IsLinkedTrade != false) {
+        output.WriteRawTag(32);
+        output.WriteBool(IsLinkedTrade);
+      }
+      if (LinkedTradeLabel.Length != 0) {
+        output.WriteRawTag(42);
+        output.WriteString(LinkedTradeLabel);
+      }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -2929,6 +2806,12 @@ namespace Niffler.Messaging.Protobuf {
       }
       if (position_ != null) {
         size += 1 + pb::CodedOutputStream.ComputeMessageSize(Position);
+      }
+      if (IsLinkedTrade != false) {
+        size += 1 + 1;
+      }
+      if (LinkedTradeLabel.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(LinkedTradeLabel);
       }
       return size;
     }
@@ -2952,6 +2835,12 @@ namespace Niffler.Messaging.Protobuf {
           position_ = new global::Niffler.Messaging.Protobuf.Position();
         }
         Position.MergeFrom(other.Position);
+      }
+      if (other.IsLinkedTrade != false) {
+        IsLinkedTrade = other.IsLinkedTrade;
+      }
+      if (other.LinkedTradeLabel.Length != 0) {
+        LinkedTradeLabel = other.LinkedTradeLabel;
       }
     }
 
@@ -2979,6 +2868,14 @@ namespace Niffler.Messaging.Protobuf {
               position_ = new global::Niffler.Messaging.Protobuf.Position();
             }
             input.ReadMessage(position_);
+            break;
+          }
+          case 32: {
+            IsLinkedTrade = input.ReadBool();
+            break;
+          }
+          case 42: {
+            LinkedTradeLabel = input.ReadString();
             break;
           }
         }
@@ -3014,7 +2911,7 @@ namespace Niffler.Messaging.Protobuf {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Niffler.Messaging.Protobuf.MessagesReflection.Descriptor.MessageTypes[10]; }
+      get { return global::Niffler.Messaging.Protobuf.MessagesReflection.Descriptor.MessageTypes[9]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]

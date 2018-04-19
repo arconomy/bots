@@ -5,7 +5,7 @@ using Niffler.Messaging.RabbitMQ;
 using Niffler.Common;
 using Niffler.Core.Config;
 using Niffler.Rules.TradingPeriods;
-using Niffler.Core.Services;
+using Niffler.Core.Model;
 using Niffler.Model;
 
 namespace Niffler.Services
@@ -145,7 +145,7 @@ namespace Niffler.Services
                 {
                     if (routingKey.GetEventAsEnum() == Event.ONORDERPLACED)
                     {
-                        if (e.Message.Order.StateChange == Messaging.Protobuf.Order.Types.StateChange.Placed)
+                        if (e.Message.Order.StateChange == Messaging.Protobuf.Order.Types.StateChange.Filled)
                         {
                             ReportOrderPlaced(e.Message.Order);
                         }
@@ -153,15 +153,16 @@ namespace Niffler.Services
 
                     if (routingKey.GetEventAsEnum() == Event.ONORDERCANCELLED)
                     {
-                        if (e.Message.Order.StateChange == Messaging.Protobuf.Order.Types.StateChange.Cancelled)
+                        if (e.Message.Order.StateChange == Messaging.Protobuf.Order.Types.StateChange.Canceled)
                         {
                             ReportOrderCancelled(e.Message.Order, Utils.FormatDateTimeWithSeparators(niffleTimeStamp));
                         }
                     }
 
+                    //Need to work out how to determine if order has been modified
                     if (routingKey.GetEventAsEnum() == Event.ONORDERMODIFIED)
                     {
-                        if (e.Message.Order.StateChange == Messaging.Protobuf.Order.Types.StateChange.Modified)
+                        if (e.Message.Order.StateChange == Messaging.Protobuf.Order.Types.StateChange.Filled)
                         {
                             ReportOrderModified(e.Message.Order, Utils.FormatDateTimeWithSeparators(niffleTimeStamp));
                         }
@@ -189,7 +190,7 @@ namespace Niffler.Services
         public void ReportPositionOpened(Messaging.Protobuf.Position position)
         {
             PositionsOpenedCount++;
-            StateManager.SetInitialState(new Dictionary<string, object>
+            StateManager.SetInitialStateAsync(new Dictionary<string, object>
                                         {
                                             { RuleConfiguration.POSITIONSOPENEDCOUNT, PipsTotal }
                                         }
@@ -202,7 +203,7 @@ namespace Niffler.Services
             PositionsClosedCount++;
             PipsTotal += position.Pips;
             ProfitTotal += position.GrossProfit;
-            StateManager.SetInitialState(new Dictionary<string, object>
+            StateManager.SetInitialStateAsync(new Dictionary<string, object>
                                         {
                                             { RuleConfiguration.PIPSTOTAL, PipsTotal },
                                             { RuleConfiguration.PROFITTOTAL, ProfitTotal },
@@ -233,7 +234,7 @@ namespace Niffler.Services
         public void ReportOrderPlaced(Messaging.Protobuf.Order order)
         {
             OrdersPlacedCount++;
-            StateManager.SetInitialState(new Dictionary<string, object>
+            StateManager.SetInitialStateAsync(new Dictionary<string, object>
                                         {
                                             { RuleConfiguration.ORDERSPLACEDCOUNT, OrdersPlacedCount }
                                         }
@@ -254,7 +255,7 @@ namespace Niffler.Services
         public void ReportError(string source, Messaging.Protobuf.Error error, string timestamp)
         {
             ErrorCount++;
-            StateManager.SetInitialState(new Dictionary<string, object>
+            StateManager.SetInitialStateAsync(new Dictionary<string, object>
                                         {
                                             { RuleConfiguration.ERRORCOUNT, ErrorCount }
                                         }
@@ -355,7 +356,7 @@ namespace Niffler.Services
         public override void Reset()
         {
             //Remove all State Variables
-            StateManager.Reset();
+            StateManager.ResetAsync();
 
 
             // reset reporting variables

@@ -3,7 +3,7 @@ using System;
 using Niffler.Rules;
 using Niffler.Messaging.RabbitMQ;
 using Niffler.Core.Config;
-using Niffler.Core.Services;
+using Niffler.Core.Model;
 
 namespace Niffler.Services
 {
@@ -28,20 +28,25 @@ namespace Niffler.Services
             Adapter.Init();
             Adapter.Connect();
 
-            //Create a FirebaseManager to set up state data mangement
+            //Create a StateManager to manage global state data
             StateManager StateManager = new StateManager();
-            
+
             //For each StrategyConfig Initialise Rules as micro-services and other default micro-services
             foreach (StrategyConfiguration strategyConfig in AppConfig.StrategyConfig)
             {
                 //Generate Strategy ID here and pass to the State and Rules
                 strategyConfig.StrategyId = StateManager.AddStrategyAsync().Result.ToString();
                 StateManager.SetStrategyId(strategyConfig.StrategyId);
-                StateManager.UpdateState("Name", strategyConfig.Name);
+                StateManager.UpdateStateAsync("Name", strategyConfig.Name);
 
                 //Create the rule services per strategy
                 Rules = (RulesFactory.CreateAndInitRules(strategyConfig));
                 Rules.ForEach(rule => rule.Run(Adapter));
+
+                //Create a TradeManager per Strategy to manage linked orders
+                TradeManager TradeManager = new TradeManager(strategyConfig,StateManager);
+                TradeManager.Run(Adapter);
+
 
                 //Create a Report Manager per strategy
                 Services.Add(new ReportManager(strategyConfig));

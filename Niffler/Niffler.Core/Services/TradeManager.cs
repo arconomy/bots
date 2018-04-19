@@ -4,77 +4,30 @@ using Niffler.Messaging.Protobuf;
 using Niffler.Messaging.RabbitMQ;
 using Niffler.Common;
 using cAlgo.API.Internals;
+using Niffler.Core.Model;
+using Niffler.Core.Config;
 
 namespace Niffler.Services
 {
     public class TradeManager : IScalableConsumerService
     {
-        public delegate void ExecuteBuyMarketOrder_cAlgo(Trade trade);
-        public delegate void ExecuteSellMarketOrder_cAlgo(Trade trade);
-        public delegate void PlaceBuyLimitOrder_cAlgo(Trade trade);
-        public delegate void PlaceBuyStopOrder_cAlgo(Trade trade);
-        public delegate void PlaceSellLimitOrder_cAlgo(Trade trade);
-        public delegate void PlaceSellStopOrder_cAlgo(Trade trade);
-        public delegate void ModifyPosition_cAlgo(Trade trade);
-        public delegate void ModifyOrder_cAlgo(Trade trade);
-        public delegate void ClosePosition_cAlgo(Trade trade);
-        public delegate void CancelOrder_cAlgo(Trade trade);
+        private StateManager StateManager;
+        private String EntityName = "TradeManager";
+        protected string StrategyId;
+        protected StrategyConfiguration StrategyConfig;
+        protected string BrokerId;
 
-        public ExecuteBuyMarketOrder_cAlgo ExecuteBuyMarketOrder { get; set; }
-        public ExecuteSellMarketOrder_cAlgo ExecuteSellMarketOrder { get; set; }
-        public PlaceBuyLimitOrder_cAlgo PlaceBuyLimitOrder { get; set; }
-        public PlaceBuyStopOrder_cAlgo PlaceBuyStopOrder { get; set; }
-        public PlaceSellLimitOrder_cAlgo PlaceSellLimitOrder { get; set; }
-        public PlaceSellStopOrder_cAlgo PlaceSellStopOrder { get; set; }
-        public ModifyPosition_cAlgo ModifyPosition { get; set; }
-        public ClosePosition_cAlgo ClosePosition { get; set; }
-        public CancelOrder_cAlgo CancelOrder { get; set; }
-        public ModifyOrder_cAlgo ModifyOrder { get; set; }
-
-        public TradeManager(String exchangeName)
+        public TradeManager(StrategyConfiguration strategyConfig, StateManager stateManager)
         {
-            ExchangeName = exchangeName;
+            StateManager = stateManager;
+
+            ExchangeName = StrategyConfig.Exchange;
+            if (String.IsNullOrEmpty(ExchangeName)) IsInitialised = false;
         }
 
         public override void Init()
         {
             throw new NotImplementedException();
-        }
-
-        public void PublishOnTickEvent(Symbol symbol, cAlgo.API.Positions _positions, cAlgo.API.PendingOrders _orders, DateTime timeStamp, bool isBackTesting = false)
-        {
-            Utils.ParseOpenPositions(_positions, out Positions positions);
-            Utils.ParsePendingOrders(_orders, out Orders orders);
-                
-            Tick tick = new Tick()
-            {
-              Code = symbol.Code,
-              Ask = symbol.Ask,
-              Bid = symbol.Bid,
-              Digits = symbol.Digits,
-              PipSize = symbol.PipSize,
-              TickSize = symbol.TickSize,
-              Spread = symbol.TickSize,
-              TimeStamp = timeStamp.ToBinary()
-            };
-
-            Publisher.TickEvent(tick, positions, orders, isBackTesting);
-        }
-
-        public void PublishOnPositionOpened(cAlgo.API.Position _postion, cAlgo.API.Positions _positions, cAlgo.API.PendingOrders _orders, bool isBackTesting = false)
-        {
-            Utils.ParseOpenPositions(_positions, out Positions positions,_postion.Label);
-            Utils.ParsePendingOrders(_orders, out Orders orders);
-            Utils.ParseOpenPosition(_postion, out Position position);
-            Publisher.PositionOpenedEvent(position,positions, orders, isBackTesting);
-        }
-
-        public void PublishOnPositionClosed(cAlgo.API.Position _postion, double closePrice, cAlgo.API.Positions _positions, cAlgo.API.PendingOrders _orders, DateTime closeTime, bool isBackTesting = false)
-        {
-            Utils.ParseOpenPositions(_positions, out Positions positions);
-            Utils.ParsePendingOrders(_orders, out Orders orders);
-            Utils.ParseClosedPosition(_postion, closePrice, closeTime, out Position position);
-            Publisher.PositionClosedEvent(position, positions, orders, isBackTesting);
         }
 
         protected override void OnMessageReceived(object sender, MessageReceivedEventArgs e)
@@ -83,82 +36,84 @@ namespace Niffler.Services
             RoutingKey routingKey = new RoutingKey(e.EventArgs.RoutingKey);
             string action = routingKey.GetAction();
             string _event = routingKey.GetEvent();
+            Trade trade = e.Message.Trade;
 
             switch (routingKey.GetActionAsEnum())
             {
                 case Messaging.RabbitMQ.Action.TRADEMANAGEMENT:
-                    // Add order labels and action required on filled to State in order to listen for them and take action
-
+                    //Save the trade to execute against the Linked Trade label
+                    StateManager.UpdateStateLinkedTradeAsync(trade.LinkedTradeLabel, trade.Order.Label, trade);
                     break;
-                case Messaging.RabbitMQ.Action.TRADEOPERATION:
-                    // Check State for order labels of filled orders and place Stop loss or Take Profit orders.
+            }
+
+            // Need to have another transforming service if FIX service only publishes raw messages
+            // Need to have a service that listens for routing key FIXServiceName.*.*
+            // This service will then have to unpack the FIX API message and construct the appropriate msg and routing key
+
+            switch (routingKey.GetEventAsEnum())
+            {
+                case Messaging.RabbitMQ.Event.ONPOSITIONCLOSED:
+                    switch (e.Message.Trade.Order.StateChange)
+                    {
+                        case Order.Types.StateChange.Filled: //The stateChange should be used to set the routing key and not needed here.
+                            //Check if this is a linked trade 
+                            if (trade.IsLinkedTrade)
+                            {
+                                //Save the state of the filled linked trade
+                                StateManager.UpdateStateLinkedTradeAsync(trade.LinkedTradeLabel, trade.Order.Label, trade);
+
+                                //Find all other linked trades and cancel them
+                                StateManager.FindAllLinkedTradesExcludingAsync(trade.LinkedTradeLabel, trade.Order.Label, CancelTradeOperation);
+                            }
+                            //This is a masker trade therefore place any linked SL and TP trades
+                            else
+                            {
+                                //Find all linked trades and excute them
+                                StateManager.FindAllLinkedTradesAsync(trade.LinkedTradeLabel, trade.Order.PosMaintRptID, ExecuteTradeOperation);
+                            }
+                        break;
+                        case Order.Types.StateChange.Canceled:
+                            //If this is a masker trade then cancel any linked SL and TP trades
+                            if (!trade.IsLinkedTrade)
+                            {
+                                //Find all linked trades and cancel them
+                                StateManager.FindAllLinkedTradesAsync(trade.LinkedTradeLabel, trade.Order.PosMaintRptID, CancelTradeOperation);
+                            }
+                            break;
+                    }
+                
+                    //Order filled
+                    if (e.Message.Trade.Order.StateChange == Order.Types.StateChange.Filled)
+                    {
+                       
+
+                    }
                     break;
                 default:
                     return;
             };
+        }
 
-            //Single Trade operation messages
-            if (e.Message.Type == Niffle.Types.Type.Trade)
-            {
-                if (e.Message.Trade != null)
-                {
-                    ExecuteTradeOperation(e.Message.Trade);
-                }
-            }
-
-            //Multiple Trades operation messages
-            if (e.Message.Type == Niffle.Types.Type.Trades)
-            {
-                if (e.Message.Trades != null)
-                {
-                    foreach (Trade trade in e.Message.Trades.Trade)
-                    {
-                        ExecuteTradeOperation(trade);
-                    }
-                } 
-            }
+        protected void CancelTradeOperation(Trade trade)
+        {
+            trade.TradeAction = Trade.Types.TradeAction.Cancelorder;
+            ExecuteTradeOperation(trade);
         }
 
         protected void ExecuteTradeOperation(Trade trade)
         {
-            switch (trade.TradeAction)
-            {
-                case Trade.Types.TradeAction.Buy:
-                    ExecuteBuyMarketOrder(trade);
-                    break;
-                case Trade.Types.TradeAction.Buylimitorder:
-                    PlaceBuyLimitOrder(trade);
-                    break;
-                case Trade.Types.TradeAction.Buystoporder:
-                    PlaceBuyStopOrder(trade);
-                    break;
-                case Trade.Types.TradeAction.Sell:
-                    ExecuteSellMarketOrder(trade);
-                    break;
-                case Trade.Types.TradeAction.Selllimitorder:
-                    PlaceSellLimitOrder(trade);
-                    break;
-                case Trade.Types.TradeAction.Sellstoporder:
-                    PlaceSellStopOrder(trade);
-                    break;
-                case Trade.Types.TradeAction.Modifyposition:
-                    ModifyPosition(trade);
-                    break;
-                case Trade.Types.TradeAction.Modifyorder:
-                    ModifyOrder(trade);
-                    break;
-                case Trade.Types.TradeAction.Closeposition:
-                    ClosePosition(trade);
-                    break;
-                case Trade.Types.TradeAction.Cancelorder:
-                    CancelOrder(trade);
-                    break;
-            }
+            Publisher.TradeOperation(trade,EntityName);
         }
 
         protected override List<RoutingKey> SetListeningRoutingKeys()
         {
-            List<RoutingKey> routingKeys = RoutingKey.Create(Niffler.Messaging.RabbitMQ.Action.TRADEOPERATION).ToList();
+            List<RoutingKey> routingKeys = RoutingKey.Create(Niffler.Messaging.RabbitMQ.Event.ONORDERCANCELLED).ToList();
+            routingKeys.Add(RoutingKey.Create(Niffler.Messaging.RabbitMQ.Event.ONORDERMODIFIED));
+            routingKeys.Add(RoutingKey.Create(Niffler.Messaging.RabbitMQ.Event.ONORDERPLACED));
+            routingKeys.Add(RoutingKey.Create(Niffler.Messaging.RabbitMQ.Event.ONPOSITIONCLOSED));
+            routingKeys.Add(RoutingKey.Create(Niffler.Messaging.RabbitMQ.Event.ONPOSITIONMODIFIED));
+            routingKeys.Add(RoutingKey.Create(Niffler.Messaging.RabbitMQ.Event.ONPOSITIONOPENED));
+            routingKeys.Add(RoutingKey.Create(Niffler.Messaging.RabbitMQ.Action.TRADEMANAGEMENT));
             return routingKeys;
         }
 

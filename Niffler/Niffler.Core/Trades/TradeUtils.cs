@@ -1,54 +1,70 @@
-﻿using Niffler.Core.Config;
+﻿using Niffler.Common;
+using Niffler.Core.Config;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static Niffler.Messaging.Protobuf.Position.Types;
 
 namespace Niffler.Core.Trades
 {
     public class TradeUtils
     {
         private BrokerConfiguration BrokerConfig;
-        public TradeVolumeCalculator TradeVolumeCalculator { get; set; }
-        public OrderSpacingCalculator OrderSpacingCalculator { get; set; }
+        private TradeVolumeCalculator TradeVolumeCalculator { get; set; }
+        private OrderSpacingCalculator OrderSpacingCalculator { get; set; }
 
-        public TradeUtils(BrokerConfiguration brokerConfig)
+        public TradeUtils(BrokerConfiguration brokerConfig, RuleConfiguration ruleConfig)
         {
             this.BrokerConfig = brokerConfig;
-        }
 
+            TradeVolumeCalculator = new TradeVolumeCalculator(ruleConfig);
+            OrderSpacingCalculator = new OrderSpacingCalculator(ruleConfig);
+        }
+        
         public double CalcPipsForBroker(double pips)
         {
             return pips * BrokerConfig.PipSize;
         }
 
-        public double CalculateVolume(int orderCount)
+        public double AddPipsToPrice(double price, double pips)
         {
-            return OrderSpacingCalculator.Calculate(orderCount);
+            return price + (pips / BrokerConfig.PipSize);
         }
 
-
-
-
-
-
-        //Calculate a new orderCount number for when tick jumps
-        public int CalcNewOrderCount(int orderCount, double currentTickPrice)
+        public double SubtractPipsFromPrice(double price, double pips)
         {
-            double tickJumpIntoRange = Math.Abs(BotState.OpenPrice - currentTickPrice) - EntryOffSetPips;
-            double pendingOrderRange = CalcOrderSpacingDistance(NumberOfOrders);
-            double pendingOrdersPercentageJumped = tickJumpIntoRange / pendingOrderRange;
-            double newOrderCount = NumberOfOrders * pendingOrdersPercentageJumped;
+            return price - (pips / BrokerConfig.PipSize);
+        }
+        
 
-            if (newOrderCount > orderCount)
-                return (int)newOrderCount;
-            else
-                return (int)orderCount;
+        //Calculate a next orderCount number when tick sequence gaps
+        public int CalculateNextOrderNumber(TradeType tradeType, double currentTickPrice, double firstEntryPrice)
+        {
+            double currentPipsIntoRange = 0;
+            switch (tradeType)
+            {
+                case TradeType.Buy:
+                    currentPipsIntoRange = firstEntryPrice - currentTickPrice;
+                break;
+                case TradeType.Sell:
+                    currentPipsIntoRange = currentTickPrice - firstEntryPrice;
+                    break;
+
+            }
+            currentPipsIntoRange = CalcPipsForBroker(currentPipsIntoRange);
+            return OrderSpacingCalculator.GetOrderNumberFromPips(currentPipsIntoRange);
         }
 
+        public double CalculateNextOrderVolume(int orderNumber)
+        {
+            return TradeVolumeCalculator.GetNextOrderVolume(orderNumber);
+        }
 
-       
-
+        public double CalculateNextEntryPips(int orderNumber)
+        {
+            return OrderSpacingCalculator.GetOrderSpacingDistancePips(orderNumber);
+        }
     }
 }

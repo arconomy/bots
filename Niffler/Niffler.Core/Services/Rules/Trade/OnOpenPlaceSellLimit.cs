@@ -1,12 +1,10 @@
-﻿using System;
-using Niffler.Messaging.RabbitMQ;
+﻿using Niffler.Messaging.RabbitMQ;
 using System.Collections.Generic;
 using Niffler.Messaging.Protobuf;
-using Niffler.Services;
 using Niffler.Core.Config;
-using Niffler.Common;
 using Niffler.Model;
 using Niffler.Core.Trades;
+using Niffler.Core.Model;
 
 namespace Niffler.Rules.TradingPeriods
 {
@@ -22,20 +20,12 @@ namespace Niffler.Rules.TradingPeriods
         private double EntryPipsFromTradeOpenPrice;
         private double TakeProfitPips;
 
-        private bool EnableOrderSpacing;
+        private bool EnableDynamicOrderSpacing;
         private double OrderSpacingBasePips;
         private double OrderSpacingMaxPips;
         private double OrderSpacingIncrementPips;
-        private double IncrementSpacingAferOrders;
-
-        private bool EnableVolumeIncrease;
-        private bool UseVolumeMultiplier;
-        private double VolumeBase;
-        private double VolumeMax;
-        private double VolumeMultiplier;
-        private double VolumeIncrement;
-        private double IncreaseVolumeAfterOrders;
-        
+        private double IncrementSpacingAfterOrders;
+ 
         public OnOpenPlaceSellLimit(StrategyConfiguration StrategyConfig, RuleConfiguration ruleConfig) : base(StrategyConfig, ruleConfig) { }
 
         //Retreive data from config to initialise the rule
@@ -46,43 +36,10 @@ namespace Niffler.Rules.TradingPeriods
             //Get Rule Config params
             ExecuteOnlyOnce = GetRuleConfigBoolParam(RuleConfiguration.EXECUTEONLYONCE);
             NumberOfOrders = GetRuleConfigIntegerParam(RuleConfiguration.NUMBEROFORDERS);
-            EntryPipsFromTradeOpenPrice = GetRuleConfigDoubleParam(RuleConfiguration.ENTRYPIPSFROMTRADEOPENPRICE);
-            TakeProfitPips = GetRuleConfigDoubleParam(RuleConfiguration.TAKEPROFIPIPS);
-            EnableOrderSpacing = GetRuleConfigBoolParam(RuleConfiguration.ENABLEORDERSPACING);
-            EnableVolumeIncrease = GetRuleConfigBoolParam(RuleConfiguration.ENABLEVOLUMEINCREASE);
-
-            if (EnableOrderSpacing)
-            {
-                OrderSpacingBasePips = GetRuleConfigDoubleParam(RuleConfiguration.ORDERSPACINGBASEPIPS);
-                OrderSpacingMaxPips = GetRuleConfigDoubleParam(RuleConfiguration.ORDERSPACINGMAXPIPS);
-                OrderSpacingIncrementPips = GetRuleConfigDoubleParam(RuleConfiguration.ORDERSPACINGINCPIPS);
-                IncrementSpacingAferOrders = GetRuleConfigIntegerParam(RuleConfiguration.INCREMENTSPACINGAFTER);
-                TradeUtils.OrderSpacingCalculator = new OrderSpacingCalculator(EnableOrderSpacing, 
-                                                                                TradeUtils.CalcPipsForBroker(OrderSpacingBasePips),
-                                                                                TradeUtils.CalcPipsForBroker(OrderSpacingMaxPips),
-                                                                                TradeUtils.CalcPipsForBroker(OrderSpacingIncrementPips),
-                                                                                IncrementSpacingAferOrders);
-            }
-
-            if (EnableVolumeIncrease)
-            {
-                VolumeBase = GetRuleConfigDoubleParam(RuleConfiguration.VOLUMEBASE);
-                VolumeMax = GetRuleConfigDoubleParam(RuleConfiguration.VOLUMEMAX);
-                IncreaseVolumeAfterOrders = GetRuleConfigIntegerParam(RuleConfiguration.INCREASEVOLUMEAFTER);
-                UseVolumeMultiplier = GetRuleConfigBoolParam(RuleConfiguration.USEVOLUMEMULTIPLIER);
-                if (UseVolumeMultiplier)
-                {
-                    VolumeMultiplier = GetRuleConfigDoubleParam(RuleConfiguration.VOLUMEMULTIPLIER);
-                    TradeUtils.TradeVolumeCalculator = new TradeVolumeCalculator(EnableVolumeIncrease,UseVolumeMultiplier, VolumeBase,VolumeMax,VolumeMultiplier,IncreaseVolumeAfterOrders);
-                }
-                else
-                {
-                    VolumeIncrement = GetRuleConfigIntegerParam(RuleConfiguration.VOLUMEINCREMENT);
-                    TradeUtils.TradeVolumeCalculator = new TradeVolumeCalculator(EnableOrderSpacing,UseVolumeMultiplier, VolumeBase, VolumeMax, VolumeIncrement, IncreaseVolumeAfterOrders);
-                }
-            }
-            
-            //Listen for state updates for
+            EntryPipsFromTradeOpenPrice = TradeUtils.CalcPipsForBroker(GetRuleConfigDoubleParam(RuleConfiguration.ENTRYPIPSFROMTRADEOPENPRICE));
+            TakeProfitPips = TradeUtils.CalcPipsForBroker(GetRuleConfigDoubleParam(RuleConfiguration.TAKEPROFIPIPS));
+           
+            //Listen for state updates for this strategy
             StateManager.ListenForStateUpdates();
         }
 
@@ -94,9 +51,14 @@ namespace Niffler.Rules.TradingPeriods
             if (EntryPipsFromTradeOpenPrice == 0.0 ) return false; //trigger points should be set when initialised
             if (OpenPrice == 0.0) return false; //Open price should be set once activated
 
-                for (int count = 0;count < NumberOfOrders; count++)
+            double EntryPrice = TradeUtils.AddPipsToPrice(OpenPrice, EntryPipsFromTradeOpenPrice);
+
+                for (int orderNumber = 1; orderNumber <= NumberOfOrders; orderNumber++)
                 {
-                    TradePublisher.PlaceSellLimit(SymbolCode, StrategyId + "-" + count,  TradeUtils.CalculateVolume(count), OpenPrice + TradeUtils.CalcPipsForBroker(EntryPipsFromTradeOpenPrice));
+                    TradePublisher.PlaceSellLimit(SymbolCode, 
+                                                    StrategyId + "-" + orderNumber,  
+                                                    TradeUtils.CalculateNextOrderVolume(orderNumber),
+                                                    TradeUtils.AddPipsToPrice(EntryPrice,TradeUtils.CalculateNextEntryPips(orderNumber)));
                 }
             
             //Set inactive if only executing once

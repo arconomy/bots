@@ -41,7 +41,7 @@ namespace Niffler.Rules.Capture
             bool notifyOfSpikePeakCapture = false;
             if(SetSpikeUpPeak(Utils.GetMidPrice(message.Tick)))
             {
-                StateManager.SetInitialState(new State
+                StateManager.SetInitialStateAsync(new State
                     {
                         { State.SPIKEUPPEAK, SpikeUpPeakPips }
                     });
@@ -50,7 +50,7 @@ namespace Niffler.Rules.Capture
 
             if (SetSpikeDownPeak(Utils.GetMidPrice(message.Tick)))
             {
-                StateManager.SetInitialState(new State
+                StateManager.SetInitialStateAsync(new State
                     {
                         { State.SPIKEDOWNPEAK, SpikeDownPeakPips }
                     });
@@ -59,7 +59,7 @@ namespace Niffler.Rules.Capture
 
             if(SetSpikeDirection())
             {
-                StateManager.SetInitialState(new State
+                StateManager.SetInitialStateAsync(new State
                     {
                         { State.SPIKEDIRECTION, SpikeDirection }
                     });

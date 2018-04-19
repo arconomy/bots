@@ -54,6 +54,12 @@ namespace cAlgo
         [Parameter("# of Buy positions placed", DefaultValue = 10)]
         public int NumberOfBuyPositions { get; set; }
 
+        [Parameter("Place buy positions interval (secs)", DefaultValue = 6)]
+        public int BuyPositionsInterval { get; set; }
+
+        [Parameter("# buy positions per interval", DefaultValue = 1)]
+        public int NumberOfBuyPositionsPerInterval { get; set; }
+
         [Parameter("% of Limit Orders opened to indicate DOWN Spike", DefaultValue = 30)]
         public int BuyLimitOrdersOpenedSpikeIndicator { get; set; }
 
@@ -166,6 +172,8 @@ namespace cAlgo
         protected bool _isReset = true;
         protected bool _isCloseTime = false;
         protected bool _isReducedRiskTime = false;
+        protected int _orderCount = 0;
+        protected int _totalIntervalSecs = 0;
 
         protected string _botId = null;
 
@@ -185,6 +193,7 @@ namespace cAlgo
             _botId = generateBotId();
             _marketTimeInfo = new MarketTimeInfo();
             setTimeZone();
+            Timer.Start(1);//start timer with 1 second interval
 
             Positions.Opened += OnPositionsOpened;
             Positions.Closed += OnPositionsClosed;
@@ -214,8 +223,9 @@ namespace cAlgo
             return id.ToString("00000");
         }
 
-        protected override void OnTick()
+        protected override void OnTimer()
         {
+
             if (IsTradingTimeIn(1))
             {
                 if (!_earlyEntryPriceCaptured)
@@ -245,10 +255,15 @@ namespace cAlgo
                     _startPriceCaptured = true;
                 }
 
-                if (!_positionsPlaced && !_positionsRequested)
+                if (IsTradingTimeAfterSeconds(_totalIntervalSecs))
                 {
-                    placeBuyOrders();
+                    if (!_positionsPlaced && !_positionsRequested)
+                    {
+                        placeBuyOrders();
+                    }
+                    _totalIntervalSecs += BuyPositionsInterval;
                 }
+
                 captureSpikePeak();
             }
 
@@ -721,7 +736,7 @@ namespace cAlgo
         protected void placeBuyOrders()
         {
             //Place Buy Limit Orders
-            for (int OrderCount = 0; OrderCount < NumberOfBuyPositions; OrderCount++)
+            for (int n = 0; n < NumberOfBuyPositionsPerInterval; n++)
             {
                 try
                 {
@@ -729,11 +744,11 @@ namespace cAlgo
                     {
                         tradeType = TradeType.Buy,
                         symbol = Symbol,
-                        volume = setBuyVolume(OrderCount),
+                        volume = setBuyVolume(_orderCount),
                         entryPrice = 0,
                         label = _botId + "-" + getTimeStamp() + _marketTimeInfo.market + "-SWF#" + _orderCountLabel + "-X",
                         stopLossPips = 0,
-                        takeProfitPips = calcTakeProfit(OrderCount)
+                        takeProfitPips = calcTakeProfit(_orderCount)
                     };
                     if (data == null)
                         continue;
@@ -741,12 +756,14 @@ namespace cAlgo
                     //Place Market Orders immediately
                     ExecuteMarketOrderAsync(data.tradeType, data.symbol, data.volume, data.label, data.stopLossPips, data.takeProfitPips, OnPlaceTradeOperationComplete);
                     _orderCountLabel++;
+                    _orderCount++;
                 } catch (Exception e)
                 {
                     Print("Failed to place Buy Limit Order: " + e.Message);
                 }
-                //If orders have been sent set flag
-                if (_orderCountLabel > 0)
+
+                //If all orders have been sent set flag
+                if (_orderCountLabel > NumberOfBuyPositions - 1)
                     _positionsRequested = true;
             }
         }
@@ -900,7 +917,7 @@ namespace cAlgo
 
         protected void OnPlaceTradeOperationComplete(TradeResult tr)
         {
-            if (tr.IsSuccessful)
+            if (tr.IsSuccessful && _orderCountLabel > NumberOfBuyPositions - 1)
                 _positionsPlaced = true;
             else
                 OnTradeOperationComplete(tr, "FAILED to enter TRADE position: ");
@@ -1133,7 +1150,12 @@ namespace cAlgo
 
         protected bool IsTradingTimeAfter(int mins)
         {
-            return _marketTimeInfo.IsTimeAfterOpen(IsBacktesting, Server.Time, mins);
+            return _marketTimeInfo.IsTimeAfterMinsFromOpen(IsBacktesting, Server.Time, mins);
+        }
+
+        protected bool IsTradingTimeAfterSeconds(int secs)
+        {
+            return _marketTimeInfo.IsTimeAfterSecsFromOpen(IsBacktesting, Server.Time, secs);
         }
 
         //Increase the volume based on Orders places and volume levels and multiplier until max volume reached
@@ -1312,8 +1334,8 @@ namespace cAlgo
                     // Instantiate a MarketTimeInfo object.
                     _marketTimeInfo.market = "FTSE";
                     _marketTimeInfo.tz = TimeZoneInfo.FindSystemTimeZoneById("GMT Standard Time");
-                    // Market for swordfish trades opens at 10:09:50 am.
-                    _marketTimeInfo.open = new TimeSpan(10, 9, 50);
+                    // Market for Options trades opens at 10:09:50 am.
+                    _marketTimeInfo.open = new TimeSpan(10, 9, 0);
                     // Market for swordfish trades closes at 10:13am.
                     _marketTimeInfo.close = _marketTimeInfo.open.Add(TimeSpan.FromMinutes(CloseTime));
                     // Close all open Swordfish position at 11:29am before US opens.
@@ -1390,11 +1412,11 @@ public struct MarketTimeInfo
     {
         if (isBackTesting)
         {
-            return IsTimeAfterOpen(serverTime, reduceRiskTimeFromOpen);
+            return IsTimeAfterMinsFromOpen(serverTime, reduceRiskTimeFromOpen);
         }
         else
         {
-            return IsTimeAfterOpen(DateTime.UtcNow, reduceRiskTimeFromOpen);
+            return IsTimeAfterMinsFromOpen(DateTime.UtcNow, reduceRiskTimeFromOpen);
         }
     }
 
@@ -1412,15 +1434,28 @@ public struct MarketTimeInfo
     }
 
     //Time X minutes from open
-    public bool IsTimeAfterOpen(bool isBackTesting, DateTime serverTime, int timeAfterOpen)
+    public bool IsTimeAfterMinsFromOpen(bool isBackTesting, DateTime serverTime, int timeAfterOpen)
     {
         if (isBackTesting)
         {
-            return IsTimeAfterOpen(serverTime, timeAfterOpen);
+            return IsTimeAfterMinsFromOpen(serverTime, timeAfterOpen);
         }
         else
         {
-            return IsTimeAfterOpen(DateTime.UtcNow, timeAfterOpen);
+            return IsTimeAfterMinsFromOpen(DateTime.UtcNow, timeAfterOpen);
+        }
+    }
+
+    //Time X minutes from open
+    public bool IsTimeAfterSecsFromOpen(bool isBackTesting, DateTime serverTime, int secsAfterOpen)
+    {
+        if (isBackTesting)
+        {
+            return IsTimeAfterSecsFromOpen(serverTime, secsAfterOpen);
+        }
+        else
+        {
+            return IsTimeAfterSecsFromOpen(DateTime.UtcNow, secsAfterOpen);
         }
     }
 
@@ -1445,11 +1480,18 @@ public struct MarketTimeInfo
         return (tzTime.TimeOfDay >= open & tzTime.TimeOfDay <= close);
     }
 
-    //Is the current time after the time period when risk should be reduced.
-    private bool IsTimeAfterOpen(DateTime dateTimeUtc, int timeFromOpen)
+    //Is the current time after the trading open time in mins
+    private bool IsTimeAfterMinsFromOpen(DateTime dateTimeUtc, int minsFromOpen)
     {
         DateTime tzTime = TimeZoneInfo.ConvertTimeFromUtc(dateTimeUtc, tz);
-        return (tzTime.TimeOfDay >= open.Add(TimeSpan.FromMinutes(timeFromOpen)));
+        return (tzTime.TimeOfDay >= open.Add(TimeSpan.FromMinutes(minsFromOpen)));
+    }
+
+    //Is the current time after the trading open time in secs
+    private bool IsTimeAfterSecsFromOpen(DateTime dateTimeUtc, int secsFromOpen)
+    {
+        DateTime tzTime = TimeZoneInfo.ConvertTimeFromUtc(dateTimeUtc, tz);
+        return (tzTime.TimeOfDay >= open.Add(TimeSpan.FromSeconds(secsFromOpen)));
     }
 
     //Is the current time after the time period when risk should be reduced.

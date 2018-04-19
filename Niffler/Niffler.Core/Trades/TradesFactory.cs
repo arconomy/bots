@@ -4,7 +4,23 @@ namespace Niffler.Core.Trades
 {
     public class TradesFactory
     {
-        public Trade CreateSellLimitTrade(string symbolCode, string label, int volume, double targetEntryPrice)
+
+        public Trade CreateSellLimitTrade(string symbolCode, string label, double volume, double targetEntryPrice, bool isLinkedTrade, string linkedParentTrade)
+        {
+            if (isLinkedTrade)
+            {
+                Trade trade = CreateSellLimitTrade(symbolCode, label, volume, targetEntryPrice);
+                trade.LinkedTradeLabel = label;
+                trade.IsLinkedTrade = isLinkedTrade;
+                return trade;
+            }
+            else
+            {
+                return CreateSellLimitTrade(symbolCode, label, volume, targetEntryPrice);
+            }
+        }
+
+        public Trade CreateSellLimitTrade(string symbolCode, string label, double volume, double targetEntryPrice)
         {
             return new Trade()
             {
@@ -21,7 +37,22 @@ namespace Niffler.Core.Trades
             };
         }
 
-        public Trade CreateSellStopTrade(string symbolCode, string label, int volume, double targetEntryPrice)
+        public Trade CreateSellStopTrade(string symbolCode, string label, double volume, double targetEntryPrice, bool isLinkedTrade, string linkedParentTrade)
+        {
+            if (isLinkedTrade)
+            {
+                Trade trade = CreateSellStopTrade(symbolCode, label, volume, targetEntryPrice);
+                trade.LinkedTradeLabel = label;
+                trade.IsLinkedTrade = isLinkedTrade;
+                return trade;
+            }
+            else
+            {
+                return CreateSellStopTrade(symbolCode, label, volume, targetEntryPrice);
+            }
+        }
+
+        public Trade CreateSellStopTrade(string symbolCode, string label, double volume, double targetEntryPrice)
         {
             return new Trade()
             {
@@ -38,7 +69,22 @@ namespace Niffler.Core.Trades
             };
         }
 
-        public Trade CreateBuyLimitTrade(string symbolCode, string label, int volume, double targetEntryPrice)
+        public Trade CreateBuyLimitTrade(string symbolCode, string label, double volume, double targetEntryPrice, bool isLinkedTrade, string linkedParentTrade)
+        {
+            if(isLinkedTrade)
+            {
+                Trade trade = CreateBuyLimitTrade(symbolCode, label, volume, targetEntryPrice);
+                trade.LinkedTradeLabel = label;
+                trade.IsLinkedTrade = isLinkedTrade;
+                return trade;
+            }
+            else
+            {
+                return CreateBuyLimitTrade(symbolCode, label, volume, targetEntryPrice);
+            }
+        }
+        
+        public Trade CreateBuyLimitTrade(string symbolCode, string label, double volume, double targetEntryPrice)
         {
             return new Trade()
             {
@@ -51,11 +97,26 @@ namespace Niffler.Core.Trades
                     Label = label,
                     Volume = volume,
                     TargetEntryPrice = targetEntryPrice,
-                }
+                },
             };
         }
 
-        public Trade CreateBuyStopTrade(string symbolCode, string label, int volume, double targetEntryPrice)
+        public Trade CreateBuyStopTrade(string symbolCode, string label, double volume, double targetEntryPrice, bool isLinkedTrade, string linkedParentTrade)
+        {
+            if (isLinkedTrade)
+            {
+                Trade trade = CreateBuyStopTrade(symbolCode, label, volume, targetEntryPrice);
+                trade.LinkedTradeLabel = label;
+                trade.IsLinkedTrade = isLinkedTrade;
+                return trade;
+            }
+            else
+            {
+                return CreateBuyStopTrade(symbolCode, label, volume, targetEntryPrice);
+            }
+        }
+
+        public Trade CreateBuyStopTrade(string symbolCode, string label, double volume, double targetEntryPrice)
         {
             return new Trade()
             {
@@ -72,7 +133,22 @@ namespace Niffler.Core.Trades
             };
         }
 
-        public Trade CreateSellTrade(string symbolCode, string label, int volume, double targetEntryPrice)
+        public Trade CreateSellTrade(string symbolCode, string label, double volume, double targetEntryPrice, bool isLinkedTrade, string linkedParentTrade)
+        {
+            if (isLinkedTrade)
+            {
+                Trade trade = CreateSellTrade(symbolCode, label, volume, targetEntryPrice);
+                trade.LinkedTradeLabel = label;
+                trade.IsLinkedTrade = isLinkedTrade;
+                return trade;
+            }
+            else
+            {
+                return CreateSellTrade(symbolCode, label, volume, targetEntryPrice);
+            }
+        }
+
+        public Trade CreateSellTrade(string symbolCode, string label, double volume, double targetEntryPrice)
         {
             return new Trade()
             {
@@ -88,7 +164,22 @@ namespace Niffler.Core.Trades
             };
         }
 
-        public Trade CreateBuyTrade(string symbolCode, string label, int volume, double targetEntryPrice)
+        public Trade CreateBuyTrade(string symbolCode, string label, double volume, double targetEntryPrice, bool isLinkedTrade, string linkedParentTrade)
+        {
+            if (isLinkedTrade)
+            {
+                Trade trade = CreateBuyTrade(symbolCode, label, volume, targetEntryPrice);
+                trade.LinkedTradeLabel = label;
+                trade.IsLinkedTrade = isLinkedTrade;
+                return trade;
+            }
+            else
+            {
+                return CreateBuyTrade(symbolCode, label, volume, targetEntryPrice);
+            }
+        }
+
+        public Trade CreateBuyTrade(string symbolCode, string label, double volume, double targetEntryPrice)
         {
             return new Trade()
             {
