@@ -33,7 +33,7 @@ namespace cAlgo
         [Parameter("Volume multipler", DefaultValue = 2)]
         public double VolumeMultipler { get; set; }
 
-        [Parameter("Take profity interval spacing in Pips", DefaultValue = 0.5)]
+        [Parameter("Take profit interval spacing in Pips", DefaultValue = 0.5)]
         public double TPSpacing { get; set; }
 
         [Parameter("# positions open before TP spacing increases by multiplier", DefaultValue = 20)]

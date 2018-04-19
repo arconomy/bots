@@ -1,0 +1,25 @@
+﻿[ChartParameters]
+Symbol = UK100
+Timeframe = m1
+
+[cBotParameters]
+DataSeriesSource = Close
+NumberOfSellLimitOrders = 15
+NumberOfPositions = 10
+Volume = 40
+VolumeMax = 100
+OrderVolumeLevels = 3
+VolumeMultipler = 1.2
+TPSpacing = 0.5
+TPSpacingLevels = 20
+TPSpacingMultipler = 2
+TPSpacingMax = 2
+MaxTakeProfit = 7
+MinTakeProfit = 3
+ReducePositionRiskTime = 6
+chaseEnabled = True
+chaseLevel1 = 20
+chaseLevel2 = 70
+FinalOrderStopLoss = 15
+HardStopLoss = 20
+TrailingStopPips = 15
