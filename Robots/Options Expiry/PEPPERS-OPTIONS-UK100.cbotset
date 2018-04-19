@@ -1,0 +1,41 @@
+﻿[ChartParameters]
+Symbol = UK100
+Timeframe = m1
+
+[cBotParameters]
+DataSeriesSource = Close
+SpikeIndicatorPips = 7
+CloseTime = 5
+ReducePositionRiskTime = 10
+BuyLimitOrderEntryOffsetPips = 3
+NumberOfBuyLimitOrders = 45
+TPLimitOrders = 0.5
+MinLimitOrderVolume = 10
+MaxLimitOrderVolume = 20
+BuyLimitOrderVolumeMulitplierLevel = 10
+BuyLimitOrderVolumeMultipler = 1.2
+LimitOrderPlacedSpacingLevel1 = 25
+LimitOrderSpacingLevel1 = 0.2
+LimitOrderPlacedSpacingLevel2 = 20
+LimitOrderSpacingLevel2 = 0.5
+LimitOrderSpacingLevel3 = 1
+BuyLimitOrdersOpenedSpikeIndicator = 40
+NumberOfBuyPositions = 25
+MinVolume = 10
+MaxVolume = 20
+BuyCycleFactor = 5
+BuyVolumeMultiplier = 0.9
+BuyPositionsInterval = 5
+NumberOfBuyPositionsPerInterval = 10
+BuyPositionsOpenedSpikeIndicator = 40
+MaxTakeProfit = 0.7
+MinTakeProfit = 0.3
+ExtraChaseTargetPips = 0.5
+TPIncrement = 0.1
+chaseEnabled = True
+retraceLevel = 50
+chaseLevel1 = 25
+chaseLevel2 = 60
+FinalOrderStopLoss = 10
+TrailingStopPips = 15
+HardStopLoss = 5

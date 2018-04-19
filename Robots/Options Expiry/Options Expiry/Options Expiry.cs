@@ -24,14 +24,28 @@ namespace cAlgo
         [Parameter("Reduce risk time mins after Start time", DefaultValue = 15)]
         public int ReducePositionRiskTime { get; set; }
 
+
+        //Limit Orders Config
+        [Parameter("Pips offset from 10.09am Price for 1st Limit Order", DefaultValue = 3)]
+        public int BuyLimitOrderEntryOffsetPips { get; set; }
+
         [Parameter("# of Limit Orders", DefaultValue = 20)]
         public int NumberOfBuyLimitOrders { get; set; }
 
-        [Parameter("Min Volume (Lots)", DefaultValue = 5)]
+        [Parameter("Take profit for Limit Orders", DefaultValue = 0.5)]
+        public double TPLimitOrders { get; set; }
+
+        [Parameter("Buy Limit Order Min Volume (Lots)", DefaultValue = 5)]
         public int MinLimitOrderVolume { get; set; }
 
-        [Parameter("Max Volume (Lots)", DefaultValue = 15)]
+        [Parameter("Buy Limit Order Max Volume (Lots)", DefaultValue = 15)]
         public int MaxLimitOrderVolume { get; set; }
+
+        [Parameter("# Limit Orders placed before Volume multiplies", DefaultValue = 2)]
+        public int BuyLimitOrderVolumeMulitplierLevel { get; set; }
+
+        [Parameter("Limit Order Volume multipler", DefaultValue = 1.5)]
+        public double BuyLimitOrderVolumeMultipler { get; set; }
 
         [Parameter("# limit orders placed with Spacing level 1", DefaultValue = 5)]
         public int LimitOrderPlacedSpacingLevel1 { get; set; }
@@ -48,11 +62,25 @@ namespace cAlgo
         [Parameter("Limit Order Spacing After Level 2 (Pips)", DefaultValue = 2)]
         public double LimitOrderSpacingLevel3 { get; set; }
 
-        [Parameter("Pips offset from 10.09am Price for 1st Limit Order", DefaultValue = 3)]
-        public int BuyLimitOrderEntryOffsetPips { get; set; }
+        [Parameter("% of Limit Orders opened to indicate DOWN Spike", DefaultValue = 30)]
+        public int BuyLimitOrdersOpenedSpikeIndicator { get; set; }
+
+        // Buy positions config
 
         [Parameter("# of Buy positions placed", DefaultValue = 10)]
         public int NumberOfBuyPositions { get; set; }
+
+        [Parameter("Buy Positions Min Volume (Lots)", DefaultValue = 20)]
+        public int MinVolume { get; set; }
+
+        [Parameter("Buy Positions Max Volume (Lots)", DefaultValue = 100)]
+        public int MaxVolume { get; set; }
+
+        [Parameter("# Buy positions placed before Volume and TP cycle", DefaultValue = 2)]
+        public int BuyCycleFactor { get; set; }
+
+        [Parameter("Buy Volume multiplier reducing from Max Volume", DefaultValue = 0.9)]
+        public double BuyVolumeMultiplier { get; set; }
 
         [Parameter("Place buy positions interval (secs)", DefaultValue = 6)]
         public int BuyPositionsInterval { get; set; }
@@ -60,47 +88,23 @@ namespace cAlgo
         [Parameter("# buy positions per interval", DefaultValue = 1)]
         public int NumberOfBuyPositionsPerInterval { get; set; }
 
-        [Parameter("% of Limit Orders opened to indicate DOWN Spike", DefaultValue = 30)]
-        public int BuyLimitOrdersOpenedSpikeIndicator { get; set; }
-
         [Parameter("% of Buy positions closed to indicate UP Spike", DefaultValue = 40)]
         public int BuyPositionsOpenedSpikeIndicator { get; set; }
 
-        [Parameter("Min Volume (Lots)", DefaultValue = 20)]
-        public int MinVolume { get; set; }
-
-        [Parameter("Max Volume (Lots)", DefaultValue = 100)]
-        public int MaxVolume { get; set; }
-
-        [Parameter("# Order placed before Volume multiplies", DefaultValue = 2)]
-        public int OrderVolumeLevels { get; set; }
-
-        [Parameter("Buy Volume multipler", DefaultValue = 2)]
-        public double BuyVolumeMultipler { get; set; }
-
-        [Parameter("Buy Limit Order Volume multipler", DefaultValue = 1.5)]
-        public double BuyLimitVolumeMultipler { get; set; }
-
-        [Parameter("TP spacing in Pips", DefaultValue = 0.5)]
-        public double TPSpacing { get; set; }
-
-        [Parameter("TP spacing pips before multiplier triggered", DefaultValue = 20)]
-        public int TPSpacingPips { get; set; }
-
-        [Parameter("TP spacing multipler", DefaultValue = 2)]
-        public double TPSpacingMultipler { get; set; }
-
-        [Parameter("TP spacing max", DefaultValue = 3)]
-        public int TPSpacingMax { get; set; }
-
-        [Parameter("Max Take Profit", DefaultValue = 0.5)]
+        //Take Profit config
+        [Parameter("Buy Max Take Profit", DefaultValue = 0.5)]
         public double MaxTakeProfit { get; set; }
+
+        [Parameter("Buy Min Take Profit", DefaultValue = 0.3)]
+        public double MinTakeProfit { get; set; }
 
         [Parameter("Extra Take Profit Pips if Chase Level 2 reached", DefaultValue = 0.5)]
         public double ExtraChaseTargetPips { get; set; }
 
-        [Parameter("Min Take Profit", DefaultValue = 0.3)]
-        public double MinTakeProfit { get; set; }
+        [Parameter("Buy TP Increment", DefaultValue = 0.1)]
+        public double TPIncrement { get; set; }
+
+        //Chase Config
 
         [Parameter("Enable chase risk management", DefaultValue = true)]
         public bool chaseEnabled { get; set; }
@@ -113,6 +117,8 @@ namespace cAlgo
 
         [Parameter("Chase level 2 Percentage", DefaultValue = 70)]
         public int chaseLevel2 { get; set; }
+
+        //Stop Loss Config
 
         [Parameter("Last Order placed - Hard SL", DefaultValue = 5)]
         public double FinalOrderStopLoss { get; set; }
@@ -193,16 +199,16 @@ namespace cAlgo
             _botId = generateBotId();
             _marketTimeInfo = new MarketTimeInfo();
             setTimeZone();
-            Timer.Start(1);//start timer with 1 second interval
-
+            Timer.Start(1);
+            //start timer with 1 second interval
             Positions.Opened += OnPositionsOpened;
             Positions.Closed += OnPositionsClosed;
             debugCSV.Add("PARAMETERS");
             debugCSV.Add("NumberOfOrders," + NumberOfBuyPositions.ToString());
             debugCSV.Add("Volume," + MinVolume.ToString());
             debugCSV.Add("VolumeMax," + MaxVolume.ToString());
-            debugCSV.Add("OrderVolumeLevels," + OrderVolumeLevels.ToString());
-            debugCSV.Add("VolumeMultipler," + BuyVolumeMultipler.ToString());
+            debugCSV.Add("OrderVolumeLevels," + BuyLimitOrderVolumeMulitplierLevel.ToString());
+            debugCSV.Add("VolumeMultipler," + BuyVolumeMultiplier.ToString());
             debugCSV.Add("MaxTakeProfit," + MaxTakeProfit.ToString());
             debugCSV.Add("MinTakeProfit," + MinTakeProfit.ToString());
             debugCSV.Add("ReducePositionRiskTime," + ReducePositionRiskTime.ToString());
@@ -419,9 +425,11 @@ namespace cAlgo
                 {
                     try
                     {
-                        if (isThisBotId(p.Label))
+                        if (isThisBotId(p.Label) && IsSpikeUpBuyPosition(p.Label))
                         {
-                            ModifyPositionAsync(p, calcNewStopLoss(p), calcNewTakeProfit(p), OnModifyTrailingStop);
+                            {
+                                ModifyPositionAsync(p, calcNewStopLoss(p), calcNewTakeProfit(p), OnModifyTrailingStop);
+                            }
                         }
                     } catch (Exception Ex)
                     {
@@ -433,6 +441,8 @@ namespace cAlgo
 
         protected double calcNewStopLoss(Position p)
         {
+            //This needs to manage positions TP (negative TP) instead of using SL and use the overall profit from all positions to calculate BreakEven.
+
             double currentSLPrice = 0;
             double trailingSLPrice = 0;
             double hardSLPrice = 0;
@@ -597,20 +607,20 @@ namespace cAlgo
 
         protected bool IsSpikeDownBuyLimitOrder(string positionLabel)
         {
-            char positionLabelLastChar = positionLabel[positionLabel.Length - 1];
-            if (positionLabelLastChar == 'O')
+            string id = positionLabel.Substring(7, 7);
+            if (id.Equals("O"))
                 return true;
-
-            return false;
+            else
+                return false;
         }
 
         protected bool IsSpikeUpBuyPosition(string positionLabel)
         {
-            char positionLabelLastChar = positionLabel[positionLabel.Length - 1];
-            if (positionLabelLastChar == 'X')
+            string id = positionLabel.Substring(7, 7);
+            if (id.Equals("X"))
                 return true;
-
-            return false;
+            else
+                return false;
         }
 
         protected double calcBreakEvenSLPrice(Position p)
@@ -746,9 +756,9 @@ namespace cAlgo
                         symbol = Symbol,
                         volume = setBuyVolume(_orderCount),
                         entryPrice = 0,
-                        label = _botId + "-" + getTimeStamp() + _marketTimeInfo.market + "-SWF#" + _orderCountLabel + "-X",
+                        label = _botId + "-X-SWF#" + _orderCountLabel + "-" + _marketTimeInfo.market + "-" + "-" + getTimeStamp(),
                         stopLossPips = 0,
-                        takeProfitPips = calcTakeProfit(_orderCount)
+                        takeProfitPips = calcBuyTakeProfit(_orderCount)
                     };
                     if (data == null)
                         continue;
@@ -782,9 +792,9 @@ namespace cAlgo
                         symbol = Symbol,
                         volume = setBuyOrderLimitVolume(OrderCount),
                         entryPrice = calcBuyOrderEntryPrice(OrderCount),
-                        label = _botId + "-" + getTimeStamp() + _marketTimeInfo.market + "-SWF#" + OrderCount,
+                        label = _botId + "-O-SWF#" + OrderCount + "-" + _marketTimeInfo.market + "-" + getTimeStamp(),
                         stopLossPips = 0,
-                        takeProfitPips = calcTakeProfit(OrderCount)
+                        takeProfitPips = calcBuyLimitTakeProfit(OrderCount)
                     };
                     if (data == null)
                         continue;
@@ -792,13 +802,13 @@ namespace cAlgo
                     //Check that entry price is valid
                     if (data.entryPrice < Symbol.Bid)
                     {
-                        PlaceLimitOrderAsync(data.tradeType, data.symbol, data.volume, data.entryPrice, data.label + "-O", data.stopLossPips, data.takeProfitPips, OnPlaceOrderOperationComplete);
+                        PlaceLimitOrderAsync(data.tradeType, data.symbol, data.volume, data.entryPrice, data.label, data.stopLossPips, data.takeProfitPips, OnPlaceOrderOperationComplete);
                     }
                     else
                     {
                         //Tick price has 'jumped' - therefore avoid placing all PendingOrders by re-calculating the OrderCount to the equivelant entry point.
                         OrderCount = calculateNewOrderCount(NumberOfBuyLimitOrders, OrderCount, Symbol.Ask);
-                        ExecuteMarketOrderAsync(data.tradeType, data.symbol, data.volume, data.label + "-XO", data.stopLossPips, data.takeProfitPips, OnPlaceOrderOperationComplete);
+                        ExecuteMarketOrderAsync(data.tradeType, data.symbol, data.volume, data.label + "X", data.stopLossPips, data.takeProfitPips, OnPlaceOrderOperationComplete);
                     }
                 } catch (Exception e)
                 {
@@ -925,59 +935,68 @@ namespace cAlgo
 
         protected void OnTradeOperationComplete(TradeResult tr, string errorMsg)
         {
-            if (!tr.IsSuccessful)
-            {
-                if (tr.Position != null)
-                    Print(errorMsg + tr.Error, " Position: ", tr.Position.Label, " ", tr.Position.TradeType, " ", Time);
-                if (tr.PendingOrder != null)
-                    Print(errorMsg + tr.Error, " PendingOrder: ", tr.PendingOrder.Label, " ", tr.PendingOrder.TradeType, " ", Time);
-            }
+            //if (!tr.IsSuccessful)
+            //{
+            //    if (tr.Position != null)
+            //        Print(errorMsg + tr.Error, " Position: ", tr.Position.Label, " ", tr.Position.TradeType, " ", Time);
+            //    if (tr.PendingOrder != null)
+            //        Print(errorMsg + tr.Error, " PendingOrder: ", tr.PendingOrder.Label, " ", tr.PendingOrder.TradeType, " ", Time);
+            //}
         }
 
-        protected double calcTakeProfit(int orderCount)
+        protected double calcBuyLimitTakeProfit(int orderCount)
+        {
+            return TPLimitOrders * (1 / Symbol.TickSize);
+
+        }
+
+        protected double calcBuyTakeProfit(int orderCount)
         {
             double tp = 0;
+            double TPCycleNumber = orderCount % BuyCycleFactor;
 
-            tp = MinTakeProfit * (1 / Symbol.TickSize) + orderCount * TPSpacing;
+            //Use Min TP for the first order and biggest volume order in the cycle
+            tp = MinTakeProfit + (TPCycleNumber) * TPIncrement;
+            tp *= (1 / Symbol.TickSize);
 
             if (tp > MaxTakeProfit * (1 / Symbol.TickSize))
                 tp = MaxTakeProfit * (1 / Symbol.TickSize);
 
-            return tp;
+            return Math.Round(tp,1);
         }
 
-        protected double calcAscendingTakeProfit(int orderCount)
-        {
-            double tp = 0;
+        //protected double calcAscendingTakeProfit(int orderCount)
+        //{
+        //    double tp = 0;
 
-            tp = MaxTakeProfit * (1 / Symbol.TickSize) - orderCount * TPSpacing;
+        //    tp = MaxTakeProfit - (1 / Symbol.TickSize) - (orderCount - 1) * TPSpacingBase;
 
-            if (tp < MinTakeProfit * (1 / Symbol.TickSize))
-                tp = MinTakeProfit * (1 / Symbol.TickSize);
+        //    if (tp < MinTakeProfit * (1 / Symbol.TickSize))
+        //        tp = MinTakeProfit * (1 / Symbol.TickSize);
 
-            return tp;
-        }
+        //    return tp;
+        //}
 
-        protected void setCascadingTakeProfit()
-        {
-            IEnumerable<Position> orderedPositions = Positions.OrderBy(position => position.EntryPrice);
+        //protected void setCascadingTakeProfit()
+        //{
+        //    IEnumerable<Position> orderedPositions = Positions.OrderBy(position => position.EntryPrice);
 
-            int positionCount = 0;
-            foreach (Position p in orderedPositions)
-            {
-                try
-                {
-                    if (isThisBotId(p.Label))
-                    {
-                        ModifyPositionAsync(p, p.StopLoss, p.EntryPrice + calcAscendingTakeProfit(positionCount) * Symbol.TickSize, OnModifyTakeProfitComplete);
-                    }
-                } catch (Exception e)
-                {
-                    Print("Failed to Modify Position: " + e.Message);
-                }
-                positionCount++;
-            }
-        }
+        //    int positionCount = 0;
+        //    foreach (Position p in orderedPositions)
+        //    {
+        //        try
+        //        {
+        //            if (isThisBotId(p.Label))
+        //            {
+        //                ModifyPositionAsync(p, p.StopLoss, p.EntryPrice + calcAscendingTakeProfit(positionCount) * Symbol.TickSize, OnModifyTakeProfitComplete);
+        //            }
+        //        } catch (Exception e)
+        //        {
+        //            Print("Failed to Modify Position: " + e.Message);
+        //        }
+        //        positionCount++;
+        //    }
+        //}
 
         protected void OnPositionsOpened(PositionOpenedEventArgs args)
         {
@@ -1004,7 +1023,7 @@ namespace cAlgo
 
                 //If Spike Down Buy Orders have opened but are fewer than SPIKE DOWN indicator % of orders then this is still a spike UP and reset the TP
                 if (0 < _openedSpikeDownBuyOrdersPositionsCount && _openedSpikeDownBuyOrdersPositionsCount < NumberOfBuyLimitOrders * BuyLimitOrdersOpenedSpikeIndicator / 100)
-                    setCascadingTakeProfit();
+                    //setCascadingTakeProfit(); Doesn't make much sense to do this given buy positions have scaled TP's and Limit orders have fixed TP's
 
                 //If the number of Buy Order positions opened is greater than SPIKE DOWN indicator % of orders then spike is DOWN
                 if (isSpikeDown(false))
@@ -1162,8 +1181,10 @@ namespace cAlgo
         protected int setBuyVolume(int orderCount)
         {
 
-            double orderVolumeLevel = orderCount / OrderVolumeLevels;
-            double volume = MaxVolume / Math.Pow(BuyVolumeMultipler, orderVolumeLevel);
+            double BuyVolumeCycleNumber = orderCount % BuyCycleFactor;
+
+            //Place the largest orders first using MaxVolume
+            double volume = Math.Floor(MaxVolume * Math.Pow(BuyVolumeMultiplier, BuyVolumeCycleNumber));
 
             if (volume < MinVolume)
             {
@@ -1177,8 +1198,8 @@ namespace cAlgo
         protected int setBuyOrderLimitVolume(int orderCount)
         {
 
-            double orderVolumeLevel = orderCount / OrderVolumeLevels;
-            double volume = Math.Pow(BuyLimitVolumeMultipler, orderVolumeLevel) * MinLimitOrderVolume;
+            double BuyLimitOrderVolumeLevel = orderCount / BuyLimitOrderVolumeMulitplierLevel;
+            double volume = Math.Pow(BuyLimitOrderVolumeMultipler, BuyLimitOrderVolumeLevel) * MinLimitOrderVolume;
 
             if (volume > MaxLimitOrderVolume)
             {
