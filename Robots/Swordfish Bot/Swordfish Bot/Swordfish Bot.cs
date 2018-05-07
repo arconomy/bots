@@ -57,9 +57,12 @@ namespace cAlgo
         [Parameter("Volume multipler", DefaultValue = 2)]
         public double VolumeMultipler { get; set; }
 
-        [Parameter("Take Profit", DefaultValue = 0.5)]
+        [Parameter("Take Profit (Points)", DefaultValue = 5.0)]
         public double TakeProfit { get; set; }
 
+        [Parameter("Take Profit breakeven buffer (Points)", DefaultValue = 0.5)]
+        public double BreakEvenProfitBuffer { get; set; }
+        
         [Parameter("Mins after swordfish period to reduce position risk", DefaultValue = 45)]
         public int ReducePositionRiskTime { get; set; }
 
@@ -98,6 +101,7 @@ namespace cAlgo
         protected double _lastPositionEntryPrice;
         protected double _lastClosedPositionEntryPrice;
         protected double _lastProfitPrice;
+        protected double _lastProfitBreakEvenPrice;
 
         protected double _openedPositionsCount = 0;
         protected double _closedPositionsCount = 0;
@@ -123,8 +127,6 @@ namespace cAlgo
         protected bool _printOnce = false;
         protected string _botId = null;
 
-        List<string> debugCSV = new List<string>();
-
         //Performance Reporting
         protected double _dayProfitTotal = 0;
         protected double _dayPipsTotal = 0;
@@ -143,33 +145,6 @@ namespace cAlgo
 
             Positions.Opened += PositionsOnOpened;
             Positions.Closed += PositionsOnClosed;
-
-            debugCSV.Add("PARAMETERS");
-            debugCSV.Add("useBollingerBandEntry," + useBollingerBandEntry.ToString());
-            debugCSV.Add("targetBolliEntryPips," + targetBolliEntryPips.ToString());
-            debugCSV.Add("SwordFishTrigger," + SwordFishTrigger.ToString());
-            debugCSV.Add("OrderEntryOffset," + OrderEntryOffset.ToString());
-            debugCSV.Add("OrderSpacing," + OrderSpacing.ToString());
-            debugCSV.Add("OrderSpacingLevels," + OrderSpacingLevels.ToString());
-            debugCSV.Add("OrderSpacingMultipler," + OrderSpacingMultipler.ToString());
-            debugCSV.Add("OrderSpacingMax," + OrderSpacingMax.ToString());
-            debugCSV.Add("NumberOfOrders," + NumberOfOrders.ToString());
-            debugCSV.Add("Volume," + Volume.ToString());
-            debugCSV.Add("VolumeMax," + VolumeMax.ToString());
-            debugCSV.Add("OrderVolumeLevels," + OrderVolumeLevels.ToString());
-            debugCSV.Add("VolumeMultipler," + VolumeMultipler.ToString());
-            debugCSV.Add("TakeProfit," + TakeProfit.ToString());
-            debugCSV.Add("ReducePositionRiskTime," + ReducePositionRiskTime.ToString());
-            debugCSV.Add("retraceEnabled," + retraceEnabled.ToString());
-            debugCSV.Add("retraceLevel1," + retraceLevel1.ToString());
-            debugCSV.Add("retraceLevel2," + retraceLevel2.ToString());
-            debugCSV.Add("retraceLevel3," + retraceLevel3.ToString());
-            debugCSV.Add("FinalOrderStopLoss," + FinalOrderStopLoss.ToString());
-            debugCSV.Add("HardStopLossBuffer," + HardStopLossBuffer.ToString());
-            debugCSV.Add("TrailingStopPips," + TrailingStopPips.ToString());
-            debugCSV.Add("--------------------------");
-
-            debugCSV.Add("Trade,Profit,Pips,Day,Label,EntryPrice,ClosePrice,SL,TP,Date/Time,OpenedPositionsCount,ClosedPositionsCount,LastPositionEntryPrice,LastClosedPositionEntryPrice,LastProfitPrice,LastPositionLabel,DivideTrailingStopPips,isTrailingStopsActive,isBreakEvenStopLossActive,isHardSLLastClosedPositionEntryPrice,isHardSLLastPositionEntryPrice,isHardSLLastProfitPrice,OpenPriceCaptured,OrdersPlaced,isSwordFishReset,isSwordfishTerminated,isReducedRiskTime");
         }
 
         protected string generateBotId()
@@ -268,6 +243,7 @@ namespace cAlgo
                     _printOnce = true;
                 }
 
+             
                 if (_ordersPlaced)
                 {
                     if (_openedPositionsCount - _closedPositionsCount > 0)
@@ -279,6 +255,8 @@ namespace cAlgo
 
                         //Look to reduce risk as Spike retraces
                         ManagePositionRisk();
+                        setBreakEvens(_lastProfitBreakEvenPrice);
+
 
                         //Positions still open after ReducePositionRiskTime
                         if (!_isReducedRiskTime && _swordFishTimeInfo.IsReduceRiskTime(IsBacktesting, Server.Time, ReducePositionRiskTime))
@@ -328,7 +306,7 @@ namespace cAlgo
                                 double newStopLossPrice = calcTrailingStopLoss(p);
                                 if (newStopLossPrice > 0)
                                 {
-                                    ModifyPositionAsync(p, newStopLossPrice, null, onTradeOperationComplete);
+                                    ModifyPositionAsync(p, newStopLossPrice, p.TakeProfit, onTradeOperationComplete);
                                 }
                             }
                         } catch (Exception e)
@@ -383,17 +361,17 @@ namespace cAlgo
                     {
                         if (_lastPositionTradeType == TradeType.Buy)
                         {
-                            if (breakEvenTriggerPrice > p.EntryPrice)
+                            if (breakEvenTriggerPrice < Symbol.Bid && breakEvenTriggerPrice > p.TakeProfit)
                             {
-                                ModifyPositionAsync(p, p.EntryPrice + HardStopLossBuffer, p.TakeProfit, onTradeOperationComplete);
+                                ModifyPositionAsync(p, p.EntryPrice + HardStopLossBuffer, p.EntryPrice, onTradeOperationComplete);
                             }
                         }
 
                         if (_lastPositionTradeType == TradeType.Sell)
                         {
-                            if (breakEvenTriggerPrice < p.EntryPrice)
+                            if (breakEvenTriggerPrice < Symbol.Ask && breakEvenTriggerPrice < p.TakeProfit)
                             {
-                                ModifyPositionAsync(p, p.EntryPrice - HardStopLossBuffer, p.TakeProfit, onTradeOperationComplete);
+                                ModifyPositionAsync(p, p.EntryPrice - HardStopLossBuffer, p.EntryPrice, onTradeOperationComplete);
                             }
                         }
                     }
@@ -403,7 +381,6 @@ namespace cAlgo
                 }
             }
         }
-
 
         //calculate Trailing Stop Loss
         protected double calcTrailingStopLoss(Position position)
@@ -440,7 +417,7 @@ namespace cAlgo
                     return 0;
 
                 //Is the difference between the newStopLoss and the current SL less than the tick size and therefore not valid
-                if (currentStopLossPips - newStopLossPips < Symbol.TickSize)
+                if (currentStopLossPips - newStopLossPips < Symbol.PipSize)
                     return 0;
             }
 
@@ -459,7 +436,7 @@ namespace cAlgo
                     return 0;
 
                 //Is the difference between the newStopLoss and the current SL less than the tick size and therefore not valid
-                if (currentStopLossPips - newStopLossPips < Symbol.TickSize)
+                if (currentStopLossPips - newStopLossPips < Symbol.PipSize)
                     return 0;
             }
 
@@ -482,7 +459,7 @@ namespace cAlgo
                         entryPrice = calcBuyEntryPrice(OrderCount),
                         label = _botId + "-" + getTimeStamp() + _swordFishTimeInfo.market + "-SWF#" + OrderCount,
                         stopLossPips = setPendingOrderStopLossPips(OrderCount, NumberOfOrders),
-                        takeProfitPips = TakeProfit * (1 / Symbol.TickSize)
+                        takeProfitPips = TakeProfit * (1 / Symbol.PipSize)
                     };
 
                     if (data == null)
@@ -563,7 +540,7 @@ namespace cAlgo
                         entryPrice = calcSellEntryPrice(OrderCount),
                         label = _botId + "-" + getTimeStamp() + _swordFishTimeInfo.market + "-SWF#" + OrderCount,
                         stopLossPips = setPendingOrderStopLossPips(OrderCount, NumberOfOrders),
-                        takeProfitPips = TakeProfit * (1 / Symbol.TickSize)
+                        takeProfitPips = TakeProfit * (1 / Symbol.PipSize)
                     };
                     if (data == null)
                         continue;
@@ -653,10 +630,6 @@ namespace cAlgo
             {
                 _closedPositionsCount++;
 
-                _dayProfitTotal += args.Position.GrossProfit;
-                _dayPipsTotal += args.Position.Pips;
-                debugCSV.Add("TRADE," + args.Position.GrossProfit + "," + args.Position.Pips + "," + Time.DayOfWeek + "," + args.Position.Label + "," + args.Position.EntryPrice + "," + History.FindLast(args.Position.Label, Symbol, args.Position.TradeType).ClosingPrice + "," + args.Position.StopLoss + "," + args.Position.TakeProfit + "," + Time + debugState());
-
                 //Last position's SL has been triggered for a loss - NOT a swordfish
                 if (_lastPositionLabel == args.Position.Label && args.Position.GrossProfit < 0)
                 {
@@ -681,7 +654,7 @@ namespace cAlgo
                     //BreakEven SL triggered in ManageRisk() function
                     if (_isBreakEvenStopLossActive)
                     {
-                        setBreakEvens(_lastProfitPrice);
+                        setBreakEvens(_lastProfitBreakEvenPrice);
                     }
                 }
             }
@@ -809,9 +782,19 @@ namespace cAlgo
         protected void setLastProfitPrice(TradeType lastProfitTradeType)
         {
             if (lastProfitTradeType == TradeType.Buy)
+            {
                 _lastProfitPrice = Symbol.Ask;
+                //Set a BreakEven once the price is past the buffer
+                _lastProfitBreakEvenPrice = _lastProfitPrice - BreakEvenProfitBuffer * (1 / Symbol.PipSize);
+            }
+                
             if (lastProfitTradeType == TradeType.Sell)
+            {
                 _lastProfitPrice = Symbol.Bid;
+                //Set a BreakEven once the price is past the buffer
+                _lastProfitBreakEvenPrice = _lastProfitPrice + BreakEvenProfitBuffer;
+            }
+               
         }
 
         protected bool IsTradingTimeIn(int mins)
@@ -847,7 +830,7 @@ namespace cAlgo
         {
             if (orderCount == numberOfOrders - 1)
             {
-                return FinalOrderStopLoss * (1 / Symbol.TickSize);
+                return FinalOrderStopLoss * (1 / Symbol.PipSize);
             }
             else
             {
@@ -940,8 +923,6 @@ namespace cAlgo
             if (_isSwordFishReset)
                 return;
 
-            reportDay();
-
             //reset position counters
             _openedPositionsCount = 0;
             _closedPositionsCount = 0;
@@ -951,6 +932,7 @@ namespace cAlgo
             _lastPositionEntryPrice = 0;
             _lastClosedPositionEntryPrice = 0;
             _lastProfitPrice = 0;
+            _lastProfitBreakEvenPrice = 0;
 
             //reset risk management variables
             _divideTrailingStopPips = 1;
@@ -979,56 +961,9 @@ namespace cAlgo
             _spikePeakPrice = 0;
         }
 
-        protected void reportDay()
-        {
-            string profit = "";
-            if (_dayProfitTotal != 0 && _dayPipsTotal != 0)
-            {
-                profit = ("DAY TOTALS," + _dayProfitTotal + "," + _dayPipsTotal + "," + _openedPositionsCount + "," + _openPrice + "," + _spikePeakPips + "," + Time.DayOfWeek + "," + Time);
-                debugCSV.Add("----------------------------------");
-                debugCSV.Add(",Profit,Pips,Opened Positions,Open Price, SpikePeakPips, Day, DateTime");
-                debugCSV.Add(profit);
-            }
-        }
-
-
-
-        protected string debugState()
-        {
-
-            string state = "";
-            // Position counters
-            state += "," + _openedPositionsCount;
-            state += "," + _closedPositionsCount;
-
-            // Last Position variables
-            state += "," + _lastPositionEntryPrice;
-            state += "," + _lastClosedPositionEntryPrice;
-            state += "," + _lastProfitPrice;
-            state += "," + _lastPositionLabel;
-
-            // risk management variables
-            state += "," + _divideTrailingStopPips;
-            state += "," + _isTrailingStopsActive;
-            state += "," + _isBreakEvenStopLossActive;
-            state += "," + _isHardSLLastClosedPositionEntryPrice;
-            state += "," + _isHardSLLastPositionEntryPrice;
-            state += "," + _isHardSLLastProfitPrice;
-
-            // swordfish bot state variables
-            state += "," + _isHardSLLastProfitPrice;
-            state += "," + _ordersPlaced;
-            state += "," + _isSwordFishReset;
-            state += "," + _isSwordfishTerminated;
-            state += "," + _isReducedRiskTime;
-
-            return state;
-        }
-
         protected override void OnStop()
         {
             // Put your deinitialization logic here
-            System.IO.File.WriteAllLines(_swordFishTimeInfo.market + "-" + _botId + "-" + "swordfish-" + getTimeStamp(true) + ".csv", debugCSV.ToArray());
         }
 
         protected string getTimeStamp(bool unformatted = false)

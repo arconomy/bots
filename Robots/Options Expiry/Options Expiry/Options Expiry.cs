@@ -265,7 +265,7 @@ namespace cAlgo
                 {
                     if (!_positionsPlaced && !_positionsRequested)
                     {
-                        placeBuyOrders();
+                      placeBuyOrders();
                     }
                     _totalIntervalSecs += BuyPositionsInterval;
                 }
@@ -515,12 +515,12 @@ namespace cAlgo
             double newChaseTPPrice = 0;
             if (p.TradeType == TradeType.Buy)
             {
-                newChaseTPPrice = (double)p.TakeProfit + ExtraChaseTargetPips * (1 / Symbol.TickSize);
+                newChaseTPPrice = (double)p.TakeProfit + ExtraChaseTargetPips * (1 / Symbol.PipSize);
             }
 
             if (p.TradeType == TradeType.Sell)
             {
-                newChaseTPPrice = (double)p.TakeProfit - ExtraChaseTargetPips * (1 / Symbol.TickSize);
+                newChaseTPPrice = (double)p.TakeProfit - ExtraChaseTargetPips * (1 / Symbol.PipSize);
                 ;
             }
             return newChaseTPPrice;
@@ -635,7 +635,7 @@ namespace cAlgo
 
             if (_lastPositionTradeType == TradeType.Buy)
             {
-                if (Symbol.Ask - minBreakEvenProfit * (1 / Symbol.TickSize) > p.EntryPrice)
+                if (Symbol.Ask - minBreakEvenProfit * (1 / Symbol.PipSize) > p.EntryPrice)
                 {
                     breakEvenSL = p.EntryPrice;
                 }
@@ -643,7 +643,7 @@ namespace cAlgo
 
             if (_lastPositionTradeType == TradeType.Sell)
             {
-                if (Symbol.Bid + minBreakEvenProfit * (1 / Symbol.TickSize) < p.EntryPrice)
+                if (Symbol.Bid + minBreakEvenProfit * (1 / Symbol.PipSize) < p.EntryPrice)
                 {
                     breakEvenSL = p.EntryPrice;
                 }
@@ -852,7 +852,7 @@ namespace cAlgo
         {
             if (orderCount == numberOfOrders - 1)
             {
-                return FinalOrderStopLoss * (1 / Symbol.TickSize);
+                return FinalOrderStopLoss * (1 / Symbol.PipSize);
             }
             else
             {
@@ -946,7 +946,7 @@ namespace cAlgo
 
         protected double calcBuyLimitTakeProfit(int orderCount)
         {
-            return TPLimitOrders * (1 / Symbol.TickSize);
+            return TPLimitOrders * (1 / Symbol.PipSize);
 
         }
 
@@ -957,22 +957,22 @@ namespace cAlgo
 
             //Use Min TP for the first order and biggest volume order in the cycle
             tp = MinTakeProfit + (TPCycleNumber) * TPIncrement;
-            tp *= (1 / Symbol.TickSize);
+            tp *= (1 / Symbol.PipSize);
 
-            if (tp > MaxTakeProfit * (1 / Symbol.TickSize))
-                tp = MaxTakeProfit * (1 / Symbol.TickSize);
+            if (tp > MaxTakeProfit * (1 / Symbol.PipSize))
+                tp = MaxTakeProfit * (1 / Symbol.PipSize);
 
-            return Math.Round(tp,1);
+            return Math.Round(tp, 1);
         }
 
         //protected double calcAscendingTakeProfit(int orderCount)
         //{
         //    double tp = 0;
 
-        //    tp = MaxTakeProfit - (1 / Symbol.TickSize) - (orderCount - 1) * TPSpacingBase;
+        //    tp = MaxTakeProfit - (1 / Symbol.PipSize) - (orderCount - 1) * TPSpacingBase;
 
-        //    if (tp < MinTakeProfit * (1 / Symbol.TickSize))
-        //        tp = MinTakeProfit * (1 / Symbol.TickSize);
+        //    if (tp < MinTakeProfit * (1 / Symbol.PipSize))
+        //        tp = MinTakeProfit * (1 / Symbol.PipSize);
 
         //    return tp;
         //}
@@ -988,7 +988,7 @@ namespace cAlgo
         //        {
         //            if (isThisBotId(p.Label))
         //            {
-        //                ModifyPositionAsync(p, p.StopLoss, p.EntryPrice + calcAscendingTakeProfit(positionCount) * Symbol.TickSize, OnModifyTakeProfitComplete);
+        //                ModifyPositionAsync(p, p.StopLoss, p.EntryPrice + calcAscendingTakeProfit(positionCount) * Symbol.PipSize, OnModifyTakeProfitComplete);
         //            }
         //        } catch (Exception e)
         //        {
@@ -1025,11 +1025,11 @@ namespace cAlgo
                 if (0 < _openedSpikeDownBuyOrdersPositionsCount && _openedSpikeDownBuyOrdersPositionsCount < NumberOfBuyLimitOrders * BuyLimitOrdersOpenedSpikeIndicator / 100)
                     //setCascadingTakeProfit(); Doesn't make much sense to do this given buy positions have scaled TP's and Limit orders have fixed TP's
 
-                //If the number of Buy Order positions opened is greater than SPIKE DOWN indicator % of orders then spike is DOWN
-                if (isSpikeDown(false))
-                {
-                    setBreakEvenTPForBuySpikePositions();
-                }
+                    //If the number of Buy Order positions opened is greater than SPIKE DOWN indicator % of orders then spike is DOWN
+                    if (isSpikeDown(false))
+                    {
+                        setBreakEvenTPForBuySpikePositions();
+                    }
 
             }
         }

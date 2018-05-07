@@ -1,5 +1,5 @@
 ﻿[ChartParameters]
-Symbol = DE30
+Symbol = GER30
 Timeframe = m1
 
 [cBotParameters]
@@ -10,21 +10,22 @@ targetBolliEntryPips = 2
 SwordFishTrigger = 15
 OrderEntryOffset = 17
 OrderSpacing = 1
-OrderSpacingLevels = 20
+OrderSpacingLevels = 30
 OrderSpacingMultipler = 2
 OrderSpacingMax = 3
 NumberOfOrders = 25
-Volume = 40
-VolumeMax = 100
-OrderVolumeLevels = 4
+Volume = 4
+VolumeMax = 10
+OrderVolumeLevels = 5
 VolumeMultipler = 1.2
-TakeProfit = 0.5
+TakeProfit = 5
+BreakEvenProfitBuffer = 2
 ReducePositionRiskTime = 45
 retraceEnabled = True
 retraceLevel1 = 33
-retraceLevel2 = 50
-retraceLevel3 = 66
-FinalOrderStopLoss = 20
+retraceLevel2 = 60
+retraceLevel3 = 75
+FinalOrderStopLoss = 15
 HardStopLossBuffer = 15
 TrailingStopPips = 7
 EnableBuyOrders = True
