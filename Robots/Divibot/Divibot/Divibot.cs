@@ -448,7 +448,7 @@ namespace cAlgo
         protected void placeSellOrders()
         {
             //Place Sell Limit Orders
-            for (int OrderCount = 0; OrderCount < NumberOfPositions; OrderCount++)
+            for (int OrderCount = 0; OrderCount < NumberOfPositions -1; OrderCount++)
             {
                 try
                 {
@@ -459,7 +459,7 @@ namespace cAlgo
                         volume = SetVolumeDesc(OrderCount),
                         entryPrice = 0,
                         label = _botId + "-" + getTimeStamp() + _marketTimeInfo.market + "-#" + _orderCountLabel,
-                        stopLossPips = CalcStopLoss(OrderCount, NumberOfPositions,false),
+                        stopLossPips = CalcStopLoss(OrderCount, NumberOfPositions, false),
                         takeProfitPips = calcTakeProfit(OrderCount)
                     };
                     if (data == null)
@@ -482,7 +482,7 @@ namespace cAlgo
         {
             //Place Sell Limit Orders
             int OrderCount = 0;
-            for (; OrderCount < NumberOfSellLimitOrders; OrderCount++)
+            for (; OrderCount < NumberOfSellLimitOrders -1; OrderCount++)
             {
                 try
                 {
@@ -493,7 +493,7 @@ namespace cAlgo
                         volume = SetVolumeAsc(OrderCount),
                         entryPrice = calcSellEntryPrice(OrderCount),
                         label = _botId + "-" + getTimeStamp() + _marketTimeInfo.market + "-#" + OrderCount,
-                        stopLossPips = CalcStopLoss(OrderCount, NumberOfSellLimitOrders,true),
+                        stopLossPips = CalcStopLoss(OrderCount, NumberOfSellLimitOrders, true),
                         takeProfitPips = calcTakeProfit(OrderCount)
                     };
                     if (data == null)
@@ -610,7 +610,7 @@ namespace cAlgo
 
         protected double CalcStopLoss(int orderCount, int lastOrderNumber, bool stopLossOnLastOrderOnly)
         {
-            double sl = FinalOrderStopLoss  * (1 / Symbol.PipSize);
+            double sl = FinalOrderStopLoss * (1 / Symbol.PipSize);
 
             //Only set a stop loss on the Last Order placed
             if (orderCount < lastOrderNumber && stopLossOnLastOrderOnly)
