@@ -448,7 +448,7 @@ namespace cAlgo
         protected void placeSellOrders()
         {
             //Place Sell Limit Orders
-            for (int OrderCount = 0; OrderCount < NumberOfPositions -1; OrderCount++)
+            for (int OrderCount = 0; OrderCount < NumberOfPositions - 1; OrderCount++)
             {
                 try
                 {
@@ -482,7 +482,7 @@ namespace cAlgo
         {
             //Place Sell Limit Orders
             int OrderCount = 0;
-            for (; OrderCount < NumberOfSellLimitOrders -1; OrderCount++)
+            for (; OrderCount < NumberOfSellLimitOrders - 1; OrderCount++)
             {
                 try
                 {

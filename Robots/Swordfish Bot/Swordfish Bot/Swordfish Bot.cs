@@ -62,7 +62,7 @@ namespace cAlgo
 
         [Parameter("Take Profit breakeven buffer (Points)", DefaultValue = 0.5)]
         public double BreakEvenProfitBuffer { get; set; }
-        
+
         [Parameter("Mins after swordfish period to reduce position risk", DefaultValue = 45)]
         public int ReducePositionRiskTime { get; set; }
 
@@ -243,7 +243,7 @@ namespace cAlgo
                     _printOnce = true;
                 }
 
-             
+
                 if (_ordersPlaced)
                 {
                     if (_openedPositionsCount - _closedPositionsCount > 0)
@@ -787,14 +787,14 @@ namespace cAlgo
                 //Set a BreakEven once the price is past the buffer
                 _lastProfitBreakEvenPrice = _lastProfitPrice - BreakEvenProfitBuffer * (1 / Symbol.PipSize);
             }
-                
+
             if (lastProfitTradeType == TradeType.Sell)
             {
                 _lastProfitPrice = Symbol.Bid;
                 //Set a BreakEven once the price is past the buffer
                 _lastProfitBreakEvenPrice = _lastProfitPrice + BreakEvenProfitBuffer;
             }
-               
+
         }
 
         protected bool IsTradingTimeIn(int mins)

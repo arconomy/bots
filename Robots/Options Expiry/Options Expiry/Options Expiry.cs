@@ -265,7 +265,7 @@ namespace cAlgo
                 {
                     if (!_positionsPlaced && !_positionsRequested)
                     {
-                      placeBuyOrders();
+                        placeBuyOrders();
                     }
                     _totalIntervalSecs += BuyPositionsInterval;
                 }
